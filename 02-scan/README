@@ -1,0 +1,7 @@
+
+2014-08-24
+Mijn sqlite3 database raakte een dag eerder verminkt, dwz sommige tabellen waren weg, er misten records,
+dus overstap naar postgres.
+Functies gemaakt om database te openen en te sluiten, zodat dat niet voor iedere database handeling 
+hoeft.
+muzik3 directory ingelezen in postgres :-).
