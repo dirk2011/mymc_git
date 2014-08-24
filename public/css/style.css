@@ -1,0 +1,61 @@
+
+body {
+    background-color: #d0e4fe;
+}
+
+td.nav {
+  padding: 0 20px 0 0;
+  width: 0;
+}
+
+td.info {
+  width: 40px;
+  height: 40px;
+  text-align: center;  
+  vertical-align: text-top;
+  
+}
+
+td.track {
+  width: 40px;
+  text-align: center;
+  vertical-align: text-top;
+}
+
+td.title {
+  width: 250px;
+  text-align: left;
+  vertical-align: text-top;
+  
+}
+
+td.artist {
+  width: 250px;
+  text-align: left;
+  vertical-align: text-top;
+}
+
+td.album {
+  width: 250px;
+  text-align: left;
+  vertical-align: text-top;
+
+}
+
+td.year {
+  width: 40px;
+  text-align: center;
+  vertical-align: text-top;
+}
+
+td.last {
+  
+  text-align: center;
+  vertical-align: text-top;
+}
+
+td.played {
+  width: 40px;
+  text-align: center;
+  vertical-align: text-top;
+}
