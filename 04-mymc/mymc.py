@@ -26,9 +26,12 @@ reload(mymc_html)
 import sonos_discover	    # eigen module, haal sonos info op
 
 
+# DBNAME = "../db/music_collection.db"
+DBNAME = "/media/rasp163-v/mymc/db/music_collection.db"
 MCSERVER = "http://192.168.1.163"
 # de box die de baas is
-COORDINATOR = sonos_discover.getSonosCoordinator()
+# COORDINATOR = sonos_discover.getSonosCoordinator()
+COORDINATOR = '192.168.1.21'
 # locatie voor caching van bestanden
 CACHE="../cache"
 # cache status aan of uit
@@ -1285,8 +1288,8 @@ def q(inString):
         uitString = uitString + teken
         if teken == "'":
             uitString = uitString + "'"
-    print uitString
-    print type(uitString)
+    # print uitString
+    # print type(uitString)
     if isinstance(uitString, str):
         uitString = unicode(uitString, 'utf-8', errors='replace')
     return uitString

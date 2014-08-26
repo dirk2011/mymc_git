@@ -1,3 +1,4 @@
+Inlezen mp3 bestanden in de database.
 
 2014-08-24
 Mijn sqlite3 database raakte een dag eerder verminkt, dwz sommige tabellen waren weg, er misten records,
