@@ -41,6 +41,8 @@ def main_navigation():
     </td><td class="nav">
       <a href="pagePlayedHistory">Play history</a>
     </td><td class="nav">
+      <a href="pagePlayedArtists">Artist history</a>
+    </td><td class="nav">
       <a href="pageClearCache">Clear Cache</a>
     </td>
   </tr>
@@ -1102,5 +1104,59 @@ def pagePlayedHistory(yearsdict, monthsdict, daysdict):
 
     return h
 
+def pagePlayedArtists():
+
+    h_page = """
+    <html><head><title>Afspeel gegevens per artiest, periode selectie
+    </title></head>
+    <body>""" + main_navigation() + """
+    <h1>Afspeel gegevens per artiest</h1>
+    <br>
+    <h2>Kies een periode</h2>
+    <table>
+        <tr><td> <a href="pagePlayedArtistsPeriod?period=lastday">Laatste dag</a> <td></tr>
+        <tr><td> <a href="pagePlayedArtistsPeriod?period=lastweek">Laatste week</a> <td></tr>
+        <tr><td> <a href="pagePlayedArtistsPeriod?period=last4weeks">Laatste 4 weken</a> <td></tr>
+        <tr><td> <a href="pagePlayedArtistsPeriod?period=last3months">Laatste 3 maanden</a> <td></tr>
+        <tr><td> <a href="pagePlayedArtistsPeriod?period=lasthalfyear">Laatste halfjaar</a> <td></tr>
+        <tr><td> <a href="pagePlayedArtistsPeriod?period=lastyear">Laatste jaar</a> <td></tr>
+        <tr><td> <a href="pagePlayedArtistsPeriod?period=alltime">Alles</a> <td></tr>
+    </table>
+
+    </body>
+    </html>
+    """    
+
+    return h_page
+
+
+def pagePlayedArtistsPeriod(period, records):
+
+    h_page_o = """
+    <html><head><title>Afspeelgegevens, per artiest, """ + period + """
+    </title></head>
+    <body>""" + main_navigation() + """
+    <h1>Overzicht afgespeeld: """ + period + """</h1>
+    <table>"""
+
+    h_page_c = """</table>
+    </body>
+    </html>"""
+
+    h_tr_o = "<tr>"
+    h_tr_c = "</tr>"
+
+    h = unicode(' ', 'utf-8', errors='replace')
+    h = h_page_o + h
+    
+    for record in records:
+        h_td =  h_tr_o + """<td>%s</td> <td>%s</td> <td>%s</td>""" % \
+            (record['volgnr'], record['artist'], record['played']) + h_tr_c
+        h_td = unicode(h_td, 'utf-8', errors='replace')
+        h = h + h_td
+
+    return h # + str(records)
+    
+    
 # einde
 

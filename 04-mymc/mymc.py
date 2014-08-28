@@ -48,6 +48,106 @@ class Mc:
     # database connectie
     cursor = None
     connection = None
+
+    @cherrypy.expose
+    def pagePlayedArtistsPeriod(self, period):
+        """Afgespeelde songs per artiest, 1e selectie, welke periode
+        """
+
+        query = """select * from played_artists
+            where period = '%s' and aat = 'artists'
+            order by played desc
+            """ % period
+
+        records = self.dbGetData(query)
+
+        h = mymc_html.pagePlayedArtistsPeriod(period, records)
+
+        return h
+
+
+    @cherrypy.expose
+    def pagePlayedArtists(self):
+        """Afgespeelde songs per artiest, 1e selectie, welke periode
+        """
+
+        h = mymc_html.pagePlayedArtists()
+
+        return h
+
+
+    def dbLoadPlayedArtists(self):
+        """Table played_artists vullen met gegevens.
+        """
+
+        # het gaat om 7 tijdvakken, elk tijdvak heeft 3 totalen
+        periods = {'alltime': 10000}
+        periods = {'lastday': 1, 'lastweek': 7, 'last4weeks': (4 * 7), 'last3months': (13 * 7), \
+                  'lasthalfyear': (26 * 7), 'lastyear': (52 * 7), 'alltime': 10000}
+        levels = ['artists', 'albums', 'titles']
+
+        query1 = """-- artiest
+        insert into     played_artists (period, aat, artist, played)
+        select 		'%(period)s', '%(level)s', artist, count(*) as aantal
+        from   		played
+        left join 	songs
+        on 		played.song_id = songs.song_id 
+        where		current_date - date(played.playdate) < %(days)s
+        group by 	artist
+        order by 	4 desc
+        limit 		100 """
+
+        query2 = """-- artiest, albums
+        insert into     played_artists (period, aat, artist, album, played)
+        select 		'%(period)s', '%(level)s', artist, album, count(*) as aantal
+        from   		played
+        left join 	songs
+        on 		played.song_id = songs.song_id 
+        where		current_date - date(played.playdate) < %(days)s
+        group by 	artist, album
+        order by 	5 desc
+        limit 		100 """
+
+        query3 = """-- artiest, albums, songs
+        insert into     played_artists (period, aat, artist, album, title, played)
+        select 		'%(period)s', '%(level)s', artist, album, title, count(*) as aantal
+        from   		played
+        left join 	songs
+        on 		played.song_id = songs.song_id 
+        where		current_date - date(played.playdate) < %(days)s
+        group by 	artist, album, title
+        order by 	6 desc
+        limit 		100 """
+
+        # vorige cijfers verwijderen
+        self.dbExecute('delete from played_artists')
+
+        tel = 0
+        # cijfers ophalen
+        for period in periods:
+            level = levels[0]
+            self.dbExecute(query1 % {'period': period, 'days': periods[period], 'level': level})
+
+            level = levels[1]
+            self.dbExecute(query2 % {'period': period, 'days': periods[period], 'level': level})
+
+            level = levels[2]
+            self.dbExecute(query3 % {'period': period, 'days': periods[period], 'level': level})
+            tel = tel + 3
+            print 'teller: ', tel
+            # break
+        
+
+    def dbExecute(self, query):
+        """Voer queries uit, niet om gegevens op te halen, maar data manipulatie,
+        zoals inserts, deletes, etc"""
+
+        self.dbOpen()
+        Mc.cursor.execute(query)
+        # print 'query', query
+        Mc.connection.commit()
+        self.dbClose()
+
     
     def __init__(self):
         # list van historische tijdvakken, jaren, maanden, dagen
@@ -84,8 +184,16 @@ class Mc:
         """ database cursor en connectie sluiten
         """
 
-        Mc.cursor.close()
-        Mc.connection.close()
+        return
+    
+        try:
+            if not Mc.cursor.closed:
+                Mc.cursor.close()
+            if not Mc.connection.close:
+                Mc.connection.close()
+
+        except psycopg2.DatabaseError, e:
+                print 'Error %s' % e
 
 
     @cherrypy.expose
@@ -626,11 +734,11 @@ class Mc:
                 if sleutel == "location":
                     hrecord['folder_jpg'] = self.createLinkFolderJpg(hrecord['location'])
                 # aparte kolom album_link, voor bijzondere tekens in album naam zoals: #
-                if sleutel == "album":
+                if sleutel == "album" and hrecord['album'] is not None:
                     hrecord['album_link'] = urllib.quote(hrecord['album'].encode('utf-8'))
                 if sleutel == "albumartist":
                     hrecord['albumartist_link'] = urllib.quote(hrecord['albumartist'])
-                if sleutel == "title":
+                if sleutel == "title" and hrecord['title'] is not None:
                     title_link = hrecord['title']
                     # title_link = unicode(title_link, 'utf-8', errors='replace')
                     print 'title_link', title_link
