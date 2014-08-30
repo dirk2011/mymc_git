@@ -9,11 +9,38 @@ de python module pycheerry.
 # TODO: alle variabelen omzetten naar functies
 """
 
+import urllib               # vertaal string naar url
+
 t = """
 <html>
 hi %(naam)s
 </html>
 """
+
+def html_start(title):
+    """Begin van een html pagina, head t/m body, inclusief laden stylesheet.
+    """
+    # 2014-08-30, creatie
+    
+    return """<html>
+    <head>
+    <title>%(title)s</title>
+    <link rel="stylesheet" type="text/css" href="/static/css/style.css">
+    </head>
+    <body>""" % {'title': title}
+
+def html_end():
+    """Einde van een pagina.
+    """
+    
+    return """</body></html>"""
+
+
+def html_h1(text):
+    """Return h1 element with passed text.
+    """
+    
+    return """<h1>%(text)s</h1>""" % {'text': text}
 
 
 def main_navigation():
@@ -39,11 +66,11 @@ def main_navigation():
     </td><td class="nav">
       <a href="pageSonosSpeakers">Volume</a>
     </td><td class="nav">
-      <a href="pagePlayedHistory">Play history</a>
+      <a href="pagePlayedHistory">Played history</a>
     </td><td class="nav">
-      <a href="pagePlayedArtists">Artist history</a>
+      <a href="pagePlayedArtists">Played Artists</a>
     </td><td class="nav">
-      <a href="pageClearCache">Clear Cache</a>
+      <a href="pageBeheer">Beheer</a>
     </td>
   </tr>
 </table>
@@ -168,11 +195,11 @@ def pageSong():
       <td>
 	<form action="pageSongSave">
 	  Rating: 
-	  <input type="radio" name="rating" value="0" checked>0
-	  <input type="radio" name="rating" value="1">1
-	  <input type="radio" name="rating" value="2">2
-	  <input type="radio" name="rating" value="3">3
-	  <input type="radio" name="rating" value="4">4
+	  <input type="radio" name="rating" value="0" checked>0 &nbsp; &nbsp;
+	  <input type="radio" name="rating" value="1">1 &nbsp; &nbsp;
+	  <input type="radio" name="rating" value="2">2 &nbsp; &nbsp;
+	  <input type="radio" name="rating" value="3">3 &nbsp; &nbsp;
+	  <input type="radio" name="rating" value="4">4 &nbsp; &nbsp;
 	  <input type="radio" name="rating" value="5">5
 	  <br><br>
 	  <input type="submit" value="Ok">
@@ -716,22 +743,20 @@ def sonosSetVolume(record):
 
 
 def pageIndex():
-    """Index (start) pagina van mc applicatie.
+    """Index (start) pagina van mymc.
     """
     
-    return """
-    <html><head><title>Index</title></head>
-    """ + main_navigation() + """       
-    <body>
-<br>
- /     \_/ ___\ <br>
-|  Y Y  \  \___ <br>
-|__|_|  /\___  ><br>
-      \/     \/<br>
-<br>      
+    h_page = html_start('Start/index pagina') + main_navigation() + \
+    """
+    <h1>My Music Collection</h1>
+    
+    <img src="/static/images/music_017.jpg">
+
     </body>
     </html>
     """
+    
+    return h_page
 
 
 def pageSearch():
@@ -1045,7 +1070,11 @@ def pagePlayedHistory(yearsdict, monthsdict, daysdict):
         <td>01</td> <td>%(month1)s</td> <td>02</td> <td>%(month2)s</td> <td>03</td> <td>%(month3)s</td>
         <td>04</td> <td>%(month4)s</td> <td>05</td> <td>%(month5)s</td> <td>06</td> <td>%(month6)s</td>
     </tr><tr>
-        <td>07</td> <td>%(month7)s</td>  <td>08</td> <td>%(month8)s</td>  <td>09</td> <td>%(month9)s</td>
+        <td>07</td> <td>%(month7)s</td>  
+
+        <td>08</td> <td> <a href="pagePlayedHistory?year=%(year)s&month=8">%(month8)s</a> </td>  
+        <td>09</td> <td> <a href="pagePlayedHistory?year=%(year)s&month=9">%(month9)s</a> </td>
+
         <td>10</td> <td>%(month10)s</td> <td>11</td> <td>%(month11)s</td> <td>12</td> <td>%(month12)s</td>
     </tr>
     </table>
@@ -1104,30 +1133,70 @@ def pagePlayedHistory(yearsdict, monthsdict, daysdict):
 
     return h
 
-def pagePlayedArtists():
 
-    h_page = """
-    <html><head><title>Afspeel gegevens per artiest, periode selectie
-    </title></head>
-    <body>""" + main_navigation() + """
+def pagePlayedArtists():
+    """Pagina met statistieken aantal afgespeelde songs per periode en per artiest.
+    """
+
+    h_page = html_start('Afspeel gegevens per artiest, periode selectie') + main_navigation() + \
+    """
     <h1>Afspeel gegevens per artiest</h1>
     <br>
     <h2>Kies een periode</h2>
     <table>
-        <tr><td> <a href="pagePlayedArtistsPeriod?period=lastday">Laatste dag</a> <td></tr>
-        <tr><td> <a href="pagePlayedArtistsPeriod?period=lastweek">Laatste week</a> <td></tr>
-        <tr><td> <a href="pagePlayedArtistsPeriod?period=last4weeks">Laatste 4 weken</a> <td></tr>
-        <tr><td> <a href="pagePlayedArtistsPeriod?period=last3months">Laatste 3 maanden</a> <td></tr>
-        <tr><td> <a href="pagePlayedArtistsPeriod?period=lasthalfyear">Laatste halfjaar</a> <td></tr>
-        <tr><td> <a href="pagePlayedArtistsPeriod?period=lastyear">Laatste jaar</a> <td></tr>
-        <tr><td> <a href="pagePlayedArtistsPeriod?period=alltime">Alles</a> <td></tr>
+        <tr>
+            <td class="PlayedArtists"> <a href="pagePlayedArtistsPeriod?period=lastday">Laatste dag</a> <td>
+            <td class="PlayedArtists"> <a href="pagePlayedArtistsPeriod?period=lasthalfyear">Laatste halfjaar</a> <td>
+        </tr><tr>
+            <td class="PlayedArtists"> <a href="pagePlayedArtistsPeriod?period=lastweek">Laatste week</a> <td>
+            <td class="PlayedArtists"> <a href="pagePlayedArtistsPeriod?period=lastyear">Laatste jaar</a> <td>
+        </tr><tr>
+            <td class="PlayedArtists"> <a href="pagePlayedArtistsPeriod?period=last4weeks">Laatste 4 weken</a> <td>
+            <td class="PlayedArtists"> <a href="pagePlayedArtistsPeriod?period=alltime">Alles</a> <td>
+        </tr><tr>
+            <td class="PlayedArtists"> <a href="pagePlayedArtistsPeriod?period=last3months">Laatste 3 maanden</a> <td>
+        </tr>
+        
     </table>
-
-    </body>
-    </html>
-    """    
+    """ + html_end()    
 
     return h_page
+
+def pagePlayedArtistsPeriodAlbums(period="", artist="", records=[]):
+    
+    pass
+
+
+
+def pagePlayedArtistsPeriodAlbums(period, artist, records):
+    """
+    """
+
+    h_page_o = """
+    <html><head><title>Afspeelgegevens, per artiest en per album, """ + period + """
+    </title></head>
+    <body>
+    """ + main_navigation() + """
+    <h1>Overzicht afgespeeld: """ + period + ", artist: " + artist + """</h1>
+    <table>"""
+
+    h_page_c = """</table></body></html>"""
+    h_tr_o = "<tr>"
+    h_tr_c = """</tr>
+    """
+
+    h = h_page_o 
+
+    for record in records:
+        h_td = h_tr_o + "<td>" + record['album'] + "</td><td>" + str(record['played']) + "</td>" + h_tr_c
+        h = h + h_td
+
+    h = h + h_page_c
+
+    print h
+
+    return h
+
 
 
 def pagePlayedArtistsPeriod(period, records):
@@ -1150,13 +1219,80 @@ def pagePlayedArtistsPeriod(period, records):
     h = h_page_o + h
     
     for record in records:
-        h_td =  h_tr_o + """<td>%s</td> <td>%s</td> <td>%s</td>""" % \
-            (record['volgnr'], record['artist'], record['played']) + h_tr_c
-        h_td = unicode(h_td, 'utf-8', errors='replace')
+        h_td = unicode(' ', 'utf-8', errors='replace')
+        h_td = h_td + h_tr_o
+        h_td = h_td + "<td>%(volgnr)s</td>" % {'volgnr': record['volgnr']}
+        artist_link = urllib.quote(record['artist'])
+        artist = unicode(record['artist'], 'utf-8', errors='replace')
+        # print 'artist', record['artist']
+        # print 'artist_link', artist_link
+        h_td = h_td + """<td><a href="pagePlayedArtistsPeriodAlbums?period=%(period)s&artist=%(artist_link)s"> %(artist)s </a> </td>""" %\
+               {'artist': artist, 'played': record['played'], \
+                'artist_link': artist_link, 'period': period}
+        h_td = h_td + "<td>%(played)s</td>" % {'played': record['played']}
+        h_td = h_td + h_tr_c
+        # h_td = unicode(h_td, 'utf-8', errors='replace')
         h = h + h_td
 
     return h # + str(records)
     
+
+def pageBeheer():
+    """Pagina voor beheer, verversen en opschonen, van tabellen, pagina's.
+    """
+    # update 20140830
+
+    title = 'Beheer'
+    h = html_start(title) + main_navigation() + html_h1(title) + """
+<table>
+    <tr><td class="beheer"> <a href="pageClearCache">
+        Clear cache, verwijder gegenereerde webpagina's.</a> </td></tr>
+    <tr><td class="beheer"> <a href="pageRefreshPlayedHistory">Ververs played history</a> </td></tr>
+    <tr><td class="beheer"> <a href="pageRefreshPlayedArtists">Ververs played artists</a> </td></tr>
+
+    </td>
+  </tr>
+</table>
+""" + html_end()
+
+    return h
+
+
+def pageRefreshPlayedHistory():
+    """pageRefreshPlayedHistory, cijfers verversen voor played history.
+    """
+    #update 20140830
+
+    title = 'pageRefreshPlayedHistory'
+    h = html_start(title) + main_navigation() + html_h1(title) + \
+    """
+
+    <script>
+	window.history.back();
+    </script>
+
+    </body></html>
+"""
+
+    return h
+
+
+def pageRefreshPlayedArtists():
+    """pageRefreshPlayedArtists, cijfers verversen voor played artists.
+    """
+    #update 20140830
+
+    title = 'pageRefreshPlayedArtists'
+    h = html_start(title) + main_navigation() + html_h1(title) + \
+    """
+    
+    <script>
+	    window.history.back();
+    </script>
+    """ + html_end() 
+
+    return h
+
     
 # einde
 

@@ -49,6 +49,39 @@ class Mc:
     cursor = None
     connection = None
 
+    
+    @cherrypy.expose
+    def pageBeheer(self):
+        """Pagina voor beheer
+        """
+
+        h = mymc_html.pageBeheer()
+
+        return h
+
+
+    @cherrypy.expose
+    def pagePlayedArtistsPeriodAlbums(self, period, artist):
+        """Afgespeelde songs per artiest en per album.
+        """
+
+        print 'period', period
+        print 'artist', artist
+
+        query = """select * from played_artists
+            where period = '%s' and aat = 'albums' and artist = '%s'
+            order by played desc
+            """ % (period, artist)
+        records = self.dbGetData(query)
+        print 'records', records
+
+        h = mymc_html.pagePlayedArtistsPeriodAlbums(period, artist, records)
+
+        return h
+
+        # return ("""period: %s, artist %s: """ % (str(period), str(artist)))
+
+
     @cherrypy.expose
     def pagePlayedArtistsPeriod(self, period):
         """Afgespeelde songs per artiest, 1e selectie, welke periode
@@ -76,8 +109,22 @@ class Mc:
         return h
 
 
+    @cherrypy.expose
+    def pageRefreshPlayedArtists(self):
+        """Verversen cijfers voor played artists.
+        """
+
+        # cijfers opnieuw opbouwen, moet waarschijnlijk anders
+        self.dbLoadPlayedArtists()
+
+        h = mymc_html.pageRefreshPlayedArtists()
+        # print 'pageRefreshPlayedArtists', h
+
+        return h
+
+
     def dbLoadPlayedArtists(self):
-        """Table played_artists vullen met gegevens.
+        """Table played_artists verversen met gegevens.
         """
 
         # het gaat om 7 tijdvakken, elk tijdvak heeft 3 totalen
@@ -196,14 +243,27 @@ class Mc:
                 print 'Error %s' % e
 
 
+
     @cherrypy.expose
-    def pagePlayedHistory(self, year = 0, month = 0):
-        """Toon per jaar, maand en dag, aantal afgespeelde songs.
+    def pageRefreshPlayedHistory(self):
+        """Verversen cijfers voor played history.
         """
 
         # cijfers opnieuw opbouwen, moet waarschijnlijk anders
         self.generate_periods()
         self.fill_periods()
+
+        # html pagina opbouwen
+        h = mymc_html.pageRefreshPlayedHistory()
+        print 'pageRefreshPlayedHistory', h
+
+        return h
+        
+
+    @cherrypy.expose
+    def pagePlayedHistory(self, year = 0, month = 0):
+        """Toon per jaar, maand en dag, aantal afgespeelde songs.
+        """
 
         if year == 0 or month == 0:
             today = datetime.datetime.now()
@@ -218,19 +278,24 @@ class Mc:
         for record in records:
             key = 'year' + str(record['year'])
             yearsdict[key] = record['played']
+        # voeg ook year en month toe aan dictionary
+        yearsdict['year'] = year
+        yearsdict['month'] = month
         #print records
-        print 'yearsdict', yearsdict
+        #print 'yearsdict', yearsdict
 
         # haal maanden op
         query = """select year, month, played from played_history
             where year = %s and month <> 0 and day = 0""" % (year)
-        
         records = self.dbGetData(query)
         monthsdict = {}
         for record in records:
             key = 'month' + str(record['month'])
             monthsdict[key] = record['played']
-        print 'monthsdict', monthsdict
+        # voeg ook year en month toe aan dictionary
+        monthsdict['year'] = year
+        monthsdict['month'] = month
+        print 'monthsdict ->', monthsdict
 
         # haal dagen op
         query = """select year, month, day, played from played_history
@@ -242,20 +307,19 @@ class Mc:
         for record in records:
             key = 'day' + str(record['day'])
             daysdict[key] = record['played']
-        print 'daysdict', daysdict
+        #print 'daysdict', daysdict
 
         h = mymc_html.pagePlayedHistory(yearsdict, monthsdict, daysdict)
-        print h
+        #print h
 
         return h
     
 
     def fill_periods(self):
+        """Cijfers opbouwen voor pagePlayedHistory
+        """
 
-        # connection = sqlite3.connect(DBNAME)
-        # connection.row_factory = sqlite3.Row
-        # cursor = connection.cursor()
-
+        # oude gegevens verwijderen
         query = "delete from played_history"
         self.dbOpen()
         Mc.cursor.execute(query)
@@ -285,8 +349,6 @@ class Mc:
             Mc.cursor.execute(query)
 
         Mc.connection.commit()
-        # cursor.close()
-        # connection.close()
 
         return True
         
@@ -907,7 +969,8 @@ class Mc:
         # haal gegevens op
         self.dbOpen()
         Mc.cursor.execute("""
-            select min(playdate) as first, max(playdate) as last, count(*) as timesplayed
+            select to_char(min(playdate), 'yyyy-mm-dd hh24:mi') as first
+            ,      to_char(max(playdate), 'yyyy-mm-dd hh24:mi') as last, count(*) as timesplayed
             from played
             where song_id = %s
             group by song_id
@@ -1323,57 +1386,10 @@ class Mc:
 
     @cherrypy.expose
     def index(self):
-        """Start pagina van mc, alleen maar een menu.
+        """Start pagina van mymc.
         """
         
         return mymc_html.pageIndex()
-        
-        
-    @cherrypy.expose
-    def index_oud(self):
-        # connectie met db en records ophalen
-        connection = sqlite3.connect(DBNAME)
-        cursor = connection.cursor()
-
-        cursor.execute("""
-            select album, year, albumartist, count(*) as aantal
-            from songs
-            group by albumartist, year, album
-            order by albumartist, year, album
-            """)
-        recordset = cursor.fetchall()
-
-        h = """
-        <html>
-        <a href="sonos_menu">Sonos</a>
-        <a href="pageListAlbumArtists">Album artiesten</a>
-        <a href="pageInfoMc">Info Mc</a>
-        <head>
-        <title>albums</title>
-        </head>
-        <body>
-        <h1>Albums in mijn collectie</h1>
-        <table>
-        <tr><th>Artiest</th><th>Album</th><th>Nummers</th><th>Jaar</th></tr>
-        """
-
-        for album in recordset:
-            # print album[0]
-            h = h + "<tr><td>" + album[2] + "</td>" + \
-                "<td>" + album[0] + "</td>" + \
-                '<td>' + str(album[3]) + '</td>' + \
-                '<td><a href="listAlbumTracks?album=' + urllib.quote(album[0]) + '">' + \
-                    str(album[1]) + "</td>" + \
-                "</tr>" + \
-                "</a>"
-
-        h = h + """
-        </table>
-        </body>
-        </html>
-        """
-
-        return h
 
 
 def saveHTMLToFile(filename, page):

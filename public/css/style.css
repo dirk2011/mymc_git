@@ -1,3 +1,5 @@
+/* css file voor mymc
+ */
 
 body {
     background-color: #d0e4fe;
@@ -7,6 +9,7 @@ td.nav {
   padding: 0 20px 0 0;
   width: 0;
 }
+
 
 td.info {
   width: 40px;
@@ -59,3 +62,12 @@ td.played {
   text-align: center;
   vertical-align: text-top;
 }
+
+td.PlayedArtists, td.beheer {
+  width: 400px;
+  height: 40px;
+  text-align: left;  
+  vertical-align: text-top;
+  
+}
+
