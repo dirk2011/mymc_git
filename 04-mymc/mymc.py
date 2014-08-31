@@ -52,7 +52,7 @@ class Mc:
     
     @cherrypy.expose
     def pageBeheer(self):
-        """Pagina voor beheer
+        """Pagina voor beheer.
         """
 
         h = mymc_html.pageBeheer()
@@ -255,7 +255,7 @@ class Mc:
 
         # html pagina opbouwen
         h = mymc_html.pageRefreshPlayedHistory()
-        print 'pageRefreshPlayedHistory', h
+        # print 'pageRefreshPlayedHistory', h
 
         return h
         
@@ -325,6 +325,7 @@ class Mc:
         Mc.cursor.execute(query)
         Mc.connection.commit()
 
+        tel = 0
         for period in self.periods:
             if period[1] == 0 and period[2] == 0:     # een jaar
                 selectie = str(period[0]) + '%'
@@ -345,7 +346,9 @@ class Mc:
                 having count(*) <> 0
                 """ % {'year': period[0], 'month': period[1], 'day': period[2], 'selectie': "'" + selectie + "'"}
             # (period[0], period[1], period[2], 'selectie' + selectie)
-            print query
+            # print query
+            tel = tel + 1
+            print 'query: ', tel
             Mc.cursor.execute(query)
 
         Mc.connection.commit()
@@ -714,8 +717,7 @@ class Mc:
                       record4[0].items())
         print "record ", record
 
-        h = mymc_html.pageInfoMc
-        h = (h % record)
+        h = mymc_html.pageInfoMc(record)
         #print '4', h
 
         return h

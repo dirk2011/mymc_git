@@ -1,43 +1,31 @@
+// css file voor mymc
+
+/*
+
+ */
 
 #kopmenu {
 	background-color: yellow;
-   background-color: #d0e4fe;
-	position: fixed;
-	top: 0px;
-	z-index: 2;
+	position: fixed; 
+	height: 50px;
+	width: 100%;
+	top: 0;
+	left: 0;
 }
 
 #kop {
-	background-color: green;
-   background-color: #d0e4fe;
+	background-color: yellow;
 	position: fixed;
-	top: 25px;
-	z-index: 2;
-}
-
-#top {
-	background-color: darkblue;
-	background-color: #d0e4fe; 
-	position: fixed;
-	top: 0px;
-	left: 0px;
-	height: 110px;
+ 	height: 50px;
 	width: 100%;
-	z-index: 1;
+	top: 60;
+	left: 0;
 }
 
 #pagina {
-    background-color: gray;
-    background-color: #d0e4fe;
-    position: relative;
-    top: 100px;
-}
-
-#pagina2 {
-    background-color: gray;
-    position: relative;
-    top: 100px;
-    z-index: -1;
+	background-color: yellow;
+	width: 100%;
+	top: 110;
 }
 
 body {
@@ -91,6 +79,7 @@ td.year {
 }
 
 td.last {
+  
   text-align: center;
   vertical-align: text-top;
 }
@@ -107,35 +96,5 @@ td.PlayedArtists, td.beheer {
   text-align: left;  
   vertical-align: text-top;
   
-}
-
-tr.InfoMc, td.InfoMc, td.ListAlbumArtists {
-    height: 3em;
-    margin: 0;
-    border: 0;
-}
-
-/* extra hoogte voor de rijen 
-*/
-tr.ExtraHoog {
-	height: 2em;
-}
-
-
-img.thumb {
-	width: 150px;
-	heigth: 150px;
-}
-
-p.thumb {
-	text-align: center;
-} 
-
-/* TODO, werkt nog niet helemaal goed ! */
-td.thumb {
-	width: 195px;
-	padding: 0 20px 0 0;
-	margin: 0;
-	border: 0;
 }
 

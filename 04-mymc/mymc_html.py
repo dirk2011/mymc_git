@@ -11,69 +11,91 @@ de python module pycheerry.
 
 import urllib               # vertaal string naar url
 
-t = """
-<html>
-hi %(naam)s
-</html>
-"""
+
+TDO = "<td>"        # <td> 
+TDC = "</td>"       # </td>
+TRO = "<tr>"        # <tr>
+TRC = """</tr>
+"""                 # </tr>
+TABO = "<table>"    # <table>
+TABC = "</table>"   # </table>
+
 
 def html_start(title):
     """Begin van een html pagina, head t/m body, inclusief laden stylesheet.
     """
     # 2014-08-30, creatie
     
-    return """<html>
-    <head>
-    <title>%(title)s</title>
-    <link rel="stylesheet" type="text/css" href="/static/css/style.css">
-    </head>
-    <body>""" % {'title': title}
+    return """<!DOCTYPE html>
+<html>
+<head>
+<title>%(title)s</title>
+<link rel="stylesheet" type="text/css" href="/static/css/style.css">
+</head>
+<body>""" % {'title': title}
+
 
 def html_end():
     """Einde van een pagina.
     """
     
-    return """</body></html>"""
+    return """
+</div></body></html>"""
 
 
 def html_h1(text):
     """Return h1 element with passed text.
     """
     
-    return """<h1>%(text)s</h1>""" % {'text': text}
+    return """
+    <div id="kop">
+    <h1>%(text)s</h1>
+    </div>
+    """ % {'text': text}
 
 
+def html_page(page):
+    """Return page wrapped in page elements.
+    """
+    
+    return """
+    <div id="top">
+    </div>
+    <div id="pagina">
+    """ + page + """
+    </div>"""
+
+    
 def main_navigation():
-    """Geef de kop terug voor webpagina's.
-    In de kop staan links naar pagina's binnen de site.
+    """Menu voor de website.
     """
 
     return """
-<link rel="stylesheet" type="text/css" href="/static/css/style.css">
-
-<table>
-  <tr>
-    <td class="nav">
-      <a href="index">Home</a>
-    </td><td class="nav">
-      <a href="pageInfoMc">Info Mc</a>
-    </td><td class="nav">
-      <a href="pageListAlbumArtists">Album artiesten</a>
-    </td><td class="nav">
-      <a href="pageSearch">Zoeken</a>
-    </td><td class="nav">
-      <a href="sonos_playmenu">Queue</a>
-    </td><td class="nav">
-      <a href="pageSonosSpeakers">Volume</a>
-    </td><td class="nav">
-      <a href="pagePlayedHistory">Played history</a>
-    </td><td class="nav">
-      <a href="pagePlayedArtists">Played Artists</a>
-    </td><td class="nav">
-      <a href="pageBeheer">Beheer</a>
-    </td>
-  </tr>
-</table>
+<div id="kopmenu">
+    <table>
+      <tr>
+        <td class="nav"> 
+            <a href="index">Home</a> 
+        </td><td class="nav">
+          <a href="pageInfoMc">Info Mc</a>
+        </td><td class="nav">
+          <a href="pageListAlbumArtists">Album artiesten</a>
+        </td><td class="nav">
+          <a href="pageSearch">Zoeken</a>
+        </td><td class="nav">
+          <a href="sonos_playmenu">Queue</a>
+        </td><td class="nav">
+          <a href="pageSonosSpeakers">Volume</a>
+        </td><td class="nav">
+          <a href="pagePlayedHistory">Played history</a>
+        </td><td class="nav">
+          <a href="pagePlayedArtists">Played Artists</a>
+        </td><td class="nav">
+          <a href="pageBeheer">Beheer</a>
+        </td>
+      </tr>
+    </table>
+</div>
 """
 
 def pageSong():
@@ -384,26 +406,14 @@ def pageListAlbumArtists(records):
     Output: html string
     """
 
-    h_page_o = """
-<html> 
-""" + main_navigation() + """
-
-<style type="text/css">
-    td {
-    padding: 20 20px 0 0;
-    margin: 0;
-    border: 0;
-    }
-</style>
-
-<h1>Album artiesten</h1>
-
+    title = 'pageListAlbumArtists'
+    h_page_o = html_start(title) + main_navigation() + html_h1('Album artiesten') + html_page("""
 <table>
-"""
+""")
 
     h_page_c="""
 </table>
-
+</div>
 </html>
 """
 
@@ -417,7 +427,7 @@ def pageListAlbumArtists(records):
     h_td = """
     <td >
       
-    </td><td>
+    </td><td class="ListAlbumArtists">
       <a href="pageListAlbums_AlbumArtist?albumartist=%(albumartist_link)s">%(albumartist)s</a><br>
       %(volgnr)s / %(num_albums)s / %(num_songs)s
     </td>"""
@@ -465,81 +475,6 @@ def testPageListAlbumArtists():
     return h
 
 
-def pageListAlbums_AlbumArtist(records):
-    """Geef pagina terug met alle albums van een albumartiest. 
-    
-    """
-    # pagina begin, heeft parameter nodig: albumartist
-    h_page_o = """
-<html>
-
-<style type="text/css">
-    td {
-    padding: 20 20px 0 0;
-    margin: 0;
-    border: 0;
-    width: 195
-    }
-    img.thumb {
-    width: 150px;
-    heigth: 150px;
-    }
-    p.thumb {
-    text-align: center;
-    } 
-</style>
-
-""" + main_navigation() + """
-
-<h1>Albumartiest: %(albumartist)s</h1>
-
-<table>
-"""
-
-    h_tr_o = "<tr>"
-    
-    h_tr_c = "</tr>"
-
-    # 2 parameters, link naar plaatje (folder_jpg), album naam (album)
-    h_td = """
-    <td align="center">
-      <a href="listAlbumTracks?album=%(album_link)s">
-	<image class="thumb" src="%(folder_jpg)s"><br>
-	<p class="thumb">%(album)s (%(year)s)</p>
-      </a>
-    </td>
-"""
-
-    h_page_c = """
-</table>
-
-</html>
-"""
-
-    # begin van de pagina
-    h = (h_page_o % records[0])
-
-    # doorloop alle records
-    tel = 0
-    for record in records:
-        # print 'record', record
-        tel = tel + 1
-	
-        if tel == 1:
-            h = h + h_tr_o
-	
-        h = h + (h_td % record)
-	
-        if tel == 4:
-            h = h + h_tr_c
-            tel = 0
-
-    if tel <> 0:
-        h = h + h_tr_c
-
-    h = h + h_page_c
-
-    return h
 
     
 def testPageListAlbums_AlbumArtist():
@@ -558,43 +493,37 @@ def testPageListAlbums_AlbumArtist():
     return h
 
 
-# TODO pageInfoMc nog omzetten naar een functie
-pageInfoMc = """
-<html>
-<head><title>pageInfoMc</title></head>
+def pageInfoMc(record):
+    """Toon aantallen uit de mc database.
+    """
+    
+    title = 'pageInfoMc'
+    page = html_start(title) + main_navigation() + html_h1('Info over mijn muziekcollectie (mc)') 
 
-<style type="text/css">
-    td {
-    padding: 20 20px 0 0;
-    margin: 0;
-    border: 0;
-    }
-</style>
-
-<body>
-
-""" + main_navigation() + \
+    dt = """
+    <table>
+        <tr class="ExtraHoog">
+            <td> Table songs </td><td> %(num_song)s </td>
+        </tr><tr class="ExtraHoog">
+            <td> <a href="pageListAlbumArtists">Album artiesten</a> </td>
+            <td> %(num_albumartist)s </td>
+        </tr><tr class="ExtraHoog">
+            <td> Albums 	    </td><td> %(num_album)s </td>
+        </tr><tr class="ExtraHoog">
+            <td> Artiesten 	    </td><td> %(num_artist)s </td>
+        </tr><tr class="ExtraHoog">
+            <td> Table played    </td><td> %(num_played)s </td>
+        </tr><tr class="ExtraHoog">
+            <td> Table songsinfo </td><td> %(num_songsinfo)s (songs met een rating) </td>
+        </tr><tr class="ExtraHoog">
+            <td> Table queue     </td><td> %(num_queue)s (songs in afspeel queue) </td>
+        </tr>
+    </table>
 """
-<h1>Info over mijn muziekcollectie (mc)</h1>
 
-<table>
-  <tr><td> Table songs </td><td> %(num_song)s </td></tr>
-
-  <tr><td>
-    <a href="pageListAlbumArtists">Album artiesten</a>
-  </td><td> %(num_albumartist)s </td></tr>
-
-  <tr><td> Albums 	    </td><td> %(num_album)s </td></tr>
-  <tr><td> Artiesten 	    </td><td> %(num_artist)s </td></tr>
-  <tr><td> Table played    </td><td> %(num_played)s </td></tr>
-  <tr><td> Table songsinfo </td><td> %(num_songsinfo)s (songs met een rating) </td></tr>
-  <tr><td> Table queue     </td><td> %(num_queue)s (songs in afspeel queue) </td></tr>
-
-</table>
-
-</body>
-</html>
-"""
+    page = page + html_page(dt % record) + html_end()
+    
+    return page
 
 
 def pageSonosSpeakers(records):
@@ -746,26 +675,21 @@ def pageIndex():
     """Index (start) pagina van mymc.
     """
     
-    h_page = html_start('Start/index pagina') + main_navigation() + \
-    """
-    <h1>My Music Collection</h1>
+    page = """
     
     <img src="/static/images/music_017.jpg">
 
-    </body>
-    </html>
     """
+    title = 'My Music Collection'
+    h_page = html_start(title) + main_navigation() + html_h1(title) + html_page(page) + html_end()
     
     return h_page
 
 
 def pageSearch():
   
-    return """
-<html>
-<head><title>Song search</title>
-</head>
-""" + main_navigation() + """
+    title = 'pageSearch'
+    return html_start(title) + main_navigation() + """
 <h1>Songs zoeken</h1>
 
 <form action="pageSearchResult">
@@ -947,40 +871,25 @@ def pageClearCache(records):
     """Pagina om te tonen voor clear cache, toont verwijderde pagina's.
     """
 
-    h_page_o =  """
-    <html>
-    <head><title>
-    </title></head>
-    <body>""" + main_navigation() + """
-    <h1>Clear Cache</h1>
-    <table>
-    """
-
-    h_tr_o = "<tr>"
-    
-    h_tr_c = "</tr>"
+    title = 'Clear Cache'
+    h = html_start(title) + main_navigation() + html_h1(title) 
 
     h_td = """<td>%(regel)s</td>
     """
     
-    h_page_c = """
-    </table>
-    </body>
-    </html>
-    """
-
-    h = h_page_o
+    h_page = TABO
 
     if len(records) > 0:
-        h = h + h_tr_o + """<td>De volgende pagina's zijn verwijderd.</td>""" + h_tr_c
+        h_page = h_page + TRO + TDO + """De volgende pagina's zijn verwijderd.</td>""" + TDC + TRC
         for record in records:
-            h = h + h_tr_o
-            h = h + (h_td % {'regel': record})
-            h = h + h_tr_c
+            h_page = h_page + TRO
+            h_page = h_page + (h_td % {'regel': record})
+            h_page = h_page + TRC
     else:
-        h = h + """Er zijn geen pagina's in cache gevonden. """
+        h_page = h_page + """Er zijn geen pagina's in cache gevonden. """
+    h_page = h_page + TABC
 
-    h = h + h_page_c
+    h = h + html_page(h_page) + html_end()
 
     return h
 
@@ -1035,19 +944,67 @@ def testPagePartSongRating():
     return h
 
 
-def pagePlayedHistory(yearsdict, monthsdict, daysdict):
-    """Toon webpagina met afspeel resultaten per jaar, maand, dag
+def pageBeheer():
+    """Pagina voor beheer, verversen en opschonen, van tabellen, pagina's.
     """
 
-    h_page_o = """
-<html>
-<head><title>
-</title></head>
-<body>
-""" + main_navigation() + """
-<h1>Play history per period</h1>
-"""
+    title = 'Beheer'
+    h = html_start(title) + main_navigation() + html_h1(title) + html_page("""
+<table>
+    <tr class="ExtraHoog">
+        <td class="beheer"> <a href="pageClearCache">
+        Clear cache, verwijder gegenereerde webpagina's.</a> </td>
+    </tr><tr class="ExtraHoog">
+        <td class="beheer"> <a href="pageRefreshPlayedHistory">Ververs played history</a> </td>
+    </tr><tr class="ExtraHoog">
+        <td class="beheer"> <a href="pageRefreshPlayedArtists">Ververs played artists</a> </td>
+    </tr>
+</table>
+""") + html_end()
 
+    return h
+
+
+def pageRefreshPlayedHistory():
+    """pageRefreshPlayedHistory, cijfers verversen voor played history.
+    """
+
+    title = 'pageRefreshPlayedHistory'
+    h = html_start(title) + main_navigation() + html_h1(title) + html_page("""
+
+    <script>
+    window.history.back();
+    </script>
+
+""") + html_end()
+
+    return h
+
+
+def pageRefreshPlayedArtists():
+    """pageRefreshPlayedArtists, cijfers verversen voor played artists.
+    """
+
+    title = 'pageRefreshPlayedArtists'
+    h = html_start(title) + main_navigation() + html_h1(title) + html_page("""
+    
+    <script>
+        window.history.back();
+    </script>
+    """) + html_end() 
+
+    return h
+
+    
+def pagePlayedHistory(yearsdict, monthsdict, daysdict):
+    """Toon webpagina met afspeel resultaten per jaar, maand, dag,
+    met doorklik naar ander jaar en maand.
+    """
+
+    title = 'pagePlayedHistory'
+    h = html_start(title) + main_navigation() + html_h1('Aantal afgespeeld per periode')
+
+    # deel 1, jaren
     h_part1_d = """
     <h2>Years</h2>
     <table>
@@ -1064,8 +1021,8 @@ def pagePlayedHistory(yearsdict, monthsdict, daysdict):
     <h2>Months</h2>
     <table>
     <tr>
-	<th>Maand</th><th>Aantal</th> <th>Maand</th><th>Aantal</th> <th>Maand</th><th>Aantal</th>
-	<th>Maand</th><th>Aantal</th> <th>Maand</th><th>Aantal</th> <th>Maand</th><th>Aantal</th>
+    <th>Maand</th><th>Aantal</th> <th>Maand</th><th>Aantal</th> <th>Maand</th><th>Aantal</th>
+    <th>Maand</th><th>Aantal</th> <th>Maand</th><th>Aantal</th> <th>Maand</th><th>Aantal</th>
     </tr><tr>
         <td>01</td> <td>%(month1)s</td> <td>02</td> <td>%(month2)s</td> <td>03</td> <td>%(month3)s</td>
         <td>04</td> <td>%(month4)s</td> <td>05</td> <td>%(month5)s</td> <td>06</td> <td>%(month6)s</td>
@@ -1085,8 +1042,8 @@ def pagePlayedHistory(yearsdict, monthsdict, daysdict):
     <h2>Days</h2>
     <table>
     <tr>
-	<th>Dag</th><th>Aantal</th> <th>Dag</th><th>Aantal</th> <th>Dag</th><th>Aantal</th> 
-	<th>Dag</th><th>Aantal</th> <th>Dag</th><th>Aantal</th> <th>Dag</th><th>Aantal</th> <th>Dag</th><th>Aantal</th> 
+    <th>Dag</th><th>Aantal</th> <th>Dag</th><th>Aantal</th> <th>Dag</th><th>Aantal</th> 
+    <th>Dag</th><th>Aantal</th> <th>Dag</th><th>Aantal</th> <th>Dag</th><th>Aantal</th> <th>Dag</th><th>Aantal</th> 
     </tr><tr>
         <td>01</td> <td>%(day1)s</td> <td>02</td> <td>%(day2)s</td> <td>03</td> <td>%(day3)s</td>
         <td>04</td> <td>%(day4)s</td> <td>05</td> <td>%(day5)s</td> <td>06</td> <td>%(day6)s</td>
@@ -1106,19 +1063,12 @@ def pagePlayedHistory(yearsdict, monthsdict, daysdict):
     </table>
 """
 
-
-    h_page_c = """
-</body>
-</html>"""
-
-    h = h_page_o
-
     # ontbrekende maanden toevoegen
     for tel in range(1, 13):
         key = 'month' + str(tel)
         if key not in monthsdict.keys():
             monthsdict[key] = ''
-    print 'monthsdict', monthsdict
+    # print 'monthsdict', monthsdict
 
     # ontbrekende dagen toevoegen
     for tel in range(1, 32):
@@ -1126,10 +1076,10 @@ def pagePlayedHistory(yearsdict, monthsdict, daysdict):
         if key not in daysdict.keys():
             daysdict[key] = ''
     
-    h = h + (h_part1_d % yearsdict)
-    h = h + (h_part2_d % monthsdict)
-    h = h + (h_part3_d % daysdict)
-    h = h + h_page_c
+    h_page = (h_part1_d % yearsdict)
+    h_page = h_page + (h_part2_d % monthsdict)
+    h_page = h_page + (h_part3_d % daysdict)
+    h = h + html_page(h_page) + html_end()
 
     return h
 
@@ -1138,10 +1088,10 @@ def pagePlayedArtists():
     """Pagina met statistieken aantal afgespeelde songs per periode en per artiest.
     """
 
-    h_page = html_start('Afspeel gegevens per artiest, periode selectie') + main_navigation() + \
-    """
-    <h1>Afspeel gegevens per artiest</h1>
-    <br>
+    title = 'Afspeel gegevens per artiest, periode selectie'
+
+    h = html_start('pagePlayedArtists') + main_navigation() + html_h1(title) + \
+    html_page("""
     <h2>Kies een periode</h2>
     <table>
         <tr>
@@ -1158,69 +1108,25 @@ def pagePlayedArtists():
         </tr>
         
     </table>
-    """ + html_end()    
-
-    return h_page
-
-def pagePlayedArtistsPeriodAlbums(period="", artist="", records=[]):
-    
-    pass
-
-
-
-def pagePlayedArtistsPeriodAlbums(period, artist, records):
-    """
-    """
-
-    h_page_o = """
-    <html><head><title>Afspeelgegevens, per artiest en per album, """ + period + """
-    </title></head>
-    <body>
-    """ + main_navigation() + """
-    <h1>Overzicht afgespeeld: """ + period + ", artist: " + artist + """</h1>
-    <table>"""
-
-    h_page_c = """</table></body></html>"""
-    h_tr_o = "<tr>"
-    h_tr_c = """</tr>
-    """
-
-    h = h_page_o 
-
-    for record in records:
-        h_td = h_tr_o + "<td>" + record['album'] + "</td><td>" + str(record['played']) + "</td>" + h_tr_c
-        h = h + h_td
-
-    h = h + h_page_c
-
-    print h
+    """) + html_end()
+    print 'pagina', h    
 
     return h
 
 
-
 def pagePlayedArtistsPeriod(period, records):
+    """Aantal afgespeelde songs per artiest over een gekozen periode.
+    """
 
-    h_page_o = """
-    <html><head><title>Afspeelgegevens, per artiest, """ + period + """
-    </title></head>
-    <body>""" + main_navigation() + """
-    <h1>Overzicht afgespeeld: """ + period + """</h1>
-    <table>"""
-
-    h_page_c = """</table>
-    </body>
-    </html>"""
-
-    h_tr_o = "<tr>"
-    h_tr_c = "</tr>"
-
+    title = 'pagePlayedArtistsPeriod' 
+    h_page = html_start(title) + main_navigation() + html_h1('Overzicht afgespeeld: ' + period)
+    
     h = unicode(' ', 'utf-8', errors='replace')
-    h = h_page_o + h
+    h = h + TABO
     
     for record in records:
         h_td = unicode(' ', 'utf-8', errors='replace')
-        h_td = h_td + h_tr_o
+        h_td = h_td + TRO
         h_td = h_td + "<td>%(volgnr)s</td>" % {'volgnr': record['volgnr']}
         artist_link = urllib.quote(record['artist'])
         artist = unicode(record['artist'], 'utf-8', errors='replace')
@@ -1230,69 +1136,95 @@ def pagePlayedArtistsPeriod(period, records):
                {'artist': artist, 'played': record['played'], \
                 'artist_link': artist_link, 'period': period}
         h_td = h_td + "<td>%(played)s</td>" % {'played': record['played']}
-        h_td = h_td + h_tr_c
+        h_td = h_td + TRC
         # h_td = unicode(h_td, 'utf-8', errors='replace')
         h = h + h_td
 
-    return h # + str(records)
+    h = h + TABC
+    
+    h_page = h_page + html_page(h) + html_end()
+
+    return h_page # + str(records)
     
 
-def pageBeheer():
-    """Pagina voor beheer, verversen en opschonen, van tabellen, pagina's.
+def pagePlayedArtistsPeriodAlbums(period, artist, records):
+    """Aantal afgespeelde songs van een artiest, per album over een gekozen periode.
     """
-    # update 20140830
 
-    title = 'Beheer'
-    h = html_start(title) + main_navigation() + html_h1(title) + """
-<table>
-    <tr><td class="beheer"> <a href="pageClearCache">
-        Clear cache, verwijder gegenereerde webpagina's.</a> </td></tr>
-    <tr><td class="beheer"> <a href="pageRefreshPlayedHistory">Ververs played history</a> </td></tr>
-    <tr><td class="beheer"> <a href="pageRefreshPlayedArtists">Ververs played artists</a> </td></tr>
+    title = 'pagePlayedArtistsPeriodAlbums'
+    h = html_start(title) + main_navigation() + \
+        html_h1("Overzicht afgespeeld: " + period + ", artiest: " + artist)
+    
+    h_page = TABO 
+    h_page = h_page + """
+    <tr>
+        <th>Album</th> <th>Aantal</th>
+    </tr>
+    """
 
-    </td>
-  </tr>
-</table>
-""" + html_end()
+    for record in records:
+        h_td = TRO + TDO + record['album'] + TDC + TDO + str(record['played']) + TDC + TRC
+        h_page = h_page + h_td
+
+    h = h + TABC
+    
+    h = h + html_page(h_page) + html_end()
+
+    print h
 
     return h
 
 
-def pageRefreshPlayedHistory():
-    """pageRefreshPlayedHistory, cijfers verversen voor played history.
-    """
-    #update 20140830
-
-    title = 'pageRefreshPlayedHistory'
-    h = html_start(title) + main_navigation() + html_h1(title) + \
+def pageListAlbums_AlbumArtist(records):
+    """Geef pagina terug met alle albums van een albumartiest. 
     """
 
-    <script>
-	window.history.back();
-    </script>
+    title = 'pageListAlbums_AlbumArtist'
+    h = html_start(title) + main_navigation() + \
+        html_h1('Albums van: %s' % records[0]['albumartist'])
 
-    </body></html>
+    xh_page_o = html_start('title') + """
+
+<style type="text/css">
+</style>
+
 """
 
+    # 2 parameters, link naar plaatje (folder_jpg), album naam (album)
+    h_td = """
+<td class="thumb">
+    <a href="listAlbumTracks?album=%(album_link)s">
+        <image class="thumb" src="%(folder_jpg)s"><br>
+        <p class="thumb">%(album)s (%(year)s)</p>
+    </a>
+</td>
+"""
+
+    h_page = TABO
+    # doorloop alle records
+    tel = 0
+    for record in records:
+        # print 'record', record
+        tel = tel + 1
+    
+        if tel == 1:
+            h_page = h_page + TRO
+    
+        h_page = h_page + (h_td % record)
+        # h_page = h_page + TDO + 'a' + TDC
+    
+        if tel == 4:
+            h_page = h_page + TRC
+            tel = 0
+
+    if tel <> 0:
+        h_page = h_page + TRC
+    h_page = h_page + TABC
+
+    h = h + html_page(h_page) + html_end()
+
     return h
 
 
-def pageRefreshPlayedArtists():
-    """pageRefreshPlayedArtists, cijfers verversen voor played artists.
-    """
-    #update 20140830
-
-    title = 'pageRefreshPlayedArtists'
-    h = html_start(title) + main_navigation() + html_h1(title) + \
-    """
-    
-    <script>
-	    window.history.back();
-    </script>
-    """ + html_end() 
-
-    return h
-
-    
 # einde
 
