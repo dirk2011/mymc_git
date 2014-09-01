@@ -786,7 +786,7 @@ class Mc:
 
         Mc.cursor.execute(query)
         recordset = Mc.cursor.fetchall()
-        print recordset
+        # print recordset
 
         hrecords = []
         tel = 0
@@ -805,7 +805,7 @@ class Mc:
                 if sleutel == "title" and hrecord['title'] is not None:
                     title_link = hrecord['title']
                     # title_link = unicode(title_link, 'utf-8', errors='replace')
-                    print 'title_link', title_link
+                    # print 'title_link', title_link
                     hrecord['title_link'] = urllib.quote(title_link)
             hrecord['volgnr'] = tel
             hrecords.append(hrecord)
@@ -1320,6 +1320,8 @@ class Mc:
 
     @cherrypy.expose
     def listAlbumTracks(self, album="nothing"):
+        """Toon alle songs van een album.
+        """
 
         pagename = "listAlbumTracks"
 
@@ -1327,59 +1329,11 @@ class Mc:
         if len(h) > 1:
             return h
         
-        # connection = sqlite3.connect(DBNAME)
-        # connection.row_factory = sqlite3.Row
-        # cursor = connection.cursor()
-
-        # album = "This Is The Life"
         # print 'album', album
-        self.dbOpen()
-        Mc.cursor.execute("""
-            select *
-            from songs
-            where album = '%s'
-            order by tracknumber
-            """ % q(album))
-        recordset = Mc.cursor.fetchall()
-
-        h = "".encode('utf-8')
-        h = """
-        <html>
-        <head>
-        <title>albums</title>
-        </head>
-        <body>
-        """ + mymc_html.main_navigation() + """
-        <h1>album: %s</h1>
-        <table>
-        <tr><th>Playlist</th><th>Play</th><th>Track</th><th>Titel</th><th>Lengte</th><th>Bitrate</th>
-        """ % album
-
-        for song in recordset:
-            print str(song['tracknumber']), song['title']
-            print 'h', type(h)
-            h = h + "<tr>"
-            h = h + "<td>" + '<a href="playAlsoSong?song_id=' + str(song['song_id']) + '">'
-            h = h + " Add " + "</a>" + "</td>"
-            h = h + "<td>" + '<a href="playSong?song_id=' + str(song['song_id']) + '">'
-            h = h + " Play " + "</a>" + "</td>"
-            h = h + "<td>" + str(song['tracknumber']) + "</td>"
-            title = song['title']
-            title = unicode(title, 'utf-8', errors='replace')
-            print 'title', type(title), title
-            h = h + "<td>" + title + "</a>" + "</td>"
-            h = h + "<td>" + str(song['length']) + "</td>"
-            h = h + "<td>" + str(song['bitrate']) + "</td>"
-            h = h + "<td>" + '<a href="pageSong?song_id=' + str(song['song_id']) + '">'
-            h = h + "Infopage" + '</a>' + "</td>" + \
-            "</tr>"
-
-        h = h + """
-        </table>
-        <p></p>
-        </body>
-        </html>
-        """
+        query = """select * from songs where album = '%s' order by tracknumber """ % q(album)
+        records = self.dbGetData(query)
+        
+        h = mymc_html.listAlbumTracks(album, records)
 
         self.storeInCache(h, pagename = pagename, key1 = album)
 

@@ -1226,5 +1226,44 @@ def pageListAlbums_AlbumArtist(records):
     return h
 
 
-# einde
+def listAlbumTracks(album, records):
+    """HTML voor: toon alle songs van een album
+    """
 
+    title = 'listAlbumTracks'
+    h = html_start(title) + main_navigation() + html_h1('Album: %s') % album
+    
+    h_page = "".encode('utf-8') + TABO + TRO + """
+    <th>Playlist</th> <th>Play</th> <th>Track</th> <th>Titel</th> <th>Lengte</th> <th>Bitrate</th>
+    """ + TRC
+    
+    for record in records:
+        # print str(record['tracknumber']), record['title']
+        h_page = h_page + '<tr class="ExtraHoog">' 
+        h_page = h_page + TDO + '<a href="playAlsoSong?song_id=' + str(record['song_id']) + '">'
+        h_page = h_page + " Add " + "</a>" + TDC
+        
+        h_page = h_page + TDO + '<a href="playSong?song_id=' + str(record['song_id']) + '">'
+        h_page = h_page + " Play " + "</a>" + TDC
+        
+        h_page = h_page + TDO + str(record['tracknumber']) + TDC
+        
+        title = record['title']
+        title = unicode(title, 'utf-8', errors='replace')
+        # print 'title', type(title), title
+        h_page = h_page + TDO + title + "</a>" + TDC
+        
+        h_page = h_page + TDO + str(record['length']) + TDC
+        h_page = h_page + TDO + str(record['bitrate']) + TDC
+        h_page = h_page + TDO + '<a href="pageSong?song_id=' + str(record['song_id']) + '">'
+        h_page = h_page + "Infopage" + '</a>' + TDC
+        h_page = h_page + TRC
+            
+    h_page = h_page + TABC
+    
+    h = h + html_page(h_page) + html_end()
+    
+    return h
+
+
+# einde

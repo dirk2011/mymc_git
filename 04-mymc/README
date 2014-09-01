@@ -1,1 +1,10 @@
+
+2014-08-29
+- beheer menu toegevoegd
+- doorklik van: played artists, naar: played artists - albums,
+  eerste versie album hoes moet erbij, en info hoeveel nummer het album heeft
+- info song
+  - datum, op minuten
+  - meer ruimte voor geven rating, tussen de nummers
+
 Python bestanden die de webpagina's genereren met cherrypy.
