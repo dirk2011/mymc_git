@@ -65,40 +65,41 @@ td.track {
 }
 
 td.title {
-  width: 250px;
-  text-align: left;
-  vertical-align: text-top;
+  	width: 250px;
+  	text-align: left;
+  	vertical-align: text-top;
   
 }
 
 td.artist {
-  width: 250px;
-  text-align: left;
-  vertical-align: text-top;
+  	width: 250px;
+  	text-align: left;
+  	vertical-align: text-top;
 }
 
 td.album {
-  width: 250px;
-  text-align: left;
-  vertical-align: text-top;
+  	width: 250px;
+  	text-align: left;
+  	vertical-align: text-top;
 
 }
 
 td.year {
-  width: 40px;
-  text-align: center;
-  vertical-align: text-top;
+  	width: 40px;
+  	text-align: center;
+  	vertical-align: text-top;
 }
 
 td.last {
-  text-align: center;
-  vertical-align: text-top;
+	width: 50px;
+  	text-align: center;
+  	vertical-align: text-top;
 }
 
 td.played {
-  width: 40px;
-  text-align: center;
-  vertical-align: text-top;
+  	width: 40px;
+  	text-align: center;
+  	vertical-align: text-top;
 }
 
 td.PlayedArtists, td.beheer {
@@ -135,7 +136,14 @@ p.thumb {
 td.thumb {
 	width: 195px;
 	padding: 0 20px 0 0;
+	text-align: center;
 	margin: 0;
 	border: 0;
+}
+
+td.SonosSpeakers, td.test11, th.test11 {
+	padding: 0px 15px 0px 0px;
+   margin: 0px;
+   border: 0px;
 }
 

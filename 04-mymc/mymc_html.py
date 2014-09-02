@@ -21,6 +21,7 @@ TABO = "<table>"    # <table>
 TABC = "</table>"   # </table>
 
 
+
 def html_start(title):
     """Begin van een html pagina, head t/m body, inclusief laden stylesheet.
     """
@@ -105,14 +106,9 @@ def pageSong():
     Terug door deze functione, de html pagina.
     """
 
-    return """
-<html>
-<head><title>pageSong</title></head>
-<body>""" + main_navigation() + \
-"""
-
-
-<h1>Song page</h1>
+    title = 'pageSong'
+    return html_start(title) + main_navigation() + html_h1('Track pagina') +  \
+        html_page("""
 
 <table><tr><td>
 <fieldset>
@@ -236,9 +232,7 @@ def pageSong():
 </tr>
 
 </table>
-</body>
-</html>
-"""
+""") + html_end()
 
 
 def sonos_playmenu():
@@ -528,59 +522,37 @@ def pageInfoMc(record):
 
 def pageSonosSpeakers(records):
     """Geef web pagina terug, om volume van de speakers te beheren.
-    
     Tevens geeft dit inzicht in alle sonos componenten.
     """
 
-    h_page_o = """
-<html>
-""" + main_navigation() + """
-
-<style type="text/css">
-    td {
-    padding: 0 20px 0 0;
-    margin: 0;
-    border: 0;
-    }
-</style>
-
-<h1>Sonos boxen</h1>
-
-<table border="1">
-<tr><th>Naam</th><th>Aan/Uit</th><th>Volume</th> <th>Zet volume</th><th>Component</th><th>Adres</th>
-    <th>Coordinator</th>
-</tr>
-"""
-
-    h_tr_o = "<tr>"
+    title = 'pageSonosSpeakers' 
+    h = html_start(title) + main_navigation() + html_h1('Sonos boxen')
     
-    h_tr_c = "</tr>"
-
     h_td = """
-    <td>%(zone_name)s</td>
-    <td>%(mute)s</td>
-    <td>%(volume)s</td>
-    <td>
+    <td class="SonosSpeakers">%(zone_name)s</td>
+    <td class="SonosSpeakers">%(mute)s</td>
+    <td class="SonosSpeakers">%(volume)s</td>
+    <td class="SonosSpeakers">
       <table>
-	<tr>
-	  <td><a href="sonosSetVolume?speaker=%(ip_address)s&volume=0">0</td>
-	  <td><a href="sonosSetVolume?speaker=%(ip_address)s&volume=10">10</td>
-	  <td><a href="sonosSetVolume?speaker=%(ip_address)s&volume=15">15</td>
-	  <td><a href="sonosSetVolume?speaker=%(ip_address)s&volume=20">20</td>
-	  <td><a href="sonosSetVolume?speaker=%(ip_address)s&volume=25">25</td>
-	  <td><a href="sonosSetVolume?speaker=%(ip_address)s&volume=30">30</td>
+	    <tr>
+	  <td class="SonosSpeakers"><a href="sonosSetVolume?speaker=%(ip_address)s&volume=0">0</td>
+	  <td class="SonosSpeakers"><a href="sonosSetVolume?speaker=%(ip_address)s&volume=10">10</td>
+	  <td class="SonosSpeakers"><a href="sonosSetVolume?speaker=%(ip_address)s&volume=15">15</td>
+	  <td class="SonosSpeakers"><a href="sonosSetVolume?speaker=%(ip_address)s&volume=20">20</td>
+	  <td class="SonosSpeakers"><a href="sonosSetVolume?speaker=%(ip_address)s&volume=25">25</td>
+	  <td class="SonosSpeakers"><a href="sonosSetVolume?speaker=%(ip_address)s&volume=30">30</td>
 
-	  <td><a href="sonosSetVolume?speaker=%(ip_address)s&volume=40">40</td>
-	  <td><a href="sonosSetVolume?speaker=%(ip_address)s&volume=50">50</td>
-	  <td><a href="sonosSetVolume?speaker=%(ip_address)s&volume=60">60</td>
-	  <td><a href="sonosSetVolume?speaker=%(ip_address)s&volume=70">70</td>
-	</tr>
+	  <td class="SonosSpeakers"><a href="sonosSetVolume?speaker=%(ip_address)s&volume=40">40</td>
+	  <td class="SonosSpeakers"><a href="sonosSetVolume?speaker=%(ip_address)s&volume=50">50</td>
+	  <td class="SonosSpeakers"><a href="sonosSetVolume?speaker=%(ip_address)s&volume=60">60</td>
+	  <td class="SonosSpeakers"><a href="sonosSetVolume?speaker=%(ip_address)s&volume=70">70</td>
+	    </tr>
       </table>
     </td>
 
-    <td>%(volgnr)s</td>
-    <td>%(ip_address)s</td>
-    <td>%(is_coordinator)s</td>
+    <td class="SonosSpeakers">%(volgnr)s</td>
+    <td class="SonosSpeakers">%(ip_address)s</td>
+    <td class="SonosSpeakers">%(is_coordinator)s</td>
 <!--    <td>%(is_speaker)s</td>
     <td>%(loudness)s</td>
     <td>%(treble)s</td>
@@ -590,30 +562,39 @@ def pageSonosSpeakers(records):
     """
 
     h_page_c = """
-  </tr>
-</table>
-
 <p>Pagina laden duurt even, omdat bij iedere box gegevens worden opgehaald.</p>
 <p>Ververs de pagina om actuele volume gegevens te zien.</p>
-</html>
+"""
+
+    h_page_o = """
+<table border="1">
+    <tr><th class="SonosSpeakers">Naam</th>
+        <th class="SonosSpeakers">Aan/Uit</th>
+        <th class="SonosSpeakers">Volume</th> 
+        <th class="SonosSpeakers">Zet volume</th>
+        <th class="SonosSpeakers">Component</th>
+        <th class="SonosSpeakers">Adres</th>
+        <th class="SonosSpeakers">Coordinator</th>
+    </tr>
 """
 
     # begin van de pagina
-    h = h_page_o
+    h_page = h_page_o
 
     # doorloop alle records
     tel = 0
     for record in records:
         # print 'record', record
-        h = h + h_tr_o
+        h_page = h_page + TRO
 	
-        hd = (h_td % record)
-        h = h + hd
+        h_page = h_page + (h_td % record)
 	
-        h = h + h_tr_c
+        h_page = h_page + TRC
 
-    h = h + h_page_c
-    print len(h)
+    h_page = h_page + TABC + h_page_c
+
+    h = h + html_page(h_page) + html_end()
+    # print len(h)
 
     return h
 
@@ -687,11 +668,11 @@ def pageIndex():
 
 
 def pageSearch():
+    """Pagina om te zoeken in de muziek collectie.
+    """
   
     title = 'pageSearch'
-    return html_start(title) + main_navigation() + """
-<h1>Songs zoeken</h1>
-
+    return html_start(title) + main_navigation() + html_h1('Tracks zoeken') + html_page("""
 <form action="pageSearchResult">
 <table>
 <tr><td>
@@ -779,22 +760,16 @@ def pageSearch():
    
 </table>
 </form>
-
-</html>
-    """
+    """) + html_end()
 
 
 def pageSearchResult(records):
+    """Pagina om het zoek resultaat te tonen.
+    """
 
-    h_page_o = """
-<html>
-<head><title>Search result</title>
-</head>
-<body>
-""" + main_navigation() + """
-<h1>Zoek resultaat</h1>
-<table>"""
-
+    title = 'pageSearchResult'
+    h = html_start(title) + main_navigation() + html_h1('Zoek resultaat')
+    
     h_tr_h = """
 <tr>
   <th>Info</th>
@@ -808,10 +783,6 @@ def pageSearchResult(records):
   <th>Played</th>
 </tr>
 """
-
-    h_tr_o = "<tr>"
-    
-    h_tr_c = "</tr>"
 
     h_td = """
 <tr>
@@ -852,17 +823,19 @@ def pageSearchResult(records):
 </html>
 """
 
-    h = h_page_o
+    h_page = TABO
 
     if len(records) == 0:
-        h = h + """<br>Geen gegevens gevonden die aan de selectie voldoen.<br>
+        h_page = h_page + """<br>Geen gegevens gevonden die aan de selectie voldoen.<br>
             Probeer het opnieuw."""
     else:
-        h = h + h_tr_h
+        h_page = h_page + h_tr_h
         for record in records:
-            h =  h + (h_td % record)
+            h_page =  h_page + (h_td % record)
 
-    h = h + h_page_c
+    h_page = h_page + TABC
+    
+    h = h + html_page(h_page) + html_end()
 
     return h
 
@@ -1264,6 +1237,16 @@ def listAlbumTracks(album, records):
     h = h + html_page(h_page) + html_end()
     
     return h
+
+
+def htd(content, options=""):
+    """return <td> en </td>, met content en opties
+    """
+    
+    if len(options) > 0:
+        return " <td " + options + ">" + content + "</td> "
+    else:
+        return " <td>" + content + "</td> "
 
 
 # einde
