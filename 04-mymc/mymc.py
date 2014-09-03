@@ -1150,7 +1150,7 @@ class Mc:
         # haal queue uit database op
         query = """select * from queue order by queue_id"""
         records = self.dbGetData(query)
-        print 'queue records', records
+        # print 'queue records', records
 
         # list songs in sonos queue
         if len(sonos.get_queue()) > 0:

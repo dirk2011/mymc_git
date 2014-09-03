@@ -1,0 +1,54 @@
+Help on module htable:
+
+NAME
+    htable - htable.py met class hTable
+
+FILE
+    /media/rasp163-v/mymc/04-mymc/htable.py
+
+DESCRIPTION
+    Met deze class kan eenvoudig een html table aangemaakt worden.
+    
+    Gebruik: import hTable from htable
+    
+    html = hTable()
+    html.th("header kolom 1")
+    html.td("data kolom 1")
+    html.closeall()
+    html.exp()
+
+CLASSES
+    hTable
+    
+    class hTable
+     |  Methods defined here:
+     |  
+     |  __init__(self, options='')
+     |      Aanmaken hTable object.
+     |  
+     |  add(self, data='')
+     |      Interne methode, tekst aan html string toevoegen
+     |  
+     |  close(self)
+     |      Sluit een niveau af.
+     |      Het is niet nodig deze zelf aan te roepen, gebruik op het einde: closeall.
+     |  
+     |  closeall(self)
+     |      Sluit tabel af.
+     |  
+     |  exp(self)
+     |      Exporteer html code.
+     |  
+     |  td(self, data='#', classs='')
+     |      Begin van een td (table detail).
+     |  
+     |  tda(self, data='#')
+     |      Voeg data toe aan td (table detail).
+     |  
+     |  th(self, data='', classs='')
+     |      Begin en einde van th (table header).
+     |  
+     |  tr(self, classs='')
+     |      Begin tr niveau.
+
+

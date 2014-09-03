@@ -10,6 +10,7 @@ de python module pycheerry.
 """
 
 import urllib               # vertaal string naar url
+from htable import hTable
 
 
 TDO = "<td>"        # <td> 
@@ -56,7 +57,8 @@ def html_h1(text):
 
 
 def html_page(page):
-    """Return page wrapped in page elements.
+    """Geef pagina terug in div pagina,
+    er kan gescrolled worden, en kop blijft staan. 
     """
     
     return """
@@ -71,33 +73,45 @@ def main_navigation():
     """Menu voor de website.
     """
 
-    return """
-<div id="kopmenu">
-    <table>
-      <tr>
-        <td class="nav"> 
-            <a href="index">Home</a> 
-        </td><td class="nav">
-          <a href="pageInfoMc">Info Mc</a>
-        </td><td class="nav">
-          <a href="pageListAlbumArtists">Album artiesten</a>
-        </td><td class="nav">
-          <a href="pageSearch">Zoeken</a>
-        </td><td class="nav">
-          <a href="sonos_playmenu">Queue</a>
-        </td><td class="nav">
-          <a href="pageSonosSpeakers">Volume</a>
-        </td><td class="nav">
-          <a href="pagePlayedHistory">Played history</a>
-        </td><td class="nav">
-          <a href="pagePlayedArtists">Played Artists</a>
-        </td><td class="nav">
-          <a href="pageBeheer">Beheer</a>
-        </td>
-      </tr>
-    </table>
-</div>
-"""
+    h = hTable()
+    h.td('<a href="index">Home</a>', 'nav')
+    h.td('<a href="pageInfoMc">Info Mc</a>', 'nav')
+    h.td('<a href="pageListAlbumArtists">Album artiesten</a>', 'nav')
+    h.td('<a href="pageSearch">Zoeken</a>', 'nav')
+    h.td('<a href="sonos_playmenu">Queue</a>', 'nav')
+    h.td('<a href="pageSonosSpeakers">Volume</a>', 'nav')
+    h.td('<a href="pagePlayedHistory">Played history</a>', 'nav')
+    h.td('<a href="pagePlayedArtists">Played Artists</a>', 'nav')
+    h.td('<a href="pageBeheer">Beheer</a>', 'nav')
+    h.closeall()
+
+    return """<div id="kopmenu">%s</div> """ % h.exp()
+
+
+def linkpageAlbumArtist(artist):
+    """geef link terug: href naar album artist
+    """
+    
+    link = urllib.quote(artist)
+    return """<a href=pageListAlbums_AlbumArtist?albumartist=%s>""" % link + artist + "</a>"
+
+
+def linkpageAlbumTracks(album):
+    """geef link terug: href naar album
+    """
+    
+    link = urllib.quote(album)
+    return """<a href=listAlbumTracks?album=%s>""" % link + album + "</a>"
+
+
+def linkpageSong(song_id):
+    """geef link terug: href naar song info pagina
+    """
+    
+    song_id = str(song_id)
+    link = urllib.quote(song_id)
+    return """<a href=pageSong?song_id=%s>""" % link + song_id + "</a>"
+
 
 def pageSong():
     """Geef webpagina terug, met veel gegevens over een song.
@@ -984,7 +998,7 @@ def pagePlayedHistory(yearsdict, monthsdict, daysdict):
     <tr>
       <th>Jaar</th><th>Aantal</th> 
     </tr><tr>
-      <td>2014</td> <td>%(year2014)s</td>
+      <td>2014</td> <td class="played">%(year2014)s</td>
     </tr>
     </table>
 """
@@ -996,16 +1010,36 @@ def pagePlayedHistory(yearsdict, monthsdict, daysdict):
     <tr>
     <th>Maand</th><th>Aantal</th> <th>Maand</th><th>Aantal</th> <th>Maand</th><th>Aantal</th>
     <th>Maand</th><th>Aantal</th> <th>Maand</th><th>Aantal</th> <th>Maand</th><th>Aantal</th>
-    </tr><tr>
-        <td>01</td> <td>%(month1)s</td> <td>02</td> <td>%(month2)s</td> <td>03</td> <td>%(month3)s</td>
-        <td>04</td> <td>%(month4)s</td> <td>05</td> <td>%(month5)s</td> <td>06</td> <td>%(month6)s</td>
-    </tr><tr>
-        <td>07</td> <td>%(month7)s</td>  
+    </tr>
+    <tr>
+        <td class="maand">01</td>
+        <td>%(month1)s</td> 
+        <td class="maand">02</td> 
+        <td>%(month2)s</td>
+        <td class="maand">03</td> 
+        <td>%(month3)s</td>
+        
+        <td class="maand">04</td> 
+        <td>%(month4)s</td> 
+        <td class="maand">05</td> 
+        <td>%(month5)s</td> 
+        <td class="maand">06</td> 
+        <td>%(month6)s</td>
+    </tr>
+    <tr>
+        <td class="maand">07</td> 
+        <td>%(month7)s</td>  
+        <td class="maand">08</td>
+        <td class="played"> <a href="pagePlayedHistory?year=%(year)s&month=8">%(month8)s</a> </td>  
+        <td class="maand">09</td> 
+        <td class="played"> <a href="pagePlayedHistory?year=%(year)s&month=9">%(month9)s</a> </td>
 
-        <td>08</td> <td> <a href="pagePlayedHistory?year=%(year)s&month=8">%(month8)s</a> </td>  
-        <td>09</td> <td> <a href="pagePlayedHistory?year=%(year)s&month=9">%(month9)s</a> </td>
-
-        <td>10</td> <td>%(month10)s</td> <td>11</td> <td>%(month11)s</td> <td>12</td> <td>%(month12)s</td>
+        <td class="maand">10</td> 
+        <td>%(month10)s</td> 
+        <td class="maand">11</td> 
+        <td>%(month11)s</td> 
+        <td class="maand">12</td> 
+        <td>%(month12)s</td>
     </tr>
     </table>
 """
@@ -1018,11 +1052,31 @@ def pagePlayedHistory(yearsdict, monthsdict, daysdict):
     <th>Dag</th><th>Aantal</th> <th>Dag</th><th>Aantal</th> <th>Dag</th><th>Aantal</th> 
     <th>Dag</th><th>Aantal</th> <th>Dag</th><th>Aantal</th> <th>Dag</th><th>Aantal</th> <th>Dag</th><th>Aantal</th> 
     </tr><tr>
-        <td>01</td> <td>%(day1)s</td> <td>02</td> <td>%(day2)s</td> <td>03</td> <td>%(day3)s</td>
-        <td>04</td> <td>%(day4)s</td> <td>05</td> <td>%(day5)s</td> <td>06</td> <td>%(day6)s</td>
+        <td class="dag">01</td> 
+        <td class="played">%(day1)s</td> 
+        <td class="dag">02</td> 
+        <td class="played">%(day2)s</td> 
+        <td class="dag">03</td> 
+        <td class="played">%(day3)s</td>
+        <td class="dag">04</td> 
+        <td class="played">%(day4)s</td> 
+        <td class="dag">05</td> 
+        <td class="played">%(day5)s</td> 
+        <td class="dag">06</td> 
+        <td class="played">%(day6)s</td>
     </tr><tr>
-        <td>07</td> <td>%(day7)s</td> <td>08</td> <td>%(day8)s</td> <td>09</td> <td>%(day9)s</td>
-        <td>10</td> <td>%(day10)s</td> <td>11</td> <td>%(day11)s</td> <td>12</td> <td>%(day12)s</td>
+        <td class="dag">07</td> 
+        <td>%(day7)s</td> 
+        <td class="dag">08</td> 
+        <td>%(day8)s</td> 
+        <td class="dag">09</td> 
+        <td>%(day9)s</td>
+        <td class="dag">10</td> 
+        <td>%(day10)s</td> 
+        <td class="dag">11</td> 
+        <td>%(day11)s</td> 
+        <td class="dag">12</td> 
+        <td>%(day12)s</td>
     </tr><tr>
         <td>13</td> <td>%(day13)s</td> <td>14</td> <td>%(day14)s</td> <td>15</td> <td>%(day15)s</td>
         <td>16</td> <td>%(day16)s</td> <td>17</td> <td>%(day17)s</td> <td>18</td> <td>%(day18)s</td>
@@ -1095,20 +1149,26 @@ def pagePlayedArtistsPeriod(period, records):
     h_page = html_start(title) + main_navigation() + html_h1('Overzicht afgespeeld: ' + period)
     
     h = unicode(' ', 'utf-8', errors='replace')
-    h = h + TABO
+    h = h + TABO + """
+    <tr> 
+        <td class="track">#</td> 
+        <td class="artist">Artiest</td>
+        <td class="played">Aantal</td> 
+    </tr>
+    """
     
     for record in records:
         h_td = unicode(' ', 'utf-8', errors='replace')
         h_td = h_td + TRO
-        h_td = h_td + "<td>%(volgnr)s</td>" % {'volgnr': record['volgnr']}
+        h_td = h_td + """<td class="track">%(volgnr)s</td>""" % {'volgnr': record['volgnr']}
         artist_link = urllib.quote(record['artist'])
         artist = unicode(record['artist'], 'utf-8', errors='replace')
         # print 'artist', record['artist']
         # print 'artist_link', artist_link
-        h_td = h_td + """<td><a href="pagePlayedArtistsPeriodAlbums?period=%(period)s&artist=%(artist_link)s"> %(artist)s </a> </td>""" %\
+        h_td = h_td + """<td class="artist"><a href="pagePlayedArtistsPeriodAlbums?period=%(period)s&artist=%(artist_link)s"> %(artist)s </a> </td>""" %\
                {'artist': artist, 'played': record['played'], \
                 'artist_link': artist_link, 'period': period}
-        h_td = h_td + "<td>%(played)s</td>" % {'played': record['played']}
+        h_td = h_td + """<td class="played">%(played)s</td>""" % {'played': record['played']}
         h_td = h_td + TRC
         # h_td = unicode(h_td, 'utf-8', errors='replace')
         h = h + h_td
@@ -1131,12 +1191,18 @@ def pagePlayedArtistsPeriodAlbums(period, artist, records):
     h_page = TABO 
     h_page = h_page + """
     <tr>
-        <th>Album</th> <th>Aantal</th>
+        <th>Artiest</th>
+        <th>Album</th> 
+        <th>Aantal</th>
     </tr>
     """
 
+
     for record in records:
-        h_td = TRO + TDO + record['album'] + TDC + TDO + str(record['played']) + TDC + TRC
+        h_td = TRO + \
+            """<td class="artist">""" + linkpageAlbumArtist(artist) + TDC + \
+            """<td class="album">"""  + linkpageAlbumTracks(record['album']) + TDC + \
+            """<td class="played">""" + str(record['played']) + TDC + TRC
         h_page = h_page + h_td
 
     h = h + TABC

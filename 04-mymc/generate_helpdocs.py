@@ -20,9 +20,10 @@ def output_help_to_file(filepath, request):
     sys.stdout = sys.__stdout__
     return
 
-output_help_to_file(r'os.txt', 'os')
+# output_help_to_file(r'os.txt', 'os')
 
 output_help_to_file(r'mymc_html.txt', 'mymc_html')
 
 output_help_to_file(r'mymc.txt', 'mymc')
 
+output_help_to_file(r'htable.txt', 'htable')
