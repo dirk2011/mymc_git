@@ -10,6 +10,7 @@ git add .gitignore
 git add *.sh
 git add *.jpg
 git add *.css
+git add *.txt
 git add README
 
 git status

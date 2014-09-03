@@ -1,12 +1,17 @@
 # -*- coding: utf-8 -*-
-# maak een lijstje van mijn sonos componenten
-# gesorteerd op naam of ip adres
-#----------------------------------------------------------------
-# 2014-08-23, fout op vangen als bv speaker is uitgezet
-#----------------------------------------------------------------
 
+""" maak een lijstje van mijn sonos componenten
+
+gesorteerd op naam of ip adres
+----------------------------------------------------------------
+2014-08-23, fout op vangen als bv speaker is uitgezet
+----------------------------------------------------------------
+"""
+# pylint: disable=C0103, C0301
+# pep8: disable=E501
 
 from soco import SoCo
+
 
 def getSonosCoordinator():
     """Geef terug ipadres van de box die coordinator is.
@@ -17,7 +22,7 @@ def getSonosCoordinator():
     for speaker in speakers:
         if speaker['is_coordinator']:
             return speaker['ip_address']
-    
+
 
 def getSonos():
     """info over alle sonos componenten ophalen
@@ -26,7 +31,7 @@ def getSonos():
     """
 
     # discover werkt niet, haal zelf 1e speaker op
-    a = SoCo('192.168.1.13') # 13, 2014-08, de bridge
+    a = SoCo('192.168.1.13')  # 13, 2014-08, de bridge
     # print a.player_name
 
     # haal nu gehele zone op, alle speakers etc
@@ -42,8 +47,8 @@ def getSonos():
         except:
             # vangt fout op, als een speaker bv is uitgezet
             continue
-            
-        if info <> 'x':
+
+        if info != 'x':
             key = info['zone_name']
         else:
             key = "Bridge"
@@ -59,12 +64,12 @@ def getSonos():
     my_speaker = {}     # per speaker dictionary vullen
     tel = 0
     for ip in ips:
-        tel = tel+1
+        tel = tel + 1
         speaker = mijn[ip]
         # print tel, speaker.ip_address,
         my_speaker['volgnr'] = tel
         my_speaker['ip_address'] = speaker.ip_address
-        
+
         speaker_info = speaker.get_speaker_info()
         if speaker.is_bridge:
             # print "bridge",
@@ -101,7 +106,5 @@ def getSonos():
         # print 'light: ', speaker.status_light
         my_sonos.append(my_speaker)
         my_speaker = {}
-            
+
     return my_sonos
-
-

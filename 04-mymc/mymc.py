@@ -3,9 +3,14 @@
 """Module music collection.
 
 Doel database maken van al mijn mp3s.
-Via webinterface inzicht hierin bieden, 
+Via webinterface inzicht hierin bieden,
 en afspelen via sonos.
 """
+# pylint: disable=C0103, C0301, R0201
+# C0103 - naming convention
+# C0301 - lengte van de regels
+# R0201 - method could be a function
+
 
 import sys
 import codecs               # voor utf-8 bestanden
@@ -16,7 +21,6 @@ from datetime import timedelta
 # import sqlite3              # sqlite database
 import psycopg2             # postgres db
 import psycopg2.extras      # dictionary cursor
-import sys
 import cherrypy             # cherrypy de webinterface
 import urllib               # vertaal string naar url
 from soco import SoCo       # sonos
@@ -33,12 +37,11 @@ MCSERVER = "http://192.168.1.163"
 # COORDINATOR = sonos_discover.getSonosCoordinator()
 COORDINATOR = '192.168.1.21'
 # locatie voor caching van bestanden
-CACHE="../cache"
+CACHE = "../cache"
 # cache status aan of uit
-CACHING=True
+CACHING = True
 # aantal dagen dat historie opgeteld moet worden
 GENERATEDAYS = 100
-
 
 
 class Mc:
@@ -129,8 +132,9 @@ class Mc:
 
         # het gaat om 7 tijdvakken, elk tijdvak heeft 3 totalen
         periods = {'alltime': 10000}
-        periods = {'lastday': 1, 'lastweek': 7, 'last4weeks': (4 * 7), 'last3months': (13 * 7), \
-                  'lasthalfyear': (26 * 7), 'lastyear': (52 * 7), 'alltime': 10000}
+        periods = {'lastday': 1, 'lastweek': 7, 'last4weeks': (4 * 7), \
+                   'last3months': (13 * 7), 'lasthalfyear': (26 * 7), \
+                   'lastyear': (52 * 7), 'alltime': 10000}
         levels = ['artists', 'albums', 'titles']
 
         query1 = """-- artiest
@@ -138,7 +142,7 @@ class Mc:
         select 		'%(period)s', '%(level)s', artist, count(*) as aantal
         from   		played
         left join 	songs
-        on 		played.song_id = songs.song_id 
+        on 		played.song_id = songs.song_id
         where		current_date - date(played.playdate) < %(days)s
         group by 	artist
         order by 	4 desc
@@ -149,7 +153,7 @@ class Mc:
         select 		'%(period)s', '%(level)s', artist, album, count(*) as aantal
         from   		played
         left join 	songs
-        on 		played.song_id = songs.song_id 
+        on 		played.song_id = songs.song_id
         where		current_date - date(played.playdate) < %(days)s
         group by 	artist, album
         order by 	5 desc
@@ -160,7 +164,7 @@ class Mc:
         select 		'%(period)s', '%(level)s', artist, album, title, count(*) as aantal
         from   		played
         left join 	songs
-        on 		played.song_id = songs.song_id 
+        on 		played.song_id = songs.song_id
         where		current_date - date(played.playdate) < %(days)s
         group by 	artist, album, title
         order by 	6 desc
@@ -227,6 +231,7 @@ class Mc:
 
         return 1
 
+
     def dbClose(self):
         """ database cursor en connectie sluiten
         """
@@ -240,8 +245,7 @@ class Mc:
                 Mc.connection.close()
 
         except psycopg2.DatabaseError, e:
-                print 'Error %s' % e
-
+            print 'Error %s' % e
 
 
     @cherrypy.expose
@@ -261,7 +265,7 @@ class Mc:
         
 
     @cherrypy.expose
-    def pagePlayedHistory(self, year = 0, month = 0):
+    def pagePlayedHistory(self, year=0, month=0):
         """Toon per jaar, maand en dag, aantal afgespeelde songs.
         """
 
@@ -338,7 +342,7 @@ class Mc:
             # print selectie
 
             query = """
-                insert into played_history (year, month, day, played) 
+                insert into played_history (year, month, day, played)
                 select %(year)s as year, %(month)s as month, %(day)s as day, count(*)
                 from played
                 where to_char(playdate, 'yyyy-mm-dd') like %(selectie)s
@@ -356,16 +360,16 @@ class Mc:
         return True
         
 
-    def generate_periods(self, by=2014, bm=8, bd=1):
+    def generate_periods(self, by=2014, bm=9, bd=1):
         """genereer perioden, jaren, jaar-maanden, datums
         in: begin year, begin month, begin day, end year
         out: list met de periods
         nb, voor het gemak gaan we er van uit dat elke maand 31 dagen telt
         """
 
-        days = timedelta(days = 1)
+        days = timedelta(days=1)
         daycounter = datetime.date(by, bm, bd)
-        periods = [] 
+        periods = []
 
         for tel in range(GENERATEDAYS):
             # tel is generator
@@ -388,8 +392,8 @@ class Mc:
         return periods
 
 
-    def partPageSongRating(self, song_id = 0):
-        """
+    def partPageSongRating(self, song_id=0):
+        """html code om song rating in te voegen
         """
 
         query = """select ifnull(max(rating), 0) as rating from songsinfo where song_id = %s""" % song_id
@@ -412,8 +416,8 @@ class Mc:
         
         # controleer of cache directory bestaat
         if os.path.exists(CACHE):
-            for root, map, files in os.walk(CACHE):
-                print map
+            for root, map2, files in os.walk(CACHE):
+                print map2
                 tel = 0
                 for bestand in files:
                     tel = tel + 1
@@ -435,7 +439,7 @@ class Mc:
         if page == "#" or pagename == "#":
             return False
 
-        if key1 <> "#":
+        if key1 != "#":
             pagename = pagename + "_" + key1
         hfile = os.path.join(CACHE, pagename)
 
@@ -456,13 +460,13 @@ class Mc:
         if not CACHING:
             return "#"
 
+        h = " "
+
         # als geen pagina naam bekend, stop
         if pagename == "#":
             return h
 
-        h = "#"
-
-        if key1 <> "#":
+        if key1 != "#":
             pagename = pagename + "_" + key1
         hfile = os.path.join(CACHE, pagename)
 
@@ -479,9 +483,6 @@ class Mc:
     @cherrypy.expose
     def pageSearchResult(self, **kwargs):
         """Geef zoek resultaat terug, zoekopdracht door pageSearch.
-
-        TODO: zoeken op rating
-        TODO: zoeken op niet afgespeeld laatste #N
         """
 
         where = ""
@@ -489,42 +490,42 @@ class Mc:
         # print kwargs
         if 'salbumartist' in kwargs.keys():
             stitle = kwargs['salbumartist'].upper()
-            if stitle <> '':
+            if stitle != '':
                 if len(where) > 0:
                     where = where + " and "
                 where = where + "upper(songs.albumartist) like '%" + stitle + "%' "
 
         if 'sartist' in kwargs.keys():
             sartist = kwargs['sartist'].upper()
-            if sartist <> '':
+            if sartist != '':
                 if len(where) > 0:
                     where = where + " and "
                 where = where + "upper(songs.artist) like '" + sartist + "' "
 
         if 'salbum' in kwargs.keys():
             salbum = kwargs['salbum'].upper()
-            if salbum <> '':
+            if salbum != '':
                 if len(where) > 0:
                     where = where + " and "
                 where = where + "upper(songs.album) like '%" + salbum + "%' "
 
         if 'stitle' in kwargs.keys():
             stitle = kwargs['stitle'].upper()
-            if stitle <> '':
+            if stitle != '':
                 if len(where) > 0:
                     where = where + " and "
                 where = where + "upper(songs.title) like '%" + stitle + "%' "
 
         if 'syear' in kwargs.keys():
             syear = kwargs['syear'].upper()
-            if syear <> '':
+            if syear != '':
                 if len(where) > 0:
                     where = where + " and "
                 where = where + "songs.year = " + syear + " "
                 
         if 'snumplayed' in kwargs.keys():
             snumplayed = kwargs['snumplayed']
-            if snumplayed <> '':
+            if snumplayed != '':
                 if len(having) > 0:
                     having = having + " and "
                 having = having + " count(played.song_id) < " + snumplayed
@@ -533,42 +534,42 @@ class Mc:
         whererating = ""
         if 'srating0' in kwargs.keys():
             srating0 = kwargs['srating0']
-            if srating0 <> '':
+            if srating0 != '':
                 if len(whererating) > 0:
                     whererating = whererating + " or "
                 whererating = whererating + " songsinfo.rating = " + srating0
 
         if 'srating1' in kwargs.keys():
             srating1 = kwargs['srating1']
-            if srating1 <> '':
+            if srating1 != '':
                 if len(whererating) > 0:
                     whererating = whererating + " or "
                 whererating = whererating + " songsinfo.rating = " + srating1
 
         if 'srating2' in kwargs.keys():
             srating2 = kwargs['srating2']
-            if srating2 <> '':
+            if srating2 != '':
                 if len(whererating) > 0:
                     whererating = whererating + " or "
                 whererating = whererating + " songsinfo.rating = " + srating2
 
         if 'srating3' in kwargs.keys():
             srating3 = kwargs['srating3']
-            if srating3 <> '':
+            if srating3 != '':
                 if len(whererating) > 0:
                     whererating = whererating + " or "
                 whererating = whererating + " songsinfo.rating = " + srating3
 
         if 'srating4' in kwargs.keys():
             srating4 = kwargs['srating4']
-            if srating4 <> '':
+            if srating4 != '':
                 if len(whererating) > 0:
                     whererating = whererating + " or "
                 whererating = whererating + " songsinfo.rating = " + srating4
 
         if 'srating5' in kwargs.keys():
             srating5 = kwargs['srating5']
-            if srating5 <> '':
+            if srating5 != '':
                 if len(whererating) > 0:
                     whererating = whererating + " or "
                 whererating = whererating + " songsinfo.rating = " + srating5
@@ -586,15 +587,15 @@ class Mc:
             if speriod == 'week':
                 dagen = timedelta(days=7)
             if speriod == '4 weken':
-                dagen = timedelta(days= (4*7))
+                dagen = timedelta(days=(4 * 7))
             if speriod == '8 weken':
-                dagen = timedelta(days= (8*7))
+                dagen = timedelta(days=(8 * 7))
             if speriod == '12 weken':
-                dagen = timedelta(days= (12*7))
+                dagen = timedelta(days=(12 * 7))
             if speriod == 'halfjaar':
-                dagen = timedelta(days= (26*7))
+                dagen = timedelta(days=(26 * 7))
             if speriod == 'jaar':
-                dagen = timedelta(days= (52*7))
+                dagen = timedelta(days=(52 * 7))
 
             ouderdan = datetime.date.today() - dagen
             ouderdan = ouderdan.isoformat()
@@ -615,7 +616,7 @@ class Mc:
                 , substr(min(to_char(playdate, 'yyyy-mm-dd')), 1, 10) as first
                 , substr(max(to_char(playdate, 'yyyy-mm-dd')), 1, 10) as last
                 , count(played.song_id) as played
-            from songs 
+            from songs
             left join songsinfo
             on songs.song_id = songsinfo.song_id
             left join played
@@ -639,6 +640,8 @@ class Mc:
 
     @cherrypy.expose
     def pageSearch(self):
+        """Presenteer pagina om te zoeken.
+        """
 
         h = mymc_html.pageSearch()
 
@@ -646,7 +649,7 @@ class Mc:
     
 
     @cherrypy.expose
-    def sonosSetVolume(self, speaker = COORDINATOR, volume = 10):
+    def sonosSetVolume(self, speaker=COORDINATOR, volume=10):
         """sonosSetVolume, volume voor speaker instellen
         """
 
@@ -679,7 +682,7 @@ class Mc:
     
     @cherrypy.expose
     def pageInfoMc(self):
-        """pageInfoMc, statistieken berekenen over de muziekcollectie 
+        """pageInfoMc, statistieken berekenen over de muziekcollectie
         """
 
         ## info over tabel songs
@@ -742,9 +745,9 @@ class Mc:
             where album || '#' || tracknumber in
             (
                 select album || '#' || min(tracknumber)
-                from songs 
+                from songs
                 where upper(albumartist) = upper('%s')
-                group by album 
+                group by album
             )
             order by year, album
         """ % albumartist)
@@ -757,15 +760,15 @@ class Mc:
         h = mymc_html.pageListAlbums_AlbumArtist(hrecords)
 
         # sla pagina in cache op
-        self.storeInCache(h, pagename = pagename, key1 = albumartist)
+        self.storeInCache(h, pagename=pagename, key1=albumartist)
 
         return h
 
 
-    def createLinkFolderJpg(self, location = ""):
+    def createLinkFolderJpg(self, location=""):
         """createLinkFolderJpg, link maken naar folder.jpg bestand
         """
-        if location <> "":
+        if location != "":
             folder_jpg = "/muzik3" + location + "/" + 'folder.jpg'
             folder_jpg = urllib.quote(folder_jpg)
             folder_jpg = MCSERVER + folder_jpg
@@ -809,7 +812,7 @@ class Mc:
                     hrecord['title_link'] = urllib.quote(title_link)
             hrecord['volgnr'] = tel
             hrecords.append(hrecord)
-        # print hrecords # zet aan voor debuggen 
+        # print hrecords # zet aan voor debuggen
 
         return hrecords
 
@@ -830,7 +833,7 @@ class Mc:
             select row_number() over (order by albumartist) as volgnr, albumartist, num_songs, num_albums
             from (
                 select albumartist, count(*) as num_songs, count(distinct album) as num_albums
-                from   songs 
+                from   songs
                 group by albumartist
                 order by 1 ) as songs
         """
@@ -841,12 +844,12 @@ class Mc:
 
         # sla pagina in cache op
         h = unicode(h, 'utf-8', errors='replace')
-        self.storeInCache(h, pagename = pagename)
+        self.storeInCache(h, pagename=pagename)
         
         return h
 
     @cherrypy.expose
-    def pageSongSave(self, song_id = -1, rating = -1):
+    def pageSongSave(self, song_id=-1, rating=-1):
         """pageSongSave, pageSong submit verwerken en opslaan
         """
         # song_id = 255
@@ -881,11 +884,11 @@ class Mc:
         h = mymc_html.pageSongSave
         return h
 
-
-
-
+    
     @cherrypy.expose
-    def pageSong(self, song_id = 0):
+    def pageSong(self, song_id=0):
+        """Presenteer pagina om een song te raadplegen, en waardering op te geven.
+        """
 
         # song_id = 1 # alleen waarde geven als debuggen
 
@@ -922,7 +925,7 @@ class Mc:
         return h
 
 
-    def dbGetInfoSong(self, song_id = 0):
+    def dbGetInfoSong(self, song_id=0):
         """dbGetInfoSong, get a song record from the database with 1 song
         """
 
@@ -950,12 +953,12 @@ class Mc:
 
             columns = recordset.keys()
             for column in columns:
-                record[column] = recordset[column] 
+                record[column] = recordset[column]
 
         return record
 
 
-    def dbGetPlayInfoSong(self, song_id = 0):
+    def dbGetPlayInfoSong(self, song_id=0):
         """dbGetPlayInfoSong, haal afspeel gegevens over een song op:
         eerste en laatste keer, en aantal keer
         """
@@ -985,12 +988,12 @@ class Mc:
 
             columns = recordset.keys()
             for column in columns:
-                record[column] = recordset[column] 
+                record[column] = recordset[column]
 
         return record
 
 
-    def dbGetSong(self, song_id = 0):
+    def dbGetSong(self, song_id=0):
         """dbGetSong, get a song record from the database with 1 song
         """
 
@@ -1017,7 +1020,7 @@ class Mc:
 
             columns = recordset.keys()
             for column in columns:
-                record[column] = recordset[column] 
+                record[column] = recordset[column]
 
             folder_jpg = "/muzik3" + record['location'] + "/" + 'folder.jpg'
             folder_jpg = urllib.quote(folder_jpg)
@@ -1035,7 +1038,7 @@ class Mc:
         # pagina laden voor als antwoord terug aan de server
         h = mymc_html.sonos_next()
                 
-        ## 
+        ##
         sonos = SoCo(COORDINATOR)
         sonos.next()
 
@@ -1050,7 +1053,7 @@ class Mc:
         # pagina laden voor als antwoord terug aan de server
         h = mymc_html.sonos_previous()
                 
-        ## 
+        ##
         sonos = SoCo(COORDINATOR)
         sonos.previous()
 
@@ -1164,8 +1167,8 @@ class Mc:
                 ht = ht + "<tr>"
 
                 ht = ht + '<td class="info">'
-                if (tel -1) < len(records):
-                    record = records[tel -1]
+                if (tel - 1) < len(records):
+                    record = records[tel - 1]
                     song_id = record['song_id']
                     ht = ht + '<a href="pageSong?song_id=%s">Info</a>' % song_id
                 ht = ht + "</td>"
@@ -1221,7 +1224,7 @@ class Mc:
         # uri samenstellen van de song
         uri = "/muzik3" + record['location'] + "/" + record['filename']
         print uri
-        print type (uri)
+        print type(uri)
 
         # een pagina maken, deze geeft browser meteen opdracht terug te gaan naar vorige pagina
         h = """
@@ -1238,7 +1241,7 @@ class Mc:
 
         ## stuur nummer naar sonos
         sonos = SoCo(COORDINATOR)
-        # TODO zonder encode werkte niet voor bijvoorbeeld: Nånting Är På Väg
+        # zonder encode werkte niet voor bijvoorbeeld: Nånting Är På Väg
         uri = urllib.quote(uri).encode('utf8')
         uri = MCSERVER + uri
         print uri
@@ -1335,7 +1338,7 @@ class Mc:
         
         h = mymc_html.listAlbumTracks(album, records)
 
-        self.storeInCache(h, pagename = pagename, key1 = album)
+        self.storeInCache(h, pagename=pagename, key1=album)
 
         return h
 
@@ -1359,6 +1362,7 @@ def saveHTMLToFile(filename, page):
     f.close()
 
     return page
+
 
 def q(inString):
     """functie: q, quotes, quotes zijn voor sqlite een probleem, die moeten ge-escaped worden
@@ -1387,9 +1391,6 @@ if __name__ == '__main__' and not 'idlelib.__main__' in sys.modules:
      }
 
     cherrypy.config.update({'server.socket_host': '0.0.0.0',
-	                    'server.socket_port': 8081,
+                            'server.socket_port': 8081,
     })
     cherrypy.quickstart(Mc(), '/', conf)
-
-
-

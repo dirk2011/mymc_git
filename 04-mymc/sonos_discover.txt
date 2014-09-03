@@ -1,0 +1,24 @@
+Help on module sonos_discover:
+
+NAME
+    sonos_discover - maak een lijstje van mijn sonos componenten
+
+FILE
+    /media/rasp163-v/mymc/04-mymc/sonos_discover.py
+
+DESCRIPTION
+    gesorteerd op naam of ip adres
+    ----------------------------------------------------------------
+    2014-08-23, fout op vangen als bv speaker is uitgezet
+    ----------------------------------------------------------------
+
+FUNCTIONS
+    getSonos()
+        info over alle sonos componenten ophalen
+        in: niets
+        uit: list met dictionries, elke dictionary heeft info over een sonos component
+    
+    getSonosCoordinator()
+        Geef terug ipadres van de box die coordinator is.
+
+

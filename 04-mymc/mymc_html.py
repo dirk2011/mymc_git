@@ -6,14 +6,14 @@ Deze module bevat strings en functies om webpagina's
 te genereren. Hiervoor wordt gebruik gemaakt van
 de python module pycheerry.
 
-# TODO: alle variabelen omzetten naar functies
 """
+# pylint: disable=C0103, C0301
 
 import urllib               # vertaal string naar url
 from htable import hTable
 
 
-TDO = "<td>"        # <td> 
+TDO = "<td>"        # <td>
 TDC = "</td>"       # </td>
 TRO = "<tr>"        # <tr>
 TRC = """</tr>
@@ -22,12 +22,11 @@ TABO = "<table>"    # <table>
 TABC = "</table>"   # </table>
 
 
-
 def html_start(title):
     """Begin van een html pagina, head t/m body, inclusief laden stylesheet.
     """
     # 2014-08-30, creatie
-    
+
     return """<!DOCTYPE html>
 <html>
 <head>
@@ -40,7 +39,7 @@ def html_start(title):
 def html_end():
     """Einde van een pagina.
     """
-    
+
     return """
 </div></body></html>"""
 
@@ -48,7 +47,7 @@ def html_end():
 def html_h1(text):
     """Return h1 element with passed text.
     """
-    
+
     return """
     <div id="kop">
     <h1>%(text)s</h1>
@@ -60,7 +59,7 @@ def html_page(page):
     """Geef pagina terug in div pagina,
     er kan gescrolled worden, en kop blijft staan. 
     """
-    
+
     return """
     <div id="top">
     </div>
@@ -68,7 +67,7 @@ def html_page(page):
     """ + page + """
     </div>"""
 
-    
+
 def main_navigation():
     """Menu voor de website.
     """
@@ -91,7 +90,7 @@ def main_navigation():
 def linkpageAlbumArtist(artist):
     """geef link terug: href naar album artist
     """
-    
+
     link = urllib.quote(artist)
     return """<a href=pageListAlbums_AlbumArtist?albumartist=%s>""" % link + artist + "</a>"
 
@@ -99,7 +98,7 @@ def linkpageAlbumArtist(artist):
 def linkpageAlbumTracks(album):
     """geef link terug: href naar album
     """
-    
+
     link = urllib.quote(album)
     return """<a href=listAlbumTracks?album=%s>""" % link + album + "</a>"
 
@@ -107,7 +106,7 @@ def linkpageAlbumTracks(album):
 def linkpageSong(song_id):
     """geef link terug: href naar song info pagina
     """
-    
+
     song_id = str(song_id)
     link = urllib.quote(song_id)
     return """<a href=pageSong?song_id=%s>""" % link + song_id + "</a>"
@@ -115,7 +114,7 @@ def linkpageSong(song_id):
 
 def pageSong():
     """Geef webpagina terug, met veel gegevens over een song.
-    
+
     Input voor de mymc module is song_id.
     Terug door deze functione, de html pagina.
     """
@@ -132,18 +131,18 @@ def pageSong():
     <td>
       <img src="%(folder_jpg)s" height="300" width="300">
     </td>
-    
+
     <td valign="TOP">
       <fieldset><legend>Played info</legend>
-	<table>
-	  <tr><td>
-	    Played
-	  </td><td>
-	    %(timesplayed)s
-	  </td></tr><tr><td>
+    <table>
+      <tr><td>
+        Played
+      </td><td>
+        %(timesplayed)s
+      </td></tr><tr><td>
 
-	    First time
-	  </td><td>
+        First time
+      </td><td>
 	    %(first)s
 	  </tr></tr><tr><td>
 
@@ -160,7 +159,7 @@ def pageSong():
       </fieldset>
     </td>
   </tr>
-  
+
   <tr>
     <td colspan="2">
       <fieldset><legend>Song / Track info</legend>
@@ -216,7 +215,7 @@ def pageSong():
       </table>
       </fieldset>
     </td>
-    
+
   </td>
 </tr>
 <tr>
@@ -419,7 +418,7 @@ def pageListAlbumArtists(records):
 <table>
 """)
 
-    h_page_c="""
+    h_page_c = """
 </table>
 </div>
 </html>
@@ -458,7 +457,7 @@ def pageListAlbumArtists(records):
             h = h + h_tr_c
             tel = 0
 
-    if tel <> 0:
+    if tel != 0:
         h = h + h_tr_c
 
     h = h + h_page_c
@@ -475,14 +474,12 @@ def testPageListAlbumArtists():
     record3 = {'volgnr': 1, 'albumartist': 'C ABBA', 'num_songs': 63, 'num_albums': 5}
     record4 = {'volgnr': 1, 'albumartist': 'D ABBA', 'num_songs': 63, 'num_albums': 5}
     record5 = {'volgnr': 1, 'albumartist': 'E ABBA', 'num_songs': 63, 'num_albums': 5}
-    records = [ record1, record2, record3, record4, record5 ]
+    records = [record1, record2, record3, record4, record5]
 
     h = pageListAlbumArtists(records)
     print h
 
     return h
-
-
 
     
 def testPageListAlbums_AlbumArtist():
@@ -493,7 +490,7 @@ def testPageListAlbums_AlbumArtist():
     record3 = {'albumartist': 'ABBA', 'folder_jpg': 'folder.jpg', 'album': 'Arrival'}
     record4 = {'albumartist': 'ABBA', 'folder_jpg': 'folder.jpg', 'album': 'Arrival'}
     record5 = {'albumartist': 'ABBA', 'folder_jpg': 'folder.jpg', 'album': 'Arrival'}
-    records = [ record1, record2, record3, record4, record5 ]
+    records = [record1, record2, record3, record4, record5]
 
     h = pageListAlbums_AlbumArtist(records)
     # print h
@@ -596,7 +593,6 @@ def pageSonosSpeakers(records):
     h_page = h_page_o
 
     # doorloop alle records
-    tel = 0
     for record in records:
         # print 'record', record
         h_page = h_page + TRO
@@ -845,7 +841,7 @@ def pageSearchResult(records):
     else:
         h_page = h_page + h_tr_h
         for record in records:
-            h_page =  h_page + (h_td % record)
+            h_page = h_page + (h_td % record)
 
     h_page = h_page + TABC
     
@@ -919,6 +915,7 @@ def pagePartSongRating(song_id, rating):
     h = (h_page % record)
 
     return h
+
 
 def testPagePartSongRating():
     """ Testen pagePartSongRating
@@ -1177,7 +1174,7 @@ def pagePlayedArtistsPeriod(period, records):
     
     h_page = h_page + html_page(h) + html_end()
 
-    return h_page # + str(records)
+    return h_page  # + str(records)
     
 
 def pagePlayedArtistsPeriodAlbums(period, artist, records):
@@ -1197,11 +1194,10 @@ def pagePlayedArtistsPeriodAlbums(period, artist, records):
     </tr>
     """
 
-
     for record in records:
         h_td = TRO + \
             """<td class="artist">""" + linkpageAlbumArtist(artist) + TDC + \
-            """<td class="album">"""  + linkpageAlbumTracks(record['album']) + TDC + \
+            """<td class="album">""" + linkpageAlbumTracks(record['album']) + TDC + \
             """<td class="played">""" + str(record['played']) + TDC + TRC
         h_page = h_page + h_td
 
@@ -1256,7 +1252,7 @@ def pageListAlbums_AlbumArtist(records):
             h_page = h_page + TRC
             tel = 0
 
-    if tel <> 0:
+    if tel != 0:
         h_page = h_page + TRC
     h_page = h_page + TABC
 
