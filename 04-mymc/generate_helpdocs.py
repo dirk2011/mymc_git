@@ -27,3 +27,5 @@ output_help_to_file(r'mymc_html.txt', 'mymc_html')
 output_help_to_file(r'mymc.txt', 'mymc')
 
 output_help_to_file(r'htable.txt', 'htable')
+
+output_help_to_file(r'sonos_discover.txt', 'sonos_discover')

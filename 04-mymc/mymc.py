@@ -30,8 +30,12 @@ reload(mymc_html)
 import sonos_discover	    # eigen module, haal sonos info op
 
 
-# DBNAME = "../db/music_collection.db"
-DBNAME = "/media/rasp163-v/mymc/db/music_collection.db"
+# dbconnectie
+DBNAME="dbmc"
+DBUSER="pi" 
+DBHOST="mc"
+DBPORT="5432"
+
 MCSERVER = "http://192.168.1.163"
 # de box die de baas is
 # COORDINATOR = sonos_discover.getSonosCoordinator()
@@ -52,10 +56,25 @@ class Mc:
     cursor = None
     connection = None
 
-    
+
+    def __init__(self):
+        # list van historische tijdvakken, jaren, maanden, dagen
+        self.periods = []
+
+
+    @cherrypy.expose
+    def pageAfgespeeld(self):
+        """Menu pagina voor afgespeeld
+        """
+
+        h = mymc_html.pageAfgespeeld()
+
+        return h
+
+
     @cherrypy.expose
     def pageBeheer(self):
-        """Pagina voor beheer.
+        """Menu pagina voor beheer.
         """
 
         h = mymc_html.pageBeheer()
@@ -127,11 +146,10 @@ class Mc:
 
 
     def dbLoadPlayedArtists(self):
-        """Table played_artists verversen met gegevens.
+        """Table played_artists verversen.
         """
 
         # het gaat om 7 tijdvakken, elk tijdvak heeft 3 totalen
-        periods = {'alltime': 10000}
         periods = {'lastday': 1, 'lastweek': 7, 'last4weeks': (4 * 7), \
                    'last3months': (13 * 7), 'lasthalfyear': (26 * 7), \
                    'lastyear': (52 * 7), 'alltime': 10000}
@@ -199,25 +217,16 @@ class Mc:
         Mc.connection.commit()
         self.dbClose()
 
-    
-    def __init__(self):
-        # list van historische tijdvakken, jaren, maanden, dagen
-        self.periods = []
 
     def dbOpen(self):
         """open connection met de database
         """
         
-        ### sqlite3 open database
-        # connection = sqlite3.connect(DBNAME)
-        # create a cursor
-        # cursor = connection.cursor()
-
         if Mc.connection is None:
             ### postgresql
             try:
-                Mc.connection = psycopg2.connect(database='dbmc', user='pi', host="mc", \
-                                  port="5432")
+                Mc.connection = psycopg2.connect(database=DBNAME, \
+                    user=DBUSER, host=DBHOST, port=DBPORT)
                 # gewone cursor
                 # Mc.cursor = Mc.connection.cursor()
                 # dictionary cursor
@@ -229,7 +238,7 @@ class Mc:
             except psycopg2.DatabaseError, e:
                 print 'Error %s' % e
 
-        return 1
+        return True
 
 
     def dbClose(self):
@@ -264,6 +273,20 @@ class Mc:
         return h
         
 
+    @cherrypy.expose
+    def pagePlayedHistoryDetails(self, datum="#"):
+        
+        # als geen datum ontvangen, doe niets
+        if datum == "#":
+            return
+        
+        records = self.dbGetSongs(playdate=datum)
+        
+        h = mymc_html.pagePlayedHistoryDetails(datum, records)
+        
+        return h
+
+    
     @cherrypy.expose
     def pagePlayedHistory(self, year=0, month=0):
         """Toon per jaar, maand en dag, aantal afgespeelde songs.
@@ -302,19 +325,23 @@ class Mc:
         print 'monthsdict ->', monthsdict
 
         # haal dagen op
-        query = """select year, month, day, played from played_history
+        query = """select year, month, day, played
+            , ltrim(to_char(year, '9999')) || ltrim(to_char(month, '09')) || ltrim(to_char(day, '09')) as datum
+            from played_history
             where year = %s and month = %s and day <> 0""" % (year, month)
         records = self.dbGetData(query)
         # print query
         # print records
-        daysdict = {}
+        daysdict = {}           # per dagnr de afgespeelde records
         for record in records:
             key = 'day' + str(record['day'])
+            key2 = 'dayb' + str(record['day'])
             daysdict[key] = record['played']
-        #print 'daysdict', daysdict
+            daysdict[key2] = record['datum']
+        print 'daysdict', daysdict
 
         h = mymc_html.pagePlayedHistory(yearsdict, monthsdict, daysdict)
-        #print h
+        # print h
 
         return h
     
@@ -360,7 +387,7 @@ class Mc:
         return True
         
 
-    def generate_periods(self, by=2014, bm=9, bd=1):
+    def generate_periods(self, by=2014, bm=8, bd=1):
         """genereer perioden, jaren, jaar-maanden, datums
         in: begin year, begin month, begin day, end year
         out: list met de periods
@@ -417,7 +444,6 @@ class Mc:
         # controleer of cache directory bestaat
         if os.path.exists(CACHE):
             for root, map2, files in os.walk(CACHE):
-                print map2
                 tel = 0
                 for bestand in files:
                     tel = tel + 1
@@ -425,29 +451,58 @@ class Mc:
                     # print str(tel) + ": " + filename
                     records.append(filename)
                     os.remove(filename)
-        print records
+        # print records
 
         h = mymc_html.pageClearCache(records)
 
         return h
-                
 
-    def storeInCache(self, page="#", pagename="#", key1="#"):
-        """Web pagina voor her gebruik opslaan op schijf.
+
+    @cherrypy.expose
+    def pageShowCache(self):
+        """Toon bestanden in cache.
         """
 
+        records = []
+        
+        # controleer of cache directory bestaat
+        if os.path.exists(CACHE):
+            for root, map2, files in os.walk(CACHE):
+                tel = 0
+                for bestand in files:
+                    tel = tel + 1
+                    filename = os.path.join(root, bestand)
+                    filename = filename.decode('utf-8', errors='replace')
+                    print str(tel) + ": " + filename
+                    records.append(filename)
+        # print records
+
+        h = mymc_html.pageShowCache(records)
+
+        return h
+
+
+    def storeInCache(self, page="#", pagename="#", key1="#"):
+        """Web pagina voor hergebruik opslaan op schijf.
+        """
+
+        # page = webpagina, pagename = pagina naam
         if page == "#" or pagename == "#":
             return False
 
+        # key1 = eventueel een parameter van de pagina
         if key1 != "#":
             pagename = pagename + "_" + key1
         hfile = os.path.join(CACHE, pagename)
 
-        # werkte niet my postgres: hhandler = codecs.open(hfile, "w", "utf-8")
-        hhandler = codecs.open(hfile, "w", 'utf-8')
-        # page = page.decode('utf-8', errors='replace')
-        hhandler.write(page)
-        hhandler.close()
+        # probeer pagina te vertalen naar utf-8
+        try:
+            page = unicode(page, 'utf-8', errors='replace')
+        except TypeError:
+            pass
+        
+        with codecs.open(hfile, "w", 'utf-8') as f:
+            f.write(page)
 
         return True
 
@@ -471,9 +526,8 @@ class Mc:
         hfile = os.path.join(CACHE, pagename)
 
         if os.path.exists(hfile):
-            hhandler = codecs.open(hfile, "r", "utf-8")
-            page = hhandler.read()
-            hhandler.close()
+            with codecs.open(hfile, "r", "utf-8") as f:
+                page = f.read()
         else:
             page = "#"
             
@@ -522,7 +576,7 @@ class Mc:
                 if len(where) > 0:
                     where = where + " and "
                 where = where + "songs.year = " + syear + " "
-                
+
         if 'snumplayed' in kwargs.keys():
             snumplayed = kwargs['snumplayed']
             if snumplayed != '':
@@ -602,8 +656,8 @@ class Mc:
             if len(where) > 0:
                 where = where + ' and '
             where = where + " played.playdate < '%s' " % ouderdan
-            
-        
+
+
         if len(where) > 0:
             where = "where " + where
 
@@ -628,7 +682,7 @@ class Mc:
             having = ' having ' + having
         query3 = " order by songs.year, songs.tracknumber limit 40 "
         query = query1 + where + query2 + having + query3
-        print 'query', query
+        # print 'query', query
 
         records = self.dbGetData(query)
         # print 'records', records
@@ -636,6 +690,61 @@ class Mc:
         h = mymc_html.pageSearchResult(records)
 
         return h
+
+
+    def dbGetSongs(self, where="", having="", playdate="", artist="", period="", orderby=""):
+        """Haal songs op, om te tonen in een table.
+        In where, having, of playdate.
+        Where en having moeten indien gebruikt geldige sql zijn.
+        Playdate indien gebruik moet een datum zijn, met opmaak: yyyymmdd.
+        """
+
+        # geef gevonden records terug
+        records = []
+
+        # indien geen where of having opgegeven, dan terug
+        if where == "" and playdate == "" and period == "":
+            return records
+
+        # bouw query op om gegevens op te halen
+        query = """
+            select songs.song_id, songs.title, songs.album, songs.artist, songs.albumartist, songs.year
+                , songs.tracknumber
+                , case when songsinfo.rating is null then 0 else songsinfo.rating end as rating
+            from songs
+            left join songsinfo
+            on songs.song_id = songsinfo.song_id
+            left join played
+            on songs.song_id = played.song_id
+            """
+
+        # where, playdate
+        playdate = str(playdate)
+        if len(playdate) == 8:
+            where = " to_char(played.playdate, 'yyyymmdd') = '%s' " % playdate
+            orderby = " played.playdate "
+
+        # where, period
+        if period == 'lastday':
+            where = " current_date - date(played.playdate) < 1 "
+            orderby = " played.playdate "
+
+        if len(where) > 0:
+            where = ' where ' + where
+
+        # sortering
+        if orderby == "":
+            orderby = " order by songs.year, songs.tracknumber "
+        else:
+            orderby = " order by " + orderby
+
+        query = query + where + orderby
+        print 'query', query
+
+        records = self.dbGetData(query)
+        # print 'records', records
+
+        return records
 
 
     @cherrypy.expose
@@ -798,19 +907,22 @@ class Mc:
             tel = tel + 1
             for sleutel in record.keys():
                 hrecord[sleutel] = record[sleutel]
-                if sleutel == "location":
-                    hrecord['folder_jpg'] = self.createLinkFolderJpg(hrecord['location'])
+                if sleutel == u"location":
+                    hrecord[u'folder_jpg'] = self.createLinkFolderJpg(hrecord[u'location'])
                 # aparte kolom album_link, voor bijzondere tekens in album naam zoals: #
-                if sleutel == "album" and hrecord['album'] is not None:
-                    hrecord['album_link'] = urllib.quote(hrecord['album'].encode('utf-8'))
-                if sleutel == "albumartist":
-                    hrecord['albumartist_link'] = urllib.quote(hrecord['albumartist'])
-                if sleutel == "title" and hrecord['title'] is not None:
-                    title_link = hrecord['title']
-                    # title_link = unicode(title_link, 'utf-8', errors='replace')
+                if sleutel == u"album" and hrecord[u'album'] is not None:
+                    hrecord[u'album_link'] = urllib.quote(hrecord[u'album'].encode('utf-8'))
+                if sleutel == u"albumartist":
+                    hrecord[u'albumartist_link'] = urllib.quote(hrecord[u'albumartist'])
+                    hrecord[u"albumartist"] = hrecord[u"albumartist"].decode('utf-8', errors='replace') 
+                if sleutel == u"title" and hrecord[u'title'] is not None:
+                    title_link = hrecord[u'title']
+                    hrecord[u'title_link'] = urllib.quote(title_link)
+                    hrecord[u"title"] = hrecord[u"title"].decode('utf-8', errors='replace')
                     # print 'title_link', title_link
-                    hrecord['title_link'] = urllib.quote(title_link)
-            hrecord['volgnr'] = tel
+                if sleutel == u"artist" and hrecord[u'artist'] is not None:
+                    hrecord[u"artist"] = hrecord[u"artist"].decode('utf-8', errors='replace')
+            hrecord[u'volgnr'] = tel
             hrecords.append(hrecord)
         # print hrecords # zet aan voor debuggen
 
@@ -823,12 +935,11 @@ class Mc:
         """
 
         # gebruik pagina uit cache, als die bestaat
-        pagename = "pageListAlbumArtists"
+        pagename = u"pageListAlbumArtists"
         h = self.getFromCache(pagename)
         if len(h) > 1:
             return h
 
-        # voor postgres, over (order . . ) toegevoegd
         query = """
             select row_number() over (order by albumartist) as volgnr, albumartist, num_songs, num_albums
             from (
@@ -843,7 +954,7 @@ class Mc:
         # saveHTMLToFile('pageListAlbumArtists', h)
 
         # sla pagina in cache op
-        h = unicode(h, 'utf-8', errors='replace')
+        # 20140907, uit gezet: h = unicode(h, 'utf-8', errors='replace')
         self.storeInCache(h, pagename=pagename)
         
         return h
@@ -895,6 +1006,7 @@ class Mc:
         ### gegevens ophalen om te tonen in web pagina
         # song
         song = self.dbGetSong(song_id)
+        print 'song', song
 
         # afspeel info
         song_playinfo = self.dbGetPlayInfoSong(song_id)
@@ -1001,10 +1113,6 @@ class Mc:
         if song_id < 1:
             return []
         
-        # connection = sqlite3.connect(DBNAME)
-        # connection.row_factory = sqlite3.Row
-        # cursor = connection.cursor()
-
         # zoek de song op in de database
         self.dbOpen()
         Mc.cursor.execute("""

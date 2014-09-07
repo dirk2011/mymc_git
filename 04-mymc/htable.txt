@@ -18,7 +18,23 @@ DESCRIPTION
     html.exp()
 
 CLASSES
+    Html
     hTable
+    
+    class Html
+     |  Eenvoudige class om text aan elkaar te plakken.
+     |  In plaats van steeds bijvoorbeeld: html = html + "<tr>"
+     |  
+     |  Methods defined here:
+     |  
+     |  __init__(self)
+     |      Maak object aan.
+     |  
+     |  add(self, html)
+     |      Voeg text toe.
+     |  
+     |  exp(self)
+     |      Vraag waarde op.
     
     class hTable
      |  Class voor aanmaken van een table in html.
@@ -52,5 +68,28 @@ CLASSES
      |  
      |  tr(self, classs='')
      |      Begin tr niveau.
+
+FUNCTIONS
+    hLink(tekst, url)
+
+DATA
+    TABC = u'</table>'
+    TABO = u'<table>'
+    TDC = u'</td>'
+    TDO = u'<td>'
+    TRC = u'</tr>\n'
+    TRO = u'<tr>'
+    __author__ = 'dp'
+    __date__ = '2014-09-07'
+    __version__ = '1'
+
+VERSION
+    1
+
+DATE
+    2014-09-07
+
+AUTHOR
+    dp
 
 
