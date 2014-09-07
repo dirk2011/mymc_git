@@ -763,6 +763,7 @@ def pageSearchResult(records):
     <th>Titel (link voeg toe aan wachtrij)</th>
     <th>Artiest</th>
     <th>Album /
+        Rating /
         Jaar /
         Gespeeld /
         Laatst</th>
@@ -799,7 +800,7 @@ def pageSearchResult(records):
 </tr>
 <tr>
     <td colspan="1">
-        %(year)s / %(played)s / %(last)s  
+        %(rating)s / %(year)s / %(played)s / %(last)s  
     </td>
 </tr>
 """
@@ -1159,7 +1160,8 @@ def pagePlayedArtistsPeriod(period, records):
         h_td = h_td + TRO
         h_td = h_td + u"""<td class="track">%(volgnr)s</td>""" % {u'volgnr': record[u'volgnr']}
         artist_link = urllib.quote(record[u'artist'])
-        artist = unicode(record['artist'], 'utf-8', errors='replace')
+        # 7-9-2014, uit: artist = unicode(record['artist'], 'utf-8', errors='replace')
+        artist = record['artist']
         # print 'artist', record['artist']
         # print 'artist_link', artist_link
         h_td = h_td + u"""<td class="artist"><a href="pagePlayedArtistsPeriodAlbums?period=%(period)s&artist=%(artist_link)s"> %(artist)s </a> </td>""" %\

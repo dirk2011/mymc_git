@@ -591,42 +591,42 @@ class Mc:
             if srating0 != '':
                 if len(whererating) > 0:
                     whererating = whererating + " or "
-                whererating = whererating + " songsinfo.rating = " + srating0
+                whererating = whererating + " coalesce(songsinfo.rating, 0) = " + srating0
 
         if 'srating1' in kwargs.keys():
             srating1 = kwargs['srating1']
             if srating1 != '':
                 if len(whererating) > 0:
                     whererating = whererating + " or "
-                whererating = whererating + " songsinfo.rating = " + srating1
+                whererating = whererating + " coalesce(songsinfo.rating, 0) = " + srating1
 
         if 'srating2' in kwargs.keys():
             srating2 = kwargs['srating2']
             if srating2 != '':
                 if len(whererating) > 0:
                     whererating = whererating + " or "
-                whererating = whererating + " songsinfo.rating = " + srating2
+                whererating = whererating + " coalesce(songsinfo.rating, 0) = " + srating2
 
         if 'srating3' in kwargs.keys():
             srating3 = kwargs['srating3']
             if srating3 != '':
                 if len(whererating) > 0:
                     whererating = whererating + " or "
-                whererating = whererating + " songsinfo.rating = " + srating3
+                whererating = whererating + " coalesce(songsinfo.rating, 0) = " + srating3
 
         if 'srating4' in kwargs.keys():
             srating4 = kwargs['srating4']
             if srating4 != '':
                 if len(whererating) > 0:
                     whererating = whererating + " or "
-                whererating = whererating + " songsinfo.rating = " + srating4
+                whererating = whererating + " coalesce(songsinfo.rating, 0) = " + srating4
 
         if 'srating5' in kwargs.keys():
             srating5 = kwargs['srating5']
             if srating5 != '':
                 if len(whererating) > 0:
                     whererating = whererating + " or "
-                whererating = whererating + " songsinfo.rating = " + srating5
+                whererating = whererating + " coalesce(songsinfo.rating, 0) = " + srating5
 
         ## where rating samen voegen met andere where's
         if len(whererating) > 0:
@@ -670,6 +670,7 @@ class Mc:
                 , substr(min(to_char(playdate, 'yyyy-mm-dd')), 1, 10) as first
                 , substr(max(to_char(playdate, 'yyyy-mm-dd')), 1, 10) as last
                 , count(played.song_id) as played
+                , coalesce(max(songsinfo.rating), 0) as rating
             from songs
             left join songsinfo
             on songs.song_id = songsinfo.song_id
