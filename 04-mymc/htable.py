@@ -56,6 +56,12 @@ class hTable():
         return self.html
 
 
+    def insert(self, data=""):
+        """Data vooraan toevoegen"""
+        
+        self.html = data + self.html
+    
+    
     def add(self, data=""):
         """Interne methode, tekst aan html string toevoegen """
 

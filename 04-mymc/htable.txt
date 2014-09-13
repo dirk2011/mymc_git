@@ -57,6 +57,9 @@ CLASSES
      |  exp(self)
      |      Exporteer html code.
      |  
+     |  insert(self, data='')
+     |      Data vooraan toevoegen
+     |  
      |  td(self, data='#', classs='')
      |      Begin van een td (table detail).
      |  

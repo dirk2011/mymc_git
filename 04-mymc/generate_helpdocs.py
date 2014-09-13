@@ -29,3 +29,5 @@ output_help_to_file(r'mymc.txt', 'mymc')
 output_help_to_file(r'htable.txt', 'htable')
 
 output_help_to_file(r'sonos_discover.txt', 'sonos_discover')
+
+output_help_to_file(r'dbfunc.txt', 'dbfunc')

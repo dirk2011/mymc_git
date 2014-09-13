@@ -111,7 +111,7 @@ def pageSong():
     """
 
     title = u'pageSong'
-    return html_start(title) + main_navigation() + html_h1(u'Track pagina') +  \
+    return html_start(title) + main_navigation() + html_h1(u'Song pagina') +  \
         html_page(u"""
 
 <table><tr><td>
@@ -153,59 +153,68 @@ def pageSong():
 
   <tr>
     <td colspan="2">
-      <fieldset><legend>Song / Track info</legend>
-      <table>
-	<tr><td>
+    <fieldset><legend>Song / Track info</legend>
+
+<table>
+    <tr><td>
 	  ID
 	</td><td>
 	  %(song_id)s
-	</td>
-	</tr><tr><td>
-	  Title
+
+	</td></tr><tr><td>
+	  Titel
 	  </td><td>
 	  %(title)s
-	</td></tr><tr><td>
 
-	  Artist
+	</td></tr><tr><td>
+	  Artiest
 	</td><td>
 	  %(artist)s
-	</tr></tr><tr><td>
 
-	  Length
+	</tr></tr><tr><td>
+	  Lengte
 	</td><td>
 	  %(length)s
-	</tr></tr><tr><td>
 
+	</tr></tr><tr><td>
 	  Album
 	</td><td>
 	  %(album)s
-	</td></tr><tr><td>
 
-	  Tracknumber
+	</td></tr><tr><td>
+	  Track
 	</td><td>
 	  %(tracknumber)s
-	</td></tr><tr><td>
 
-	  Albumartist
+	</td></tr><tr><td>
+	  Albumartiest
 	</td><td>
 	  %(albumartist)s
-	</td></tr><tr><td>
 
+	</td></tr><tr><td>
 	  Jaar
 	</td><td>
 	  %(year)s
-	</td></tr><tr><td>
 
-	Bitrate
-	</td><td>
-	  %(bitrate)s
 	</td></tr><tr><td>
-	  Size
+        Bitrate
 	</td><td>
-	  %(size)s (Mb's)
-      </table>
-      </fieldset>
-    </td>
+        %(bitrate)s
+
+	</td></tr><tr><td>
+        Size
+	</td><td>
+        %(size)s (Mb's)
+
+    </td></tr><tr><td>
+        Bestand
+    </td><td>
+        %(filename)s
+
+    </tr></td>
+
+</table>
+</fieldset>
 
   </td>
 </tr>
@@ -247,53 +256,48 @@ def sonos_playmenu():
     Oude naam: sonos_menu.
     """
 
-    return u"""
-<html>
-  """ + main_navigation() + u"""
-  <h1> sonos player commands and info </h1>
+    title = "sonos_playmenu" 
+    h = html_start(title) + main_navigation() + html_h1("Queue beheer")
+    
+    table = hTable()
+    
+    table.td(TDO + """
+        <form action="sonos_previous">
+        <input type="submit" value="Previous">
+        </form>
+        """ + TDC)
+    
+    table.td(TDO + """
+        <form action="sonos_pause">
+        <input type="submit" value="Pause">
+        </form>
+    """ + TDC)
+    
+    table.td(TDO + """
+        <form action="sonos_play">
+        <input type="submit" value="Play">
+        </form>
+    """ + TDC)
 
-  <table>
-    <tr>
-      <td>
-      <form action="sonos_previous">
-      <input type="submit" value="Previous">
-      </form>
-      </td>
+    table.td(TDO + """
+        <form action="sonos_next">
+        <input type="submit" value="Next">
+        </form>
+    """ + TDC)
 
-      <td>
-      <form action="sonos_pause">
-      <input type="submit" value="Pause">
-      </form>
-      </td>
+    table.td(TDO + """
+        <form action="sonos_clear_queue">
+        <input type="submit" value="Clear queue">
+        </form>
+    """ + TDC)
 
-      <td>
-      <form action="sonos_play">
-      <input type="submit" value="Play">
-      </form>
-      </td>
-      
-      <td>
-      <form action="sonos_next">
-      <input type="submit" value="Next">
-      </form>
-      </td>
-      
-      <td>
-      <form action="sonos_clear_queue">
-      <input type="submit" value="Clear queue">
-      </form>
-      </td>
+    table.td(TDO + """
+        <form action="sonos_play_from_queue">
+        <input type="submit" value="Play queue">
+        </form>
+    """ + TDC)
 
-      <td>
-      <form action="sonos_play_from_queue">
-      <input type="submit" value="Play queue">
-      </form>
-      </td>
-    </tr>
-  </table>
-
-</html>
-"""
+    return h + html_page(table.exp())
 
 
 def sonos_next():
@@ -411,7 +415,7 @@ def pageListAlbumArtists(records):
     <td >
       
     </td><td class="ListAlbumArtists">
-      <a href="pageListAlbums_AlbumArtist?albumartist=%(albumartist_link)s">%(albumartist)s</a><br>
+      <a href="pageListAlbums_AlbumArtist?albumartist_id=%(albumartist_id)s">%(albumartist)s</a><br>
       %(volgnr)s / %(num_albums)s / %(num_songs)s
     </td>"""
 
@@ -486,18 +490,25 @@ def pageInfoMc(record):
         <tr class="ExtraHoog">
             <td> Table songs </td><td> %(num_song)s </td>
         </tr><tr class="ExtraHoog">
-            <td> <a href="pageListAlbumArtists">Album artiesten</a> </td>
-            <td> %(num_albumartist)s </td>
+            <td> <a href="pageListAlbumArtists">Album artiesten </a> </td>
+            <td> %(num_albumartist)s upper() </td>
         </tr><tr class="ExtraHoog">
-            <td> Albums 	    </td><td> %(num_album)s </td>
+            <td> Albums 	    </td><td> %(num_album)s upper() </td>
         </tr><tr class="ExtraHoog">
-            <td> Artiesten 	    </td><td> %(num_artist)s </td>
+            <td> Artiesten 	    </td><td> %(num_artist)s upper() </td>
         </tr><tr class="ExtraHoog">
             <td> Table played    </td><td> %(num_played)s </td>
         </tr><tr class="ExtraHoog">
             <td> Table songsinfo </td><td> %(num_songsinfo)s (songs met een rating) </td>
         </tr><tr class="ExtraHoog">
             <td> Table queue     </td><td> %(num_queue)s (songs in afspeel queue) </td>
+
+        </tr><tr class="ExtraHoog">
+            <td> Table albumartists  </td><td> %(num_tab_albumartists)s </td>
+        </tr><tr class="ExtraHoog">
+            <td> Table albums        </td><td> %(num_tab_albums)s </td>
+        </tr><tr class="ExtraHoog">
+            <td> Table artists       </td><td> %(num_tab_artists)s </td>
         </tr>
     </table>
 """
@@ -1227,7 +1238,7 @@ def pageListAlbums_AlbumArtist(records):
     # 2 parameters, link naar plaatje (folder_jpg), album naam (album)
     h_td = u"""
 <td class="thumb">
-    <a href="listAlbumTracks?album=%(album_link)s">
+    <a href="listAlbumTracks?album_id=%(album_id)s">
         <image class="thumb" src="%(folder_jpg)s"><br>
         <p class="thumb">%(album)s (%(year)s)</p>
     </a>
@@ -1258,11 +1269,20 @@ def pageListAlbums_AlbumArtist(records):
     return h
 
 
-def listAlbumTracks(album, records):
+def listAlbumTracks(album_id, records):
     """HTML voor: toon alle songs van een album
     """
 
+    # pagina title 
     title = u'listAlbumTracks'
+    
+    # pagina kop
+    if len(records) > 0:
+        album = records[0]['albumartist'] + " - " + records[0]['album']
+        if len(album) > 45:
+            album = album[0:45] + " . . ."
+    else:
+        album = "geen"
     h = html_start(title) + main_navigation() + html_h1(u'Album: %s') % album
     
     table = hTable()
@@ -1401,5 +1421,6 @@ def pagePlayedHistoryDetails(datum, records):
     h = h + html_end()
 
     return h
+
 
 # einde

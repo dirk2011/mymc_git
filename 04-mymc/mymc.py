@@ -6,6 +6,7 @@ Doel database maken van al mijn mp3s.
 Via webinterface inzicht hierin bieden,
 en afspelen via sonos.
 """
+
 # pylint: disable=C0103, C0301, R0201
 # C0103 - naming convention
 # C0301 - lengte van de regels
@@ -29,6 +30,15 @@ import mymc_html            # web pagina's
 reload(mymc_html)
 import sonos_discover	    # eigen module, haal sonos info op
 
+from htable import hTable
+from hTable import Html
+from hTable import hLink
+from hTable import TDO, TDC, TRO, TRC, TABO, TABC
+
+from dbfunc import dbSongsUpdateAlbumId
+from dbfunc import dbSongsUpdateAlbumArtistId
+from dbfunc import dbSongsUpdateArtistId
+from dbfunc import MyDB
 
 # dbconnectie
 DBNAME="dbmc"
@@ -55,7 +65,6 @@ class Mc:
     # database connectie
     cursor = None
     connection = None
-
 
     def __init__(self):
         # list van historische tijdvakken, jaren, maanden, dagen
@@ -205,56 +214,6 @@ class Mc:
             tel = tel + 3
             print 'teller: ', tel
             # break
-        
-
-    def dbExecute(self, query):
-        """Voer queries uit, niet om gegevens op te halen, maar data manipulatie,
-        zoals inserts, deletes, etc"""
-
-        self.dbOpen()
-        Mc.cursor.execute(query)
-        # print 'query', query
-        Mc.connection.commit()
-        self.dbClose()
-
-
-    def dbOpen(self):
-        """open connection met de database
-        """
-        
-        if Mc.connection is None:
-            ### postgresql
-            try:
-                Mc.connection = psycopg2.connect(database=DBNAME, \
-                    user=DBUSER, host=DBHOST, port=DBPORT)
-                # gewone cursor
-                # Mc.cursor = Mc.connection.cursor()
-                # dictionary cursor
-                Mc.cursor = Mc.connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-                Mc.cursor.execute('select version()')
-                ver = Mc.cursor.fetchone()
-                print ver
-
-            except psycopg2.DatabaseError, e:
-                print 'Error %s' % e
-
-        return True
-
-
-    def dbClose(self):
-        """ database cursor en connectie sluiten
-        """
-
-        return
-    
-        try:
-            if not Mc.cursor.closed:
-                Mc.cursor.close()
-            if not Mc.connection.close:
-                Mc.connection.close()
-
-        except psycopg2.DatabaseError, e:
-            print 'Error %s' % e
 
 
     @cherrypy.expose
@@ -795,72 +754,93 @@ class Mc:
         """pageInfoMc, statistieken berekenen over de muziekcollectie
         """
 
+        # connectie met database maken
+        db = MyDB()
+
         ## info over tabel songs
         query1 = """
-        select 	count(distinct albumartist) as num_albumartist
-        ,       count(distinct albumartist || '#' || album) as num_album
-        ,       count(distinct artist) as num_artist
+        select 	count(distinct upper(albumartist)) as num_albumartist
+        ,       count(distinct upper(albumartist || '#' || album)) as num_album
+        ,       count(distinct upper(artist)) as num_artist
         ,       count(*) as num_song
         from songs
         """
-        record1 = self.dbGetData(query1)
+        record1 = db.dbGetData(query1)
         # print "1: ", record1
 
         ## info over tabel played
         query2 = """
         select count(*) as num_played from played
         """
-        record2 = self.dbGetData(query2)
+        record2 = db.dbGetData(query2)
         # print "2: ", record2
 
         ## info over hoeveel songs een rating hebben
         query3 = """
         select count(*) as num_songsinfo from songsinfo
         """
-        record3 = self.dbGetData(query3)
+        record3 = db.dbGetData(query3)
 
         ## info over hoeveel songs in de queue zitten
         query4 = """
         select count(*) as num_queue from queue
         """
-        record4 = self.dbGetData(query4)
+        record4 = db.dbGetData(query4)
+        
+        ## info over artists
+        query5 = """
+        select count(*) as num_tab_artists from artists
+        """
+        record5 = db.dbGetData(query5)
+        
+        ## info over albumartists
+        query6 = """
+        select count(*) as num_tab_albumartists from albumartists
+        """
+        record6 = db.dbGetData(query6)
+        
+        ## info over albums
+        query7 = """
+        select count(*) as num_tab_albums from albums 
+        """
+        record7 = db.dbGetData(query7)
 
         # één dictionary van maken
         record = dict(record1[0].items() + record2[0].items() + record3[0].items() + \
-                      record4[0].items())
+                      record4[0].items() + record5[0].items() + record6[0].items() + \
+                      record7[0].items())
         print "record ", record
 
         h = mymc_html.pageInfoMc(record)
-        #print '4', h
 
         return h
         
 
     @cherrypy.expose
-    def pageListAlbums_AlbumArtist(self, albumartist="XQX"):
+    def pageListAlbums_AlbumArtist(self, albumartist_id="0"):
         """ageListAlbumArtists, alle album artiesten uitlijsten
         """
 
         # check of pagina in de cache bestaat
         pagename = "pageListAlbums_AlbumArtist"
-        h = self.getFromCache(pagename, albumartist)
+        h = self.getFromCache(pagename, albumartist_id)
         if len(h) > 1:
             return h
 
         #albumartist='ABBA'
-        albumartist = q(albumartist)    # q(), voor namen als: Guys 'n' Dolls
+        # albumartist = q(albumartist)    # q(), voor namen als: Guys 'n' Dolls
         query = ("""
-            select albumartist, album, year, location
+            select albumartist, album, album_id, year, location
             from songs
-            where album || '#' || tracknumber in
+            where albumartist_id || '#' || tracknumber in
             (
-                select album || '#' || min(tracknumber)
+                select albumartist_id || '#' || min(tracknumber)
                 from songs
-                where upper(albumartist) = upper('%s')
-                group by album
+                where albumartist_id = %s
+                group by albumartist_id
             )
             order by year, album
-        """ % albumartist)
+        """ % int(albumartist_id))
         # print query
         
         hrecords = self.dbGetData(query)
@@ -870,7 +850,7 @@ class Mc:
         h = mymc_html.pageListAlbums_AlbumArtist(hrecords)
 
         # sla pagina in cache op
-        self.storeInCache(h, pagename=pagename, key1=albumartist)
+        self.storeInCache(h, pagename=pagename, key1=albumartist_id)
 
         return h
 
@@ -941,18 +921,19 @@ class Mc:
         if len(h) > 1:
             return h
 
+        db = MyDB()     # open database
         query = """
-            select row_number() over (order by albumartist) as volgnr, albumartist, num_songs, num_albums
+            select row_number() over (order by albumartist) as volgnr, albumartist, albumartist_id, num_songs, num_albums
             from (
-                select albumartist, count(*) as num_songs, count(distinct album) as num_albums
+                select albumartist, albumartist_id, count(*) as num_songs, count(distinct album) as num_albums
                 from   songs
-                group by albumartist
+                group by albumartist, albumartist_id
                 order by 1 ) as songs
         """
-        hrecords = self.dbGetData(query)
-
+        # haal gegevens op
+        hrecords = db.dbGetData(query)
+        # voeg gegevens samen met template webpagina
         h = mymc_html.pageListAlbumArtists(hrecords)
-        # saveHTMLToFile('pageListAlbumArtists', h)
 
         # sla pagina in cache op
         # 20140907, uit gezet: h = unicode(h, 'utf-8', errors='replace')
@@ -964,12 +945,7 @@ class Mc:
     def pageSongSave(self, song_id=-1, rating=-1):
         """pageSongSave, pageSong submit verwerken en opslaan
         """
-        # song_id = 255
-        # rating = 4
-        
-        # connection = sqlite3.connect(DBNAME)
-        # connection.row_factory = sqlite3.Row
-        # cursor = connection.cursor()
+
         self.dbOpen()
         Mc.cursor.execute("""
             select count(*) as aantal from songsinfo where song_id = %s
@@ -1136,6 +1112,10 @@ class Mc:
             folder_jpg = MCSERVER + folder_jpg
             record['folder_jpg'] = folder_jpg
 
+            min = str(int(record['length'] / 60)) + ":"
+            sec = str(record['length'] - int(record['length'] / 60) * 60)
+            record['length'] = min + ((sec + "00")[0:2])
+
         return record
 
 
@@ -1165,21 +1145,6 @@ class Mc:
         ##
         sonos = SoCo(COORDINATOR)
         sonos.previous()
-
-        return h
-
-
-    @cherrypy.expose
-    def sonos_play(self):
-        """Afspeellijst, <play> button, afspelen of doorgaan na een pauze.
-        """
-        
-        # pagina laden voor als antwoord terug aan de server
-        h = mymc_html.sonos_play()
-                
-        ## sonos, afspelen
-        sonos = SoCo(COORDINATOR)
-        sonos.play()
 
         return h
 
@@ -1266,46 +1231,47 @@ class Mc:
 
         # list songs in sonos queue
         if len(sonos.get_queue()) > 0:
-            ht = """<html>
-<h2>Sonos queue</h2>"""
-            ht = ht + "<table> "
-            ht = ht + """<tr><th class="info">Info</th> <th class="track">Track</th> <th class="title">Titel</th>  <th class="artist">Artiest</th> <th class="album">Album</th></tr>"""
+            table = hTable()
+            table.insert("""
+<h2> </h2>""")
+            table.insert("""
+<h2>Sonos queue</h2>""")
+
+            table.add("""<tr><th class="info">Info</th> 
+                <th class="track">Track</th> <th class="title">Titel</th>  
+                <th class="artist">Artiest</th> <th class="album">Album</th></tr>""")
             tel = 0
             for song in sonos.get_queue():
                 tel = tel + 1
-                ht = ht + "<tr>"
+                table.add(TRO)
 
-                ht = ht + '<td class="info">'
+                table.add('<td class="info">')
                 if (tel - 1) < len(records):
                     record = records[tel - 1]
                     song_id = record['song_id']
-                    ht = ht + '<a href="pageSong?song_id=%s">Info</a>' % song_id
-                ht = ht + "</td>"
+                    table.add('<a href="pageSong?song_id=%s">Info</a>' % song_id)
+                table.add("</td>")
                     
                 if tel == current_track:
-                    ht = ht + '<td class="track">' + ">" + str(tel) + "< </td>"
+                    table.add('<td class="track">' + ">" + str(tel) + "< </td>")
                 else:
-                    ht = ht + '<td class="track">' + str(tel) + "</td>"
+                    table.add('<td class="track">' + str(tel) + "</td>")
 
-                ht = ht + '<td class="title">' + song.title + "</td>"
+                table.add('<td class="title">' + song.title + "</td>")
                 # gegevens kunnen None zijn als de sonos server de gegevens nog niet heeft opgehaald
                 if song.creator is None:
-                    ht = ht + '<td class="artist">' + "</td>"
+                    table.add('<td class="artist">' + "</td>")
                 else:
-                    ht = ht + '<td class="artist">' + song.creator + "</td>"
+                    table.add('<td class="artist">' + song.creator + "</td>")
                     
                 if song.album is None:
-                    ht = ht + '<td class="album">' + "</td>"
+                    table.add('<td class="album">' + "</td>")
                 else:
-                    ht = ht + '<td class="album">' + song.album + "</td>"
+                    table.add('<td class="album">' + song.album + "</td>")
 
-                ht = ht + "<td>"
-                # rating invoeren
-                # ht = ht + self.partPageSongRating(song_id)
-                ht = ht + "</td> "
-                ht = ht + "</tr>"
-            ht = ht + "</table>"
-            h = h + ht
+                table.add(TRC)
+                
+            h = h + table.exp()
 
         return h
     
@@ -1315,10 +1281,6 @@ class Mc:
         """playAlsoSong, nummer toevoegen aan afspeellijst, met: add_uri_to_queue(uri)
         """
         
-        # connection = sqlite3.connect(DBNAME)
-        # connection.row_factory = sqlite3.Row
-        # cursor = connection.cursor()
-
         self.dbOpen()
         # zoek de song op in de database
         Mc.cursor.execute("""
@@ -1378,11 +1340,6 @@ class Mc:
         """playSong, song naar sonos sturen om af te spelen
         """
 
-        # verbinding maken met database
-        # connection = sqlite3.connect(DBNAME)
-        # connection.row_factory = sqlite3.Row
-        # cursor = connection.cursor()
-
         self.dbOpen()
         # zoek de song op in de database
         Mc.cursor.execute("""
@@ -1431,23 +1388,27 @@ class Mc:
 
 
     @cherrypy.expose
-    def listAlbumTracks(self, album="nothing"):
+    def listAlbumTracks(self, album_id="0"):
         """Toon alle songs van een album.
         """
 
+        # indien pagina in cache, gebruik die dan
         pagename = "listAlbumTracks"
-
-        h = self.getFromCache(pagename, album)
+        h = self.getFromCache(pagename, album_id)
         if len(h) > 1:
             return h
         
-        # print 'album', album
-        query = """select * from songs where album = '%s' order by tracknumber """ % q(album)
+        # haal tracks op
+        db = MyDB()
+        query = """select * from songs where album_id = %s order by tracknumber """ % int(album_id)
+        db.dbGetData(query)
         records = self.dbGetData(query)
         
-        h = mymc_html.listAlbumTracks(album, records)
+        # pagina samenstellen, met records en template
+        h = mymc_html.listAlbumTracks(album_id, records)
 
-        self.storeInCache(h, pagename=pagename, key1=album)
+        # pagina opslaan in cache
+        self.storeInCache(h, pagename=pagename, key1=album_id)
 
         return h
 
@@ -1458,6 +1419,56 @@ class Mc:
         """
         
         return mymc_html.pageIndex()
+
+
+    def dbExecute(self, query):
+        """Voer queries uit, niet om gegevens op te halen, maar data manipulatie,
+        zoals inserts, deletes, etc"""
+    
+        self.dbOpen()
+        Mc.cursor.execute(query)
+        # print 'query', query
+        Mc.connection.commit()
+        self.dbClose()
+    
+    
+    def dbOpen(self):
+        """open connection met de database
+        """
+        
+        if Mc.connection is None:
+            ### postgresql
+            try:
+                Mc.connection = psycopg2.connect(database=DBNAME, \
+                    user=DBUSER, host=DBHOST, port=DBPORT)
+                # gewone cursor
+                # Mc.cursor = Mc.connection.cursor()
+                # dictionary cursor
+                Mc.cursor = Mc.connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
+                Mc.cursor.execute('select version()')
+                ver = Mc.cursor.fetchone()
+                print ver
+    
+            except psycopg2.DatabaseError, e:
+                print 'Error %s' % e
+    
+        return True
+    
+    
+    def dbClose(self):
+        """ database cursor en connectie sluiten
+        """
+    
+        return
+    
+        try:
+            if not Mc.cursor.closed:
+                Mc.cursor.close()
+            if not Mc.connection.close:
+                Mc.connection.close()
+    
+        except psycopg2.DatabaseError, e:
+            print 'Error %s' % e
 
 
 def saveHTMLToFile(filename, page):
@@ -1488,10 +1499,32 @@ def q(inString):
     return uitString
 
 
+class sonos_play:
+
+    @cherrypy.expose
+    def index(self):
+        """Afspeellijst, <play> button, afspelen of doorgaan na een pauze.
+        """
+        
+        # pagina laden voor als antwoord terug aan de server
+        h = mymc_html.sonos_play()
+                
+        ## sonos, afspelen
+        sonos = SoCo(COORDINATOR)
+        sonos.play()
+
+        return h
+
+
+class Admin:
+    @cherrypy.expose
+    def index(self):
+        return "This is a private area"
+
 if __name__ == '__main__' and not 'idlelib.__main__' in sys.modules:
     conf = {
          '/': {
-             'tools.staticdir.root': os.path.abspath(os.getcwd())
+             'tools.staticdir.root': os.path.abspath(os.getcwd()),
          },
          '/static': {
              'tools.staticdir.on': True,
@@ -1502,4 +1535,8 @@ if __name__ == '__main__' and not 'idlelib.__main__' in sys.modules:
     cherrypy.config.update({'server.socket_host': '0.0.0.0',
                             'server.socket_port': 8081,
     })
-    cherrypy.quickstart(Mc(), '/', conf)
+    root = Mc()
+    root.admin2 = Admin()
+    root.sonos_play = sonos_play()
+    cherrypy.quickstart(root, '/', conf)
+

@@ -1,0 +1,48 @@
+Help on module dbfunc:
+
+NAME
+    dbfunc - Module met database functionaliteit
+
+FILE
+    /media/rasp163-v/mymc/04-mymc/dbfunc.py
+
+DESCRIPTION
+    O.a. opvragen gegevens, en wijzigingen uitvoeren.
+    Tevens specifiek onderhoud van bepaalde tabellen.
+
+CLASSES
+    MyDB
+    
+    class MyDB
+     |  Methods defined here:
+     |  
+     |  __del__(self)
+     |  
+     |  __init__(self)
+     |  
+     |  dbExecute(self, query)
+     |      Voer queries uit, niet om gegevens op te halen, maar data manipulatie,
+     |      zoals inserts, deletes, etc
+     |  
+     |  dbGetData(self, query='select * from songs limit 5 ')
+     |      dbGetData, input query uitvoeren, en data terug leveren
+     |      input: een query
+     |      output: de data in de vorm: list, genest meerdere dictionries
+
+FUNCTIONS
+    dbSongsUpdateAlbumArtistId()
+        Update table songs, vul albumartist_id als deze nog leeg is, zoek op in table albumartists.
+    
+    dbSongsUpdateAlbumId()
+        Update table songs, vul album_id als deze nog leeg is, zoek op in table albums.
+    
+    dbSongsUpdateArtistId()
+        Update table songs, vul artist_id als deze nog leeg is, zoek op in table artists.
+
+DATA
+    DBHOST = 'mc'
+    DBNAME = 'dbmc'
+    DBPORT = '5432'
+    DBUSER = 'pi'
+
+
