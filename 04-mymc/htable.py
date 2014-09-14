@@ -206,3 +206,22 @@ if __name__ == "__main__":
     html.td(u'einde')
     html.closeall()
     print html.exp()
+
+
+def hButton(text="", id="", classs="", onclick=""):
+    """button aanmaken, parameters: text, class, id, onclick.
+    """
+
+    if text == "":
+        text = "Knop"
+
+    if classs != "":
+        classs = ' class="%s"' % classs
+
+    if id != "":
+        id = ' id="%s"' % id
+
+    if onclick != "":
+        onclick = """ onclick="location.href='%s'" """ % onclick
+
+    return """<button%s%s%s>""" % (classs, id, onclick) + text + "</button>"

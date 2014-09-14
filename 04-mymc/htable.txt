@@ -73,6 +73,9 @@ CLASSES
      |      Begin tr niveau.
 
 FUNCTIONS
+    hButton(text='', id='', classs='', onclick='')
+        button aanmaken, parameters: text, class, id, onclick.
+    
     hLink(tekst, url)
 
 DATA

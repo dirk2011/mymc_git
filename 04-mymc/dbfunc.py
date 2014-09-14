@@ -1,10 +1,15 @@
 # -*- coding: utf-8 -*-
 
-"""Module met database functionaliteit
+"""Module met database functies.
 
-O.a. opvragen gegevens, en wijzigingen uitvoeren.
-Tevens specifiek onderhoud van bepaalde tabellen.
+Voor opvragen gegevens, en wijzigingen uitvoeren.
+Tevens functies voor specifieke taken.
 """
+
+
+__author__  = 'dp'
+__date__    = '2014-09-14'
+
 
 # imports
 import psycopg2             # postgres db
@@ -44,9 +49,9 @@ class MyDB():
 
 
     def dbGetData(self, query="select * from songs limit 5 "):
-        """dbGetData, input query uitvoeren, en data terug leveren
-            input: een query
-            output: de data in de vorm: list, genest meerdere dictionries
+        """dbGetData, Voer een query uit en geef data terug..
+        @param query: de uit te voeren query.
+        @return: de data in de vorm: list, genest meerdere dictionries
         """
 
         self._db_cur.execute(query)
@@ -90,6 +95,32 @@ class MyDB():
         self._db_cur.execute(query)
         # print 'query', query
         self._db_connection.commit()
+
+
+def dbGetSongInfoPlayed(song_id="0"):
+    """Haal afspeel gegevens over een song op: eerste en laatste keer, en aantal keer
+    """
+
+    # haal gegevens op
+    query = """
+        select   to_char(min(playdate), 'yyyy-mm-dd hh24:mi') as first
+        ,        to_char(max(playdate), 'yyyy-mm-dd hh24:mi') as last
+        ,        count(*) as timesplayed
+        from     played
+        where    song_id = %s
+        """ % int(song_id)
+
+    db = MyDB()
+    records = db.dbGetData(query)
+    print 'dbGetPlayInfoSong - records', records
+    print 'query: ', query
+
+    if len(records) == 1:
+        record = records[0]
+    else:
+        record = {}
+
+    return record
 
 
 def dbSongsUpdateAlbumId():

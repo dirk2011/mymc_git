@@ -12,7 +12,7 @@ de python module pycheerry.
 import urllib           # vertaal string naar url
 from htable import hTable
 from hTable import Html
-from hTable import hLink
+from hTable import hLink, hButton
 from hTable import TDO, TDC, TRO, TRC, TABO, TABC
 
 
@@ -43,7 +43,7 @@ def html_h1(text):
     """
 
     return u"""
-    <div id="kop"> <h1>%(text)s</h1> </div>
+    <div id="kop"> <h1 id="kop_tekst">%(text)s</h1> </div>
     """ % {'text': text}
 
 
@@ -65,14 +65,23 @@ def main_navigation():
     """
 
     h = hTable()
-    h.td(hLink(u'Home'           , u'index'), u'nav')
+    h.td(hButton(u'Home', u'btnHome', u'knop', u'/index'))
+    h.td(hButton(u'Info Mc', u'btnInfoMc', u'knop', u'/pageInfoMc'))
+    h.td(hButton(u'Artiesten', u'btnArtiesten', u'knop', u'/pageListAlbumArtists'))
+    h.td(hButton(u'Zoeken', u'btnZoeken', u'knop', u'/pageSearch'))
+    h.td(hButton(u'Queue', u'btnQueue', u'knop', u'/sonos_playmenu'))
+    h.td(hButton(u'Volume', u'btnVolume', u'knop', u'/pageSonosSpeakers'))
+    h.td(hButton(u'Afgespeeld', u'btnAfgespeeld', u'knop', u'pageAfgespeeld'))
+    h.td(hButton(u'Beheer', u'btnBeheer', u'knop', u'/pageBeheer'))
+
+    """"h.td(hLink(u'Home'           , u'index'), u'nav')
     h.td(hLink(u"Info Mc"        , u"pageInfoMc"), u'nav')
     h.td(hLink(u"Album artiesten", u"pageListAlbumArtists"), u'nav')
     h.td(hLink(u"Zoeken"         , u"pageSearch"), u'nav')
     h.td(hLink(u"Queue"          , u"sonos_playmenu"), u'nav')
     h.td(hLink(u"Volume"         , u"pageSonosSpeakers"), u'nav')
     h.td(hLink(u"Afgespeeld"     , u"pageAfgespeeld"), u'nav')
-    h.td(hLink(u"Beheer"         , u"pageBeheer"), u'nav')
+    h.td(hLink(u"Beheer"         , u"pageBeheer"), u'nav') """
     h.closeall()
 
     return u"""<div id="kopmenu">%s</div> """ % h.exp()
@@ -111,7 +120,7 @@ def pageSong():
     """
 
     title = u'pageSong'
-    return html_start(title) + main_navigation() + html_h1(u'Song pagina') +  \
+    return html_start(title) + main_navigation() + html_h1(u'Liedje pagina') +  \
         html_page(u"""
 
 <table><tr><td>
@@ -179,7 +188,7 @@ def pageSong():
 	</tr></tr><tr><td>
 	  Album
 	</td><td>
-	  %(album)s
+	  <a href="listAlbumTracks?album_id=%(album_id)s"> %(album)s </a>
 
 	</td></tr><tr><td>
 	  Track
@@ -189,7 +198,7 @@ def pageSong():
 	</td></tr><tr><td>
 	  Albumartiest
 	</td><td>
-	  %(albumartist)s
+        <a href="pageListAlbums_AlbumArtist?albumartist_id=%(albumartist_id)s"> %(albumartist)s </a>
 
 	</td></tr><tr><td>
 	  Jaar
@@ -206,9 +215,9 @@ def pageSong():
 	</td><td>
         %(size)s (Mb's)
 
-    </td></tr><tr><td>
+    </td></tr><tr><td class="song_bestand_label">
         Bestand
-    </td><td>
+    </td><td class="song_bestand_data">
         %(filename)s
 
     </tr></td>
@@ -798,13 +807,13 @@ def pageSearchResult(records):
     </td>
 
     <td class="artist" rowspan="2">
-        <a href="pageListAlbums_AlbumArtist?albumartist=%(albumartist_link)s">
+        <a href="pageListAlbums_AlbumArtist?albumartist_id=%(albumartist_id)s">
         %(artist)s
         </a>
     </td>
 
     <td class="album">
-        <a href="listAlbumTracks?album=%(album_link)s">
+        <a href="listAlbumTracks?album_id=%(album_id)s">
         %(album)s
         </a>
     </td>
@@ -999,7 +1008,7 @@ def pagePlayedHistory(yearsdict, monthsdict, daysdict):
 
     # deel 1, jaren
     h_part1_d = u"""
-    <h2>Years</h2>
+    <h2>Jaren</h2>
     <table>
     <tr>
       <th>Jaar</th><th>Aantal</th> 
@@ -1011,7 +1020,7 @@ def pagePlayedHistory(yearsdict, monthsdict, daysdict):
 
     # deel 2, maanden
     h_part2_d = u"""
-    <h2>Months</h2>
+    <h2>Maanden</h2>
     <table>
     <tr>
     <th>Maand</th><th>Aantal</th> <th>Maand</th><th>Aantal</th> <th>Maand</th><th>Aantal</th>
@@ -1052,7 +1061,7 @@ def pagePlayedHistory(yearsdict, monthsdict, daysdict):
 
     # deel 3, dagen
     h_part3_d = u"""
-    <h2>Days</h2>
+    <h2>Dagen</h2>
     <table>
     <tr>
     <th>Dag</th><th>Aantal</th> <th>Dag</th><th>Aantal</th> <th>Dag</th><th>Aantal</th> 
@@ -1339,6 +1348,7 @@ def pageAfgespeeld():
 def tableWithSongs(records):
     """Geef tabel terug met de records in <table> opmaak.
     Velden: info, volgnr, titel, artiest, album, jaar
+    Vanaf 14 sept 2014, extra nodig: album_id, albumartist_id
     """
 
     # table header (th)
@@ -1373,13 +1383,13 @@ def tableWithSongs(records):
     </td>
 
     <td class="artist" rowspan="2">
-        <a href="pageListAlbums_AlbumArtist?albumartist=%(albumartist_link)s">
+        <a href="pageListAlbums_AlbumArtist?albumartist_id=%(albumartist_id)s">
         %(artist)s
         </a>
     </td>
 
     <td class="album">
-        <a href="listAlbumTracks?album=%(album_link)s">
+        <a href="listAlbumTracks?album_id=%(album_id)s">
         %(album)s
         </a>
     </td>
@@ -1399,7 +1409,7 @@ def tableWithSongs(records):
     else:
         table.add(h_tr_h)
         for record in records:
-            print 'record', record
+            # print 'record', record
             table.add(h_td % record)
 
     table.closeall()

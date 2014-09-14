@@ -39,6 +39,7 @@ from dbfunc import dbSongsUpdateAlbumId
 from dbfunc import dbSongsUpdateAlbumArtistId
 from dbfunc import dbSongsUpdateArtistId
 from dbfunc import MyDB
+from dbfunc import dbGetSongInfoPlayed
 
 # dbconnectie
 DBNAME="dbmc"
@@ -56,7 +57,7 @@ CACHE = "../cache"
 CACHING = True
 # aantal dagen dat historie opgeteld moet worden
 GENERATEDAYS = 100
-
+DEBUG = True # print commando's aan of uit
 
 class Mc:
     """Mc = music collection
@@ -624,7 +625,10 @@ class Mc:
         # print 'having: ', having
 
         query1 = """
-            select songs.song_id, songs.title, songs.album, songs.artist, songs.albumartist, songs.year
+            select songs.song_id, songs.title, songs.year
+                , songs.album, songs.album_id
+                , songs.artist
+                , songs.albumartist, songs.albumartist_id
                 , songs.tracknumber
                 , substr(min(to_char(playdate, 'yyyy-mm-dd')), 1, 10) as first
                 , substr(max(to_char(playdate, 'yyyy-mm-dd')), 1, 10) as last
@@ -668,8 +672,9 @@ class Mc:
 
         # bouw query op om gegevens op te halen
         query = """
-            select songs.song_id, songs.title, songs.album, songs.artist, songs.albumartist, songs.year
-                , songs.tracknumber
+            select songs.song_id, songs.title, songs.artist, songs.year, songs.tracknumber
+                , songs.album, songs.album_id
+                , songs.albumartist, songs.albumartist_id
                 , case when songsinfo.rating is null then 0 else songsinfo.rating end as rating
             from songs
             left join songsinfo
@@ -699,9 +704,10 @@ class Mc:
             orderby = " order by " + orderby
 
         query = query + where + orderby
-        print 'query', query
+        # print 'query', query
 
-        records = self.dbGetData(query)
+        db = MyDB()
+        records = db.dbGetData(query)
         # print 'records', records
 
         return records
@@ -974,30 +980,29 @@ class Mc:
 
     
     @cherrypy.expose
-    def pageSong(self, song_id=0):
+    def pageSong(self, song_id="0"):
         """Presenteer pagina om een song te raadplegen, en waardering op te geven.
         """
 
         # song_id = 1 # alleen waarde geven als debuggen
 
-        ### gegevens ophalen om te tonen in web pagina
-        # song
+        # 1 - song gegevens ophalen
         song = self.dbGetSong(song_id)
-        print 'song', song
 
-        # afspeel info
-        song_playinfo = self.dbGetPlayInfoSong(song_id)
-        if len(song_playinfo.keys()) < 1:
-            song_playinfo['first'] = "Never"
-            song_playinfo['last'] = "Never"
-            song_playinfo['timesplayed'] = "0"
+        # 2 - afspeel info ophalen
+        song_playinfo = dbGetSongInfoPlayed(song_id)
+        if not song_playinfo:
+            song_playinfo = {}
+            song_playinfo['first'] = u"Never"
+            song_playinfo['last'] = u"Never"
+            song_playinfo['timesplayed'] = u"0"
         # print 'song_playinfo', song_playinfo
 
-        # rating, etc info
+        # 3 - rating ophalen
         song_info = self.dbGetInfoSong(song_id)
         if len(song_info.keys()) < 1:
             song_info['rating'] = 0
-            song_info['notes'] = ""
+            song_info['notes'] = u""
         # print 'song_info', song_info
 
         # tel alle dict bij elkaar op
@@ -1047,41 +1052,6 @@ class Mc:
         return record
 
 
-    def dbGetPlayInfoSong(self, song_id=0):
-        """dbGetPlayInfoSong, haal afspeel gegevens over een song op:
-        eerste en laatste keer, en aantal keer
-        """
-
-        ## controleer song_id
-        if song_id < 1:
-            return []
-
-        # connection = sqlite3.connect(DBNAME)
-        # connection.row_factory = sqlite3.Row
-        # cursor = connection.cursor()
-
-        # haal gegevens op
-        self.dbOpen()
-        Mc.cursor.execute("""
-            select to_char(min(playdate), 'yyyy-mm-dd hh24:mi') as first
-            ,      to_char(max(playdate), 'yyyy-mm-dd hh24:mi') as last, count(*) as timesplayed
-            from played
-            where song_id = %s
-            group by song_id
-            """ % int(song_id))
-        recordset = Mc.cursor.fetchall()
-
-        record = {}
-        if len(recordset) > 0:
-            recordset = recordset[0]
-
-            columns = recordset.keys()
-            for column in columns:
-                record[column] = recordset[column]
-
-        return record
-
-
     def dbGetSong(self, song_id=0):
         """dbGetSong, get a song record from the database with 1 song
         """
@@ -1091,21 +1061,15 @@ class Mc:
             return []
         
         # zoek de song op in de database
-        self.dbOpen()
-        Mc.cursor.execute("""
+        db = MyDB()
+        records = db.dbGetData("""
             select *
             from songs
             where song_id = %s
             """ % int(song_id))
-        recordset = Mc.cursor.fetchall()
 
-        record = {}
-        if len(recordset) > 0:
-            recordset = recordset[0]
-
-            columns = recordset.keys()
-            for column in columns:
-                record[column] = recordset[column]
+        if len(records) == 1:
+            record = records[0]
 
             folder_jpg = "/muzik3" + record['location'] + "/" + 'folder.jpg'
             folder_jpg = urllib.quote(folder_jpg)
@@ -1115,6 +1079,8 @@ class Mc:
             min = str(int(record['length'] / 60)) + ":"
             sec = str(record['length'] - int(record['length'] / 60) * 60)
             record['length'] = min + ((sec + "00")[0:2])
+
+            # print 'dbGetSong record', record
 
         return record
 
@@ -1482,6 +1448,13 @@ def saveHTMLToFile(filename, page):
     f.close()
 
     return page
+
+
+def debug(input):
+    """print debug meldingen
+    """
+    if DEBUG:
+        print input
 
 
 def q(inString):
