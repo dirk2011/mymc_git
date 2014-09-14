@@ -1,0 +1,213 @@
+Help on module mymc:
+
+NAME
+    mymc - Module music collection.
+
+FILE
+    /media/rasp163-v/mymc/04-mymc/mymc.py
+
+DESCRIPTION
+    Doel database maken van al mijn mp3s.
+    Via webinterface inzicht hierin bieden,
+    en afspelen via sonos.
+
+CLASSES
+    Admin
+    Mc
+    sonos_play
+    
+    class Admin
+     |  Methods defined here:
+     |  
+     |  index(self)
+    
+    class Mc
+     |  Mc = music collection
+     |  
+     |  Methods defined here:
+     |  
+     |  __init__(self)
+     |  
+     |  createLinkFolderJpg(self, location='')
+     |      createLinkFolderJpg, link maken naar folder.jpg bestand
+     |  
+     |  dbClose(self)
+     |      database cursor en connectie sluiten
+     |  
+     |  dbExecute(self, query)
+     |      Voer queries uit, niet om gegevens op te halen, maar data manipulatie,
+     |      zoals inserts, deletes, etc
+     |  
+     |  dbGetData(self, query='select * from songs limit 5 ')
+     |      dbGetData, input query uitvoeren, en data terug leveren
+     |      input: een query
+     |      output: de data in de vorm: list, genest meerdere dictionries
+     |  
+     |  dbGetInfoSong(self, song_id=0)
+     |      dbGetInfoSong, get a song record from the database with 1 song
+     |  
+     |  dbGetSong(self, song_id=0)
+     |      dbGetSong, get a song record from the database with 1 song
+     |  
+     |  dbGetSongs(self, where='', having='', playdate='', artist='', period='', orderby='')
+     |      Haal songs op, om te tonen in een table.
+     |      In where, having, of playdate.
+     |      Where en having moeten indien gebruikt geldige sql zijn.
+     |      Playdate indien gebruik moet een datum zijn, met opmaak: yyyymmdd.
+     |  
+     |  dbLoadPlayedArtists(self)
+     |      Table played_artists verversen.
+     |  
+     |  dbOpen(self)
+     |      open connection met de database
+     |  
+     |  fill_periods(self)
+     |      Cijfers opbouwen voor pagePlayedHistory
+     |  
+     |  generate_periods(self, by=2014, bm=8, bd=1)
+     |      genereer perioden, jaren, jaar-maanden, datums
+     |      in: begin year, begin month, begin day, end year
+     |      out: list met de periods
+     |      nb, voor het gemak gaan we er van uit dat elke maand 31 dagen telt
+     |  
+     |  getFromCache(self, pagename='#', key1='#', key2='#', key3='#')
+     |      Check of webpagina bestaat in cache, zo ja, ophalen.
+     |  
+     |  index(self)
+     |      Start pagina van mymc.
+     |  
+     |  listAlbumTracks(self, album_id='0')
+     |      Toon alle songs van een album.
+     |  
+     |  pageAfgespeeld(self)
+     |      Menu pagina voor afgespeeld
+     |  
+     |  pageBeheer(self)
+     |      Menu pagina voor beheer.
+     |  
+     |  pageClearCache(self)
+     |      Cache bestanden verwijderen.
+     |  
+     |  pageInfoMc(self)
+     |      pageInfoMc, statistieken berekenen over de muziekcollectie
+     |  
+     |  pageListAlbumArtists(self)
+     |      ageListAlbumArtists, alle album artiesten uitlijsten
+     |  
+     |  pageListAlbums_AlbumArtist(self, albumartist_id='0')
+     |      ageListAlbumArtists, alle album artiesten uitlijsten
+     |  
+     |  pagePlayedArtists(self)
+     |      Afgespeelde songs per artiest, 1e selectie, welke periode
+     |  
+     |  pagePlayedArtistsPeriod(self, period)
+     |      Afgespeelde songs per artiest, 1e selectie, welke periode
+     |  
+     |  pagePlayedArtistsPeriodAlbums(self, period, artist)
+     |      Afgespeelde songs per artiest en per album.
+     |  
+     |  pagePlayedHistory(self, year=0, month=0)
+     |      Toon per jaar, maand en dag, aantal afgespeelde songs.
+     |  
+     |  pagePlayedHistoryDetails(self, datum='#')
+     |  
+     |  pageRefreshPlayedArtists(self)
+     |      Verversen cijfers voor played artists.
+     |  
+     |  pageRefreshPlayedHistory(self)
+     |      Verversen cijfers voor played history.
+     |  
+     |  pageSearch(self)
+     |      Presenteer pagina om te zoeken.
+     |  
+     |  pageSearchResult(self, **kwargs)
+     |      Geef zoek resultaat terug, zoekopdracht door pageSearch.
+     |  
+     |  pageShowCache(self)
+     |      Toon bestanden in cache.
+     |  
+     |  pageSong(self, song_id='0')
+     |      Presenteer pagina om een song te raadplegen, en waardering op te geven.
+     |  
+     |  pageSongSave(self, song_id=-1, rating=-1)
+     |      pageSongSave, pageSong submit verwerken en opslaan
+     |  
+     |  pageSonosSpeakers(self)
+     |      pageSonosSpeakers, toon status sonos speaker, verander volume
+     |  
+     |  partPageSongRating(self, song_id=0)
+     |      html code om song rating in te voegen
+     |  
+     |  playAlsoSong(self, song_id=0)
+     |      playAlsoSong, nummer toevoegen aan afspeellijst, met: add_uri_to_queue(uri)
+     |  
+     |  playSong(self, song_id=0)
+     |      playSong, song naar sonos sturen om af te spelen
+     |  
+     |  sonosSetVolume(self, speaker='192.168.1.21', volume=10)
+     |      sonosSetVolume, volume voor speaker instellen
+     |  
+     |  sonos_clear_queue(self)
+     |      sonos_clear_queue, maak sonos afspeellijst leeg
+     |  
+     |  sonos_next(self)
+     |      Afspeellijst <Next> button, gaat naar volgende nummer in afspeellijst.
+     |  
+     |  sonos_pause(self)
+     |      Afspeellijst, <pause> button, afspelen pauzeren.
+     |  
+     |  sonos_play_from_queue(self)
+     |      sonos_play_from_queue, speelt queue af
+     |  
+     |  sonos_playmenu(self)
+     |      sonos_menu, menu om commando's aan sonos te geven en info op te halen
+     |  
+     |  sonos_previous(self)
+     |      Afspeellijst, <Previous> button, gaat naar vorige nummer, in de afspeellijst.
+     |  
+     |  storeInCache(self, page='#', pagename='#', key1='#')
+     |      Web pagina voor hergebruik opslaan op schijf.
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data and other attributes defined here:
+     |  
+     |  connection = None
+     |  
+     |  cursor = None
+    
+    class sonos_play
+     |  Methods defined here:
+     |  
+     |  index(self)
+     |      Afspeellijst, <play> button, afspelen of doorgaan na een pauze.
+
+FUNCTIONS
+    debug(input)
+        print debug meldingen
+    
+    q(inString)
+        functie: q, quotes, quotes zijn voor sqlite een probleem, die moeten ge-escaped worden
+        door nog een quote
+    
+    saveHTMLToFile(filename, page)
+        HTML opslaan als een bestand, tbv debugging
+
+DATA
+    CACHE = '../cache'
+    CACHING = True
+    COORDINATOR = '192.168.1.21'
+    DBHOST = 'mc'
+    DBNAME = 'dbmc'
+    DBPORT = '5432'
+    DBUSER = 'pi'
+    DEBUG = True
+    GENERATEDAYS = 100
+    MCSERVER = 'http://192.168.1.163'
+    TABC = u'</table>'
+    TABO = u'<table>'
+    TDC = u'</td>'
+    TDO = u'<td>'
+    TRC = u'</tr>\n'
+    TRO = u'<tr>'
+
+

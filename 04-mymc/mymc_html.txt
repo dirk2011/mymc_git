@@ -1,0 +1,165 @@
+Help on module mymc_html:
+
+NAME
+    mymc_html - Deze module hoort bij module mymc.
+
+FILE
+    /media/rasp163-v/mymc/04-mymc/mymc_html.py
+
+DESCRIPTION
+    Deze module bevat strings en functies om webpagina's
+    te genereren. Hiervoor wordt gebruik gemaakt van
+    de python module pycheerry.
+
+FUNCTIONS
+    html_end()
+        Einde van een pagina.
+    
+    html_h1(text)
+        Return h1 element with passed text.
+    
+    html_page(page)
+        Geef pagina terug in div pagina,
+        er kan gescrolled worden, en kop blijft staan.
+    
+    html_start(title)
+        Begin van een html pagina, head t/m body, inclusief laden stylesheet.
+    
+    linkpageAlbumArtist(artist)
+        geef link terug: href naar album artist
+    
+    linkpageAlbumTracks(album)
+        geef link terug: href naar album
+    
+    linkpageSong(song_id)
+        geef link terug: href naar song info pagina
+    
+    listAlbumTracks(album_id, records)
+        HTML voor: toon alle songs van een album
+    
+    main_navigation()
+        Menu voor de website.
+    
+    pageAfgespeeld()
+        Menu pagina voor afgespeeld
+    
+    pageBeheer()
+        Pagina voor beheer, verversen en opschonen, van tabellen, pagina's.
+    
+    pageClearCache(records)
+        Pagina, voor als op clear cache is gedrukt.
+        Er wordt een overzicht getoond van verwijderde pagina's uit de cache.
+    
+    pageIndex()
+        Index (start) pagina van mymc.
+    
+    pageInfoMc(record)
+        Toon aantallen uit de mc database.
+    
+    pageListAlbumArtists(records)
+        Toon de artiesten die één of meerdere albums hebben.
+        Input: list bestaande uit dictionaries, dictionary: volgnr, albumartist, num_songs, num_albums
+        Output: html string
+    
+    pageListAlbums_AlbumArtist(records)
+        Geef pagina terug met alle albums van een albumartiest.
+    
+    pagePartSongRating(song_id, rating)
+        Stukje html etc, voor rating van songs, om in te voegen in andere pagina's,
+        nodig: song_id, en huidige rating.
+    
+    pagePlayedArtists()
+        Menu pagina naar aantal afgespeelde songs per periode en per artiest.
+    
+    pagePlayedArtistsPeriod(period, records)
+        Aantal afgespeelde songs per artiest over een gekozen periode.
+    
+    pagePlayedArtistsPeriodAlbums(period, artist, records)
+        Aantal afgespeelde songs van een artiest, per album over een gekozen periode.
+    
+    pagePlayedHistory(yearsdict, monthsdict, daysdict)
+        Toon webpagina met afspeel resultaten per jaar, maand, dag,
+        met doorklik naar ander jaar en maand.
+    
+    pagePlayedHistoryDetails(datum, records)
+        Toon details (songs), afgespeelde songs op een bepaalde datum.
+    
+    pageRefreshPlayedArtists()
+        pageRefreshPlayedArtists, cijfers verversen voor played artists.
+    
+    pageRefreshPlayedHistory()
+        pageRefreshPlayedHistory, cijfers verversen voor played history.
+    
+    pageSearch()
+        Pagina om te zoeken in de muziek collectie.
+    
+    pageSearchResult(records)
+        Pagina om het zoek resultaat te tonen.
+    
+    pageShowCache(records)
+        Toon pagina's in cache.
+    
+    pageSong()
+        Geef webpagina terug, met veel gegevens over een song.
+        
+        Input voor de mymc module is song_id.
+        Terug door deze functione, de html pagina.
+    
+    pageSonosSpeakers(records)
+        Geef web pagina terug, om volume van de speakers te beheren.
+        Tevens geeft dit inzicht in alle sonos componenten.
+    
+    sonosSetVolume(record)
+        Dummy html pagina, de mymc functie past het volume aan van de gevraagde speaker.
+        
+        In dictionary, met 2 waarden: speaker en volume, kan hier voor debuggen worden
+        weergegeven.
+    
+    sonos_next()
+        Dummy pagina voor de next button.
+    
+    sonos_pause()
+        Dummy pagina voor de pause button.
+    
+    sonos_play()
+        Dummy pagina voor de play button.
+    
+    sonos_playmenu()
+        Geef webpagina terug om afspeellijst (queue) te beheren.
+        
+        De queue kan afgespeeld en leeggemaakt worden. Tevens zijn er knoppen 
+        voor previous, next, stop en pause.
+        Oude naam: sonos_menu.
+    
+    sonos_previous()
+        Dummy pagina voor de previous button.
+    
+    tableWithSongs(records)
+        Geef tabel terug met de records in <table> opmaak.
+        Velden: info, volgnr, titel, artiest, album, jaar
+        Vanaf 14 sept 2014, extra nodig: album_id, albumartist_id
+    
+    testPageListAlbumArtists()
+        Functie voor het testen van pageListAlbumArtists() met dummy data.
+    
+    testPageListAlbums_AlbumArtist()
+        Functie voor het testen van functie: pageListAlbums_AlbumArtist, met dummy data.
+    
+    testPagePartSongRating()
+        Testen pagePartSongRating
+    
+    testPageSonosSpeakers()
+        Functie voor het testen van functie: pageSonosSpeakers met dummy data.
+
+DATA
+    TABC = u'</table>'
+    TABO = u'<table>'
+    TDC = u'</td>'
+    TDO = u'<td>'
+    TRC = u'</tr>\n'
+    TRO = u'<tr>'
+    pageSongSave = u'\n    <html>\n    pageSongSave</br>\n\n    <sc....his...
+    sonos_clear_queue = u'\n    <html>\n    sonos_clear_queue</br>\n\n  .....
+    sonos_play_from_queue = u'\n    <html>\n    sonos_play_from_queue</br>...
+
+
