@@ -3,12 +3,18 @@
 """ maak een lijstje van mijn sonos componenten
 
 gesorteerd op naam of ip adres
-----------------------------------------------------------------
-2014-08-23, fout op vangen als bv speaker is uitgezet
-----------------------------------------------------------------
 """
-# pylint: disable=C0103, C0301
-# pep8: disable=E501
+
+
+__author__  = 'dp'
+__date__    = '2014-09'
+
+
+# pylint: disable=C0103, C0301, R0201
+# C0103 - naming convention
+# C0301 - lengte van de regels
+# R0201 - method could be a function
+
 
 from soco import SoCo
 

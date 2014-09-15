@@ -8,9 +8,6 @@ FILE
 
 DESCRIPTION
     gesorteerd op naam of ip adres
-    ----------------------------------------------------------------
-    2014-08-23, fout op vangen als bv speaker is uitgezet
-    ----------------------------------------------------------------
 
 FUNCTIONS
     getSonos()
@@ -20,5 +17,15 @@ FUNCTIONS
     
     getSonosCoordinator()
         Geef terug ipadres van de box die coordinator is.
+
+DATA
+    __author__ = 'dp'
+    __date__ = '2014-09'
+
+DATE
+    2014-09
+
+AUTHOR
+    dp
 
 

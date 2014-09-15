@@ -1,25 +1,19 @@
 # -*- coding: utf-8 -*-
 
-"""htable.py met class hTable
+"""Module om html code te genereren.
 
-Met deze class kan eenvoudig een html table aangemaakt worden.
-
-Gebruik: import hTable from htable
-
-html = hTable()
-html.th("header kolom 1")
-html.td("data kolom 1")
-html.closeall()
-html.exp()
-
+O.a. een tabel, link, button.
 """
 
+
 __author__  = 'dp'
-__date__    = '2014-09-07'
-__version__ = '1'
+__date__    = '2014-09'
 
 
-# pylint: disable=C0103, C0301
+# pylint: disable=C0103, C0301, R0201
+# C0103 - naming convention
+# C0301 - lengte van de regels
+# R0201 - method could be a function
 
 
 TDO = u"<td>"           # <td>
@@ -33,6 +27,14 @@ TABC = u"</table>"      # </table>
 
 class hTable():
     """Class voor aanmaken van een table in html.
+    
+    Gebruik: import hTable from htable
+
+    html = hTable()
+    html.th("header kolom 1")
+    html.td("data kolom 1")
+    html.closeall()
+    html.exp()
     """
 
     def __init__(self, options=""):
@@ -192,20 +194,9 @@ class Html():
 
 
 def hLink(tekst, url):
+    """"Een link terug geven, input tekst en url. 
+    """
     return u"""<a href="%s">%s</a>""" % (url, tekst)
-
-
-if __name__ == "__main__":
-    # Bedoeld voor testen.
-
-    html = hTable()
-    html.td(u"header kolom 1")
-    html.tr()
-    html.td(u"data kolom 1")
-    html.tr()
-    html.td(u'einde')
-    html.closeall()
-    print html.exp()
 
 
 def hButton(text="", id="", classs="", onclick=""):
@@ -225,3 +216,16 @@ def hButton(text="", id="", classs="", onclick=""):
         onclick = """ onclick="location.href='%s'" """ % onclick
 
     return """<button%s%s%s>""" % (classs, id, onclick) + text + "</button>"
+
+
+if __name__ == "__main__":
+    # Bedoeld voor testen.
+
+    html = hTable()
+    html.td(u"header kolom 1")
+    html.tr()
+    html.td(u"data kolom 1")
+    html.tr()
+    html.td(u'einde')
+    html.closeall()
+    print html.exp()

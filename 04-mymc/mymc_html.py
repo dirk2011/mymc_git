@@ -2,12 +2,20 @@
 
 """Deze module hoort bij module mymc.
 
-Deze module bevat strings en functies om webpagina's
-te genereren. Hiervoor wordt gebruik gemaakt van
-de python module pycheerry.
+Deze module bevat templates en functies om webpagina's
+te genereren. 
 
 """
-# pylint: disable=C0103, C0301
+
+__author__  = 'dp'
+__date__    = '2014-09'
+
+
+# pylint: disable=C0103, C0301, R0201
+# C0103 - naming convention
+# C0301 - lengte van de regels
+# R0201 - method could be a function
+
 
 import urllib           # vertaal string naar url
 from htable import hTable
@@ -73,34 +81,24 @@ def main_navigation():
     h.td(hButton(u'Volume', u'btnVolume', u'knop', u'/pageSonosSpeakers'))
     h.td(hButton(u'Afgespeeld', u'btnAfgespeeld', u'knop', u'pageAfgespeeld'))
     h.td(hButton(u'Beheer', u'btnBeheer', u'knop', u'/pageBeheer'))
-
-    """"h.td(hLink(u'Home'           , u'index'), u'nav')
-    h.td(hLink(u"Info Mc"        , u"pageInfoMc"), u'nav')
-    h.td(hLink(u"Album artiesten", u"pageListAlbumArtists"), u'nav')
-    h.td(hLink(u"Zoeken"         , u"pageSearch"), u'nav')
-    h.td(hLink(u"Queue"          , u"sonos_playmenu"), u'nav')
-    h.td(hLink(u"Volume"         , u"pageSonosSpeakers"), u'nav')
-    h.td(hLink(u"Afgespeeld"     , u"pageAfgespeeld"), u'nav')
-    h.td(hLink(u"Beheer"         , u"pageBeheer"), u'nav') """
     h.closeall()
 
     return u"""<div id="kopmenu">%s</div> """ % h.exp()
 
 
-def linkpageAlbumArtist(artist):
+def linkpageAlbumArtist(albumartist, albumartist_id):
     """geef link terug: href naar album artist
     """
 
-    link = urllib.quote(artist)
-    return u"""<a href=pageListAlbums_AlbumArtist?albumartist=%s>""" % link + artist + u"</a>"
+    return u"""<a href=pageListAlbums_AlbumArtist?albumartist_id=%s>""" % albumartist_id \
+        + albumartist + u"</a>"
 
 
-def linkpageAlbumTracks(album):
-    """geef link terug: href naar album
+def linkpageAlbumTracks(album, album_id):
+    """geef link terug: href naar album_id
     """
 
-    link = urllib.quote(album)
-    return u"""<a href=listAlbumTracks?album=%s>""" % link + album + u"</a>"
+    return u"""<a href=listAlbumTracks?album_id=%s>""" % album_id + album + u"</a>"
 
 
 def linkpageSong(song_id):
@@ -875,14 +873,15 @@ def pageShowCache(records):
     title = u'pageShowCache'
     h = html_start(title) + main_navigation() + html_h1(u"Pagina's in cache") 
 
-    h_td = u"""%(regel)s"""
+    h_td = u"""%(volgnr)s: %(bestand)s"""
     
     table = hTable()
     if len(records) > 0:
         table.td(u"""De volgende pagina's bevinden zich in de cache.</td>""")
+        # print records
         for record in records:
             table.tr()
-            table.td(h_td % {u'regel': record})
+            table.td(h_td % record)
     else:
         table.tr()
         table.td(u"""Er zijn geen pagina's in cache gevonden. """)
@@ -1179,14 +1178,18 @@ def pagePlayedArtistsPeriod(period, records):
         h_td = unicode(' ', 'utf-8', errors='replace')
         h_td = h_td + TRO
         h_td = h_td + u"""<td class="track">%(volgnr)s</td>""" % {u'volgnr': record[u'volgnr']}
-        artist_link = urllib.quote(record[u'artist'])
-        # 7-9-2014, uit: artist = unicode(record['artist'], 'utf-8', errors='replace')
+        
+        # TODO, volgende 5 regels
+        print 'artist', record['artist']
+        # artist = unicode(record['artist'], 'utf-8', errors='replace')
+        artist_link = record[u'artist'] # urllib.quote(record[u'artist'])
         artist = record['artist']
-        # print 'artist', record['artist']
         # print 'artist_link', artist_link
-        h_td = h_td + u"""<td class="artist"><a href="pagePlayedArtistsPeriodAlbums?period=%(period)s&artist=%(artist_link)s"> %(artist)s </a> </td>""" %\
-               {u'artist': artist, u'played': record[u'played'], \
-                u'artist_link': artist_link, u'period': period}
+        
+        h_td = h_td + u"""<td class="artist">
+            <a href="pagePlayedArtistsPeriodAlbums?period=%(period)s&artist_id=%(artist_id)s"> %(artist)s </a> </td>""" \
+            % ({u'artist': artist, u'played': record[u'played'], \
+            u'artist_id': record[u'artist_id'], u'period': period})
         h_td = h_td + u"""<td class="played">%(played)s</td>""" % {u'played': record[u'played']}
         
         link = hLink(u'aantal', u'pageShowSongs&period=%s&artist=%s' % (period, artist_link))
@@ -1203,13 +1206,13 @@ def pagePlayedArtistsPeriod(period, records):
     return h_page  # + str(records)
     
 
-def pagePlayedArtistsPeriodAlbums(period, artist, records):
+def pagePlayedArtistsPeriodAlbums(period, artist_id, records):
     """Aantal afgespeelde songs van een artiest, per album over een gekozen periode.
     """
 
     title = u'pagePlayedArtistsPeriodAlbums'
     h = html_start(title) + main_navigation() + \
-        html_h1(u"Afgespeeld: " + period + u", artiest: " + artist)
+        html_h1(u"Afgespeeld: " + period + u", artiest: " + records[0]['artist'])
     
     h_page = TABO 
     h_page = h_page + u"""
@@ -1222,16 +1225,15 @@ def pagePlayedArtistsPeriodAlbums(period, artist, records):
 
     for record in records:
         h_td = TRO + \
-            u"""<td class="artist">""" + linkpageAlbumArtist(artist) + TDC + \
-            u"""<td class="album">""" + linkpageAlbumTracks(record[u'album']) + TDC + \
+            u"""<td class="artist">""" + record['artist'] + TDC + \
+            u"""<td class="album">""" + linkpageAlbumTracks(record[u'album'], record[u'album_id']) + TDC + \
             u"""<td class="played">""" + str(record['played']) + TDC + TRC
         h_page = h_page + h_td
 
     h = h + TABC
     
     h = h + html_page(h_page) + html_end()
-
-    print h
+    # print h
 
     return h
 
@@ -1288,7 +1290,7 @@ def listAlbumTracks(album_id, records):
     # pagina kop
     if len(records) > 0:
         album = records[0]['albumartist'] + " - " + records[0]['album']
-        if len(album) > 45:
+        if len(album) > 51:
             album = album[0:45] + " . . ."
     else:
         album = "geen"

@@ -17,8 +17,10 @@ CLASSES
      |  Methods defined here:
      |  
      |  __del__(self)
+     |      Verbinding met postgres database sluiten.
      |  
      |  __init__(self)
+     |      Connectie met postgresql database maken, en een cursor maken.
      |  
      |  dbExecute(self, query)
      |      Voer queries uit, niet om gegevens op te halen, maar data manipulatie,
@@ -41,6 +43,10 @@ FUNCTIONS
     
     dbSongsUpdateArtistId()
         Update table songs, vul artist_id als deze nog leeg is, zoek op in table artists.
+    
+    q(inString)
+        functie: q, quotes, quotes zijn voor sqlite een probleem, die moeten ge-escaped worden
+        door nog een quote
 
 DATA
     DBHOST = 'mc'
@@ -48,10 +54,10 @@ DATA
     DBPORT = '5432'
     DBUSER = 'pi'
     __author__ = 'dp'
-    __date__ = '2014-09-14'
+    __date__ = '2014-09'
 
 DATE
-    2014-09-14
+    2014-09
 
 AUTHOR
     dp

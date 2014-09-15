@@ -10,7 +10,7 @@ create table played_artists
         history_id	serial         		primary key
         -- period = day, week, month, quarter, half year, year, all
 ,       period		character varying(20) 	not null
-	-- aat = album, artist, title
+	-- aat één van de volgende: album, artist, title
 ,	aat		character varying(20)	not null
 ,       artist		character varying(200)	not null
 ,	album		character varying(200)
@@ -23,4 +23,8 @@ create table played_artists
 
 create unique index played_artists_i1 on played_artists (period, aat, artist, album, title) ;
 
-
+-- 2014-09-15, ids opnemen
+alter table played_artists add artist_id	integer ;
+alter table played_artists add albumartist_id	integer ;
+alter table played_artists add album_id	integer ;
+alter table played_artists add song_id	        integer ;

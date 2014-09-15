@@ -8,7 +8,13 @@ Tevens functies voor specifieke taken.
 
 
 __author__  = 'dp'
-__date__    = '2014-09-14'
+__date__    = '2014-09'
+
+
+# pylint: disable=C0103, C0301, R0201
+# C0103 - naming convention
+# C0301 - lengte van de regels
+# R0201 - method could be a function
 
 
 # imports
@@ -29,7 +35,9 @@ class MyDB():
     _db_cur = None
     
     def __init__(self):
-        ### postgresql
+        """Connectie met postgresql database maken, en een cursor maken.
+        """
+
         try:
             self._db_connection = psycopg2.connect(database=DBNAME, user=DBUSER, host=DBHOST, port=DBPORT)
             # gewone cursor
@@ -45,6 +53,8 @@ class MyDB():
 
 
     def __del__(self):
+        """Verbinding met postgres database sluiten.
+        """
         self._db_connection.close()
 
 
@@ -95,6 +105,21 @@ class MyDB():
         self._db_cur.execute(query)
         # print 'query', query
         self._db_connection.commit()
+
+
+def q(inString):
+    """functie: q, quotes, quotes zijn voor sqlite een probleem, die moeten ge-escaped worden
+    door nog een quote"""
+    uitString = ""
+    for teken in inString:
+        uitString = uitString + teken
+        if teken == "'":
+            uitString = uitString + "'"
+    # print uitString
+    # print type(uitString)
+    if isinstance(uitString, str):
+        uitString = unicode(uitString, 'utf-8', errors='replace')
+    return uitString
 
 
 def dbGetSongInfoPlayed(song_id="0"):
@@ -183,7 +208,9 @@ def dbSongsUpdateAlbumArtistId():
     # zoek alle songs waarvan artist_id leeg is
     query = """select song_id, albumartist, albumartist_id
         from songs
-        where albumartist_id is null order by song_id"""
+        where albumartist_id is null
+          -- and song_id in (1759, 1835)
+        order by song_id """
     songs = db.dbGetData(query)
     print 'lengte songs: ', len(songs)
 
@@ -193,7 +220,7 @@ def dbSongsUpdateAlbumArtistId():
         # zoek albumartist op in table albumartists
         query = """select * from albumartists
             where upper(albumartist) = upper('%s') """ % q(song['albumartist'])
-        albumartist = dbGetData(query)
+        albumartist = db.dbGetData(query)
         if len(albumartist) == 0:
             # als niet gevonden voeg artist toe
             query = """insert into albumartists (albumartist)
@@ -207,15 +234,17 @@ def dbSongsUpdateAlbumArtistId():
         if len(albumartist) > 0:
             # update songs, vul albumartist_id
             albumartist = albumartist[0]
+            # print albumartist
             print tel, "song: ", song['albumartist'], " albumartists: ", albumartist['albumartist']
             query = """update songs
                 set albumartist_id = %s
                 where song_id = %s """ % (albumartist['albumartist_id'], song['song_id'])
+            # print query
             db.dbExecute(query)
 
         # beperk het bijwerken tot een maximum                
         tel = tel + 1
-        if tel > 3000:
+        if tel > 30000:
             break
     
     return tel
@@ -226,6 +255,7 @@ def dbSongsUpdateArtistId():
     """
 
     # zoek alle songs waarvan artist_id leeg is
+    db = MyDB()
     query = """select song_id, artist, artist_id, artist from songs where artist_id is null order by song_id"""
     songs = db.dbGetData(query)
     print 'lengte songs: ', len(songs)

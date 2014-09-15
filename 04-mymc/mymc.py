@@ -7,6 +7,10 @@ Via webinterface inzicht hierin bieden,
 en afspelen via sonos.
 """
 
+__author__  = 'dp'
+__date__    = '2014-09'
+
+
 # pylint: disable=C0103, C0301, R0201
 # C0103 - naming convention
 # C0301 - lengte van de regels
@@ -40,6 +44,7 @@ from dbfunc import dbSongsUpdateAlbumArtistId
 from dbfunc import dbSongsUpdateArtistId
 from dbfunc import MyDB
 from dbfunc import dbGetSongInfoPlayed
+from dbfunc import q
 
 # dbconnectie
 DBNAME="dbmc"
@@ -93,21 +98,21 @@ class Mc:
 
 
     @cherrypy.expose
-    def pagePlayedArtistsPeriodAlbums(self, period, artist):
+    def pagePlayedArtistsPeriodAlbums(self, period, artist_id):
         """Afgespeelde songs per artiest en per album.
         """
 
         print 'period', period
-        print 'artist', artist
+        print 'artist_id', artist_id
 
         query = """select * from played_artists
-            where period = '%s' and aat = 'albums' and artist = '%s'
+            where period = '%s' and aat = 'albums' and artist_id = %s
             order by played desc
-            """ % (period, artist)
+            """ % (period, int(artist_id))
         records = self.dbGetData(query)
         print 'records', records
 
-        h = mymc_html.pagePlayedArtistsPeriodAlbums(period, artist, records)
+        h = mymc_html.pagePlayedArtistsPeriodAlbums(period, artist_id, records)
 
         return h
 
@@ -166,37 +171,38 @@ class Mc:
         levels = ['artists', 'albums', 'titles']
 
         query1 = """-- artiest
-        insert into     played_artists (period, aat, artist, played)
-        select 		'%(period)s', '%(level)s', artist, count(*) as aantal
+        insert into     played_artists (period, aat, artist, artist_id, played)
+        select 		'%(period)s', '%(level)s', max(artist), artist_id, count(*) as aantal
         from   		played
         left join 	songs
-        on 		played.song_id = songs.song_id
+        on 		    played.song_id = songs.song_id
         where		current_date - date(played.playdate) < %(days)s
-        group by 	artist
-        order by 	4 desc
-        limit 		100 """
-
-        query2 = """-- artiest, albums
-        insert into     played_artists (period, aat, artist, album, played)
-        select 		'%(period)s', '%(level)s', artist, album, count(*) as aantal
-        from   		played
-        left join 	songs
-        on 		played.song_id = songs.song_id
-        where		current_date - date(played.playdate) < %(days)s
-        group by 	artist, album
+        group by 	artist_id
         order by 	5 desc
         limit 		100 """
 
-        query3 = """-- artiest, albums, songs
-        insert into     played_artists (period, aat, artist, album, title, played)
-        select 		'%(period)s', '%(level)s', artist, album, title, count(*) as aantal
+        query2 = """-- artiest, albums
+        insert into     played_artists (period, aat, artist, artist_id, album, album_id, played)
+        select 		'%(period)s', '%(level)s', max(artist), artist_id, max(album), album_id, count(*) as aantal
         from   		played
         left join 	songs
-        on 		played.song_id = songs.song_id
+        on 		    played.song_id = songs.song_id
         where		current_date - date(played.playdate) < %(days)s
-        group by 	artist, album, title
-        order by 	6 desc
-        limit 		100 """
+        group by 	artist_id, album_id
+        order by 	7 desc
+         """
+
+        query3 = """-- artiest, albums, songs
+        insert into     played_artists (period, aat, artist, artist_id, album, album_id, title, song_id, played)
+        select 		'%(period)s', '%(level)s', max(artist), artist_id
+                    , max(album), album_id, max(title), songs.song_id, count(*) as aantal
+        from   		played
+        left join 	songs
+        on 		    played.song_id = songs.song_id
+        where		current_date - date(played.playdate) < %(days)s
+        group by 	artist_id, album_id, songs.song_id
+        order by 	9 desc
+        limit 		10 """
 
         # vorige cijfers verwijderen
         self.dbExecute('delete from played_artists')
@@ -259,8 +265,9 @@ class Mc:
 
         ### haal jaar, maand, en dag gegevens op, en maak er dictionaries van voor weergave op webpagina
         # haal jaren op
+        db = MyDB()
         query = """select year, played from played_history where month = 0"""
-        records = self.dbGetData(query)
+        records = db.dbGetData(query)
         yearsdict = {}
         for record in records:
             key = 'year' + str(record['year'])
@@ -274,7 +281,7 @@ class Mc:
         # haal maanden op
         query = """select year, month, played from played_history
             where year = %s and month <> 0 and day = 0""" % (year)
-        records = self.dbGetData(query)
+        records = db.dbGetData(query)
         monthsdict = {}
         for record in records:
             key = 'month' + str(record['month'])
@@ -282,14 +289,14 @@ class Mc:
         # voeg ook year en month toe aan dictionary
         monthsdict['year'] = year
         monthsdict['month'] = month
-        print 'monthsdict ->', monthsdict
+        # print 'monthsdict ->', monthsdict
 
         # haal dagen op
         query = """select year, month, day, played
             , ltrim(to_char(year, '9999')) || ltrim(to_char(month, '09')) || ltrim(to_char(day, '09')) as datum
             from played_history
             where year = %s and month = %s and day <> 0""" % (year, month)
-        records = self.dbGetData(query)
+        records = db.dbGetData(query)
         # print query
         # print records
         daysdict = {}           # per dagnr de afgespeelde records
@@ -298,7 +305,7 @@ class Mc:
             key2 = 'dayb' + str(record['day'])
             daysdict[key] = record['played']
             daysdict[key2] = record['datum']
-        print 'daysdict', daysdict
+        # print 'daysdict', daysdict
 
         h = mymc_html.pagePlayedHistory(yearsdict, monthsdict, daysdict)
         # print h
@@ -433,10 +440,13 @@ class Mc:
                     tel = tel + 1
                     filename = os.path.join(root, bestand)
                     filename = filename.decode('utf-8', errors='replace')
-                    print str(tel) + ": " + filename
-                    records.append(filename)
-        # print records
+                    # print str(tel) + ": " + filename
+                    record = {}
+                    record['volgnr'] = tel
+                    record['bestand'] = filename
+                    records.append(record)
 
+        # return str(records)
         h = mymc_html.pageShowCache(records)
 
         return h
@@ -836,15 +846,14 @@ class Mc:
         #albumartist='ABBA'
         # albumartist = q(albumartist)    # q(), voor namen als: Guys 'n' Dolls
         query = ("""
-            select albumartist, album, album_id, year, location
-            from songs
-            where albumartist_id || '#' || tracknumber in
-            (
-                select albumartist_id || '#' || min(tracknumber)
-                from songs
-                where albumartist_id = %s
-                group by albumartist_id
-            )
+            select   album_id
+            ,        min(albumartist) as albumartist
+            ,        min(album) as album
+            ,        min(year) as year
+            ,        min(location) as location
+            from     songs
+            where    albumartist_id = %s
+            group by album_id 
             order by year, album
         """ % int(albumartist_id))
         # print query
@@ -1455,21 +1464,6 @@ def debug(input):
     """
     if DEBUG:
         print input
-
-
-def q(inString):
-    """functie: q, quotes, quotes zijn voor sqlite een probleem, die moeten ge-escaped worden
-    door nog een quote"""
-    uitString = ""
-    for teken in inString:
-        uitString = uitString + teken
-        if teken == "'":
-            uitString = uitString + "'"
-    # print uitString
-    # print type(uitString)
-    if isinstance(uitString, str):
-        uitString = unicode(uitString, 'utf-8', errors='replace')
-    return uitString
 
 
 class sonos_play:

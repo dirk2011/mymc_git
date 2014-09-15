@@ -7,9 +7,8 @@ FILE
     /media/rasp163-v/mymc/04-mymc/mymc_html.py
 
 DESCRIPTION
-    Deze module bevat strings en functies om webpagina's
-    te genereren. Hiervoor wordt gebruik gemaakt van
-    de python module pycheerry.
+    Deze module bevat templates en functies om webpagina's
+    te genereren.
 
 FUNCTIONS
     html_end()
@@ -25,11 +24,11 @@ FUNCTIONS
     html_start(title)
         Begin van een html pagina, head t/m body, inclusief laden stylesheet.
     
-    linkpageAlbumArtist(artist)
+    linkpageAlbumArtist(albumartist, albumartist_id)
         geef link terug: href naar album artist
     
-    linkpageAlbumTracks(album)
-        geef link terug: href naar album
+    linkpageAlbumTracks(album, album_id)
+        geef link terug: href naar album_id
     
     linkpageSong(song_id)
         geef link terug: href naar song info pagina
@@ -74,7 +73,7 @@ FUNCTIONS
     pagePlayedArtistsPeriod(period, records)
         Aantal afgespeelde songs per artiest over een gekozen periode.
     
-    pagePlayedArtistsPeriodAlbums(period, artist, records)
+    pagePlayedArtistsPeriodAlbums(period, artist_id, records)
         Aantal afgespeelde songs van een artiest, per album over een gekozen periode.
     
     pagePlayedHistory(yearsdict, monthsdict, daysdict)
@@ -158,8 +157,16 @@ DATA
     TDO = u'<td>'
     TRC = u'</tr>\n'
     TRO = u'<tr>'
+    __author__ = 'dp'
+    __date__ = '2014-09'
     pageSongSave = u'\n    <html>\n    pageSongSave</br>\n\n    <sc....his...
     sonos_clear_queue = u'\n    <html>\n    sonos_clear_queue</br>\n\n  .....
     sonos_play_from_queue = u'\n    <html>\n    sonos_play_from_queue</br>...
+
+DATE
+    2014-09
+
+AUTHOR
+    dp
 
 

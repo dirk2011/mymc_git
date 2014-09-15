@@ -103,7 +103,7 @@ CLASSES
      |  pagePlayedArtistsPeriod(self, period)
      |      Afgespeelde songs per artiest, 1e selectie, welke periode
      |  
-     |  pagePlayedArtistsPeriodAlbums(self, period, artist)
+     |  pagePlayedArtistsPeriodAlbums(self, period, artist_id)
      |      Afgespeelde songs per artiest en per album.
      |  
      |  pagePlayedHistory(self, year=0, month=0)
@@ -185,10 +185,6 @@ FUNCTIONS
     debug(input)
         print debug meldingen
     
-    q(inString)
-        functie: q, quotes, quotes zijn voor sqlite een probleem, die moeten ge-escaped worden
-        door nog een quote
-    
     saveHTMLToFile(filename, page)
         HTML opslaan als een bestand, tbv debugging
 
@@ -209,5 +205,13 @@ DATA
     TDO = u'<td>'
     TRC = u'</tr>\n'
     TRO = u'<tr>'
+    __author__ = 'dp'
+    __date__ = '2014-09'
+
+DATE
+    2014-09
+
+AUTHOR
+    dp
 
 
