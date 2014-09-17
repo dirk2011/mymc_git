@@ -73,14 +73,14 @@ def main_navigation():
     """
 
     h = hTable()
-    h.td(hButton(u'Home', u'btnHome', u'knop', u'/index'))
-    h.td(hButton(u'Info Mc', u'btnInfoMc', u'knop', u'/pageInfoMc'))
-    h.td(hButton(u'Artiesten', u'btnArtiesten', u'knop', u'/pageListAlbumArtists'))
-    h.td(hButton(u'Zoeken', u'btnZoeken', u'knop', u'/pageSearch'))
-    h.td(hButton(u'Queue', u'btnQueue', u'knop', u'/sonos_playmenu'))
-    h.td(hButton(u'Volume', u'btnVolume', u'knop', u'/pageSonosSpeakers'))
-    h.td(hButton(u'Afgespeeld', u'btnAfgespeeld', u'knop', u'pageAfgespeeld'))
-    h.td(hButton(u'Beheer', u'btnBeheer', u'knop', u'/pageBeheer'))
+    h.td(hButton(u'Home', u'btnHome', u'menuknop', u'/index'))
+    h.td(hButton(u'Info Mc', u'btnInfoMc', u'menuknop', u'/pageInfoMc'))
+    h.td(hButton(u'Artiesten', u'btnArtiesten', u'menuknop', u'/pageListAlbumArtists'))
+    h.td(hButton(u'Zoeken', u'btnZoeken', u'menuknop', u'/pageSearch'))
+    h.td(hButton(u'Queue', u'btnQueue', u'menuknop', u'/sonos_playmenu'))
+    h.td(hButton(u'Volume', u'btnVolume', u'menuknop', u'/pageSonosSpeakers'))
+    h.td(hButton(u'Afgespeeld', u'btnAfgespeeld', u'menuknop', u'/pageAfgespeeld'))
+    h.td(hButton(u'Beheer', u'btnBeheer', u'menuknop', u'/pageBeheer'))
     h.closeall()
 
     return u"""<div id="kopmenu">%s</div> """ % h.exp()
@@ -950,6 +950,9 @@ def pageBeheer():
     h = html_start(title) + main_navigation() + html_h1("Beheer") 
     
     table = hTable()
+    link = hLink(u"Selecties muteren", u"pageSelections")
+    table.td(link, u'beheer')
+    table.tr()
     link = hLink(u"Toon pagina's in cache", u"pageShowCache")
     table.td(link, u'beheer')
     table.tr()
@@ -1435,4 +1438,74 @@ def pagePlayedHistoryDetails(datum, records):
     return h
 
 
-# einde
+def pageSelections():
+    """Template voor muteren selecties
+    """
+
+    title = "pageSelections"
+    h = html_start(title) + main_navigation() + html_h1("Muteren selecties")
+    
+    hRecord = """
+<style>
+.knop {
+  xtext-transform: uppercase;
+  width: 10em;
+  height: 2em;
+}
+
+#invoer-gebied {
+  display: inline;
+  background-color: #b0c4de;
+  border-style: solid;
+  border-width: 1px;
+  border-color: black;
+}
+
+#invoer-label {
+  background-color: #b0c4de;
+  padding: 0.25em;
+  border-style: solid;
+  border-width: 1px;
+}
+</style>
+
+<fieldset id="invoer-gebied"><legend id="invoer-label">Muteren playlist</legend>
+<table>
+  <tr>
+    <td>
+      Selectie
+    </td><td>
+      <input type="text" id="code" size="30" maxlength="30"><br>
+    </td>
+   </tr> 
+
+   <tr>
+    <td>
+      Toelichting 
+    </td><td>
+      <input type="text" id="oms" size="50" maxlength="100"><br>
+    </td>
+  </tr>
+  
+  <tr>
+    <td>
+      Conditie
+    </td><td>
+      <input type="text" id="code" size="100" maxlength="30"><br>
+    </td>
+   </tr> 
+      
+  <tr>
+    <td>
+    </td><td>
+      <button type="button" class="knop" id="opslaan">Opslaan</button>
+      <button type="button" class="knop" id="terug">Verwijderen</button>
+     </td>
+  </tr>
+</table>
+</fieldset>
+"""
+
+    h = h + html_page(hRecord) + html_end()
+
+    return h

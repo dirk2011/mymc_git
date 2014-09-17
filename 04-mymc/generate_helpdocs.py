@@ -23,11 +23,8 @@ def output_help_to_file(filepath, request):
 # output_help_to_file(r'os.txt', 'os')
 
 output_help_to_file(r'mymc_html.txt', 'mymc_html')
-
 output_help_to_file(r'mymc.txt', 'mymc')
-
 output_help_to_file(r'htable.txt', 'htable')
-
 output_help_to_file(r'sonos_discover.txt', 'sonos_discover')
-
 output_help_to_file(r'dbfunc.txt', 'dbfunc')
+output_help_to_file(r'selections.txt', 'selections')

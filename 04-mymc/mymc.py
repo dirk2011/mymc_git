@@ -46,6 +46,9 @@ from dbfunc import MyDB
 from dbfunc import dbGetSongInfoPlayed
 from dbfunc import q
 
+import selections           # pagina muteren selecties
+
+
 # dbconnectie
 DBNAME="dbmc"
 DBUSER="pi" 
@@ -1502,8 +1505,10 @@ if __name__ == '__main__' and not 'idlelib.__main__' in sys.modules:
     cherrypy.config.update({'server.socket_host': '0.0.0.0',
                             'server.socket_port': 8081,
     })
+
     root = Mc()
     root.admin2 = Admin()
     root.sonos_play = sonos_play()
+    root.pageSelections = selections.pageSelections()
+    
     cherrypy.quickstart(root, '/', conf)
-

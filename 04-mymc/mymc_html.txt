@@ -95,6 +95,9 @@ FUNCTIONS
     pageSearchResult(records)
         Pagina om het zoek resultaat te tonen.
     
+    pageSelections()
+        Template voor muteren selecties
+    
     pageShowCache(records)
         Toon pagina's in cache.
     
