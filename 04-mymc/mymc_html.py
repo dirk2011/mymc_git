@@ -17,6 +17,9 @@ __date__    = '2014-09'
 # R0201 - method could be a function
 
 
+import cherrypy         # cherrypy de webinterface
+import os
+import json
 import urllib           # vertaal string naar url
 from htable import hTable
 from hTable import Html
@@ -34,6 +37,7 @@ def html_start(title):
 <head>
 <title>%(title)s</title>
 <link rel="stylesheet" type="text/css" href="/static/css/style.css">
+<script src="/static/js/jquery.js" type="text/javascript"></script>
 </head>
 <body>""" % {'title': title}
 
@@ -1469,13 +1473,53 @@ def pageSelections():
 }
 </style>
 
+<script type="text/javascript">
+$(document).ready(function() {
+    $("#btnStore").click(function() {
+        $.ajax({
+            url: "save",
+            type: "POST",
+            data: {txtCode: $("#txtCode").val(), txtDescr: $("#txtDescr").val(),
+                txtCond: $("#txtCond").val()},
+            success: function(response) {
+                alert(response);
+                /* $("#test").html(response); */
+            }
+        });
+        /* alert("I am an alert box!"); */
+    });
+
+    $("#btnDelete").click(function() {
+        $.ajax({
+            url: "delete",
+            type: "POST",
+            data: {txtCode: $("#txtCode").val()},
+            success: function(response) {
+                alert(response);
+                /* $("#test").html(response); */
+            }
+        });
+        /* alert("I am an alert box!"); */
+    });
+
+    $("#btnCancel").click(function() {
+        var a = $( "#testform" ).serialize() ; 
+        alert(a);
+        $.post( "save", $( "#testform" ).serialize() );
+    });
+
+});
+</script>
+
+
 <fieldset id="invoer-gebied"><legend id="invoer-label">Muteren playlist</legend>
+<form id="testform">
 <table>
   <tr>
     <td>
       Selectie
     </td><td>
-      <input type="text" id="code" size="30" maxlength="30"><br>
+      <input type="text" id="txtCode" size="30" maxlength="30"><br>
     </td>
    </tr> 
 
@@ -1483,7 +1527,7 @@ def pageSelections():
     <td>
       Toelichting 
     </td><td>
-      <input type="text" id="oms" size="50" maxlength="100"><br>
+      <input type="text" id="txtDescr" size="50" maxlength="100"><br>
     </td>
   </tr>
   
@@ -1491,18 +1535,19 @@ def pageSelections():
     <td>
       Conditie
     </td><td>
-      <input type="text" id="code" size="100" maxlength="30"><br>
+      <input type="text" id="txtCond" size="100" maxlength="30"><br>
     </td>
    </tr> 
       
   <tr>
     <td>
     </td><td>
-      <button type="button" class="knop" id="opslaan">Opslaan</button>
-      <button type="button" class="knop" id="terug">Verwijderen</button>
+      <button type="button" class="knop" id="btnStore">Opslaan</button>
+      <button type="button" class="knop" id="btnDelete">Verwijderen</button>
      </td>
   </tr>
 </table>
+</form>
 </fieldset>
 """
 
