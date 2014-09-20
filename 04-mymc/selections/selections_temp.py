@@ -2,7 +2,7 @@
 
 """Module selections_temp.
 
-Tempates voor selections
+Pagina tempates voor om table selections te bewerken.
 
 """
 
@@ -30,7 +30,7 @@ from mymc_html import html_end
 
 
 def pageSelection(records):
-    """Template voor muteren selecties
+    """Pagina template voor muteren van één selection.
     """
 
     title = "pageSelections"
@@ -177,7 +177,7 @@ $(document).ready(function() {
 
 
 def pageSelectionsList(records):
-    """Template voor muteren selecties
+    """Pagina template voor een overzicht van bestaande selections.
     """
 
     title ="pageSelectionsList"

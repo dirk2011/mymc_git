@@ -35,13 +35,15 @@ class pageSelections(object):
     """
 
     def __init__(self):
-        """Initialisatie
+        """Database verbinding wordt hier gemaakt.
+        @ivar _db: database  
         """
         self._db = MyDB() 
 
     @cherrypy.expose
     def index(self):
-        """De webpagina voor het muteren
+        """Hoofd ingang muteren selections. 
+        Pagina geeft een lijst van bestaande selections.
         """
 
         query = """
@@ -60,7 +62,7 @@ class pageSelections(object):
 
     @cherrypy.expose
     def new(self):
-        """New buttton afhandelen, voor nieuwe selections toe te voegen.
+        """Buttton new afhandelen, om nieuwe selections toe te voegen.
         """
         
         # leeg record aanmaken
@@ -94,7 +96,7 @@ class pageSelections(object):
     @cherrypy.expose
     @cherrypy.tools.json_out()
     def save(self, txtCode="#", txtDescr="#", txtCond="#"):
-        """Save button afhandelen, een selection opslaan.
+        """Button saven afhandelen, een selection opslaan.
         """
 
         # db = MyDB()
@@ -110,7 +112,7 @@ class pageSelections(object):
 
     @cherrypy.expose
     def delete(self, txtCode="#"):
-        """Delete button afhandelen, een selection verwijderen.
+        """Button delete afhandelen, een selection verwijderen. 
         """
 
         # db = MyDB()

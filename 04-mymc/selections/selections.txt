@@ -21,22 +21,24 @@ CLASSES
      |  Methods defined here:
      |  
      |  __init__(self)
-     |      Initialisatie
+     |      Database verbinding wordt hier gemaakt.
+     |      @ivar _db: database
      |  
      |  delete(self, txtCode='#')
-     |      Delete button afhandelen, een selection verwijderen.
+     |      Button delete afhandelen, een selection verwijderen.
      |  
      |  index(self)
-     |      De webpagina voor het muteren
+     |      Hoofd ingang muteren selections. 
+     |      Index geeft een lijst van bestande selecties.
      |  
      |  new(self)
-     |      New buttton afhandelen, voor nieuwe selections toe te voegen.
+     |      Buttton new afhandelen, om nieuwe selections toe te voegen.
      |  
      |  pageSelection(self, id)
      |      Pagina voor het muteren van één selectie.
      |  
      |  save(self, txtCode='#', txtDescr='#', txtCond='#')
-     |      Save button afhandelen, een selection opslaan.
+     |      Button saven afhandelen, een selection opslaan.
      |  
      |  ----------------------------------------------------------------------
      |  Data descriptors defined here:
