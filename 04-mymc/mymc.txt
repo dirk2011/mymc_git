@@ -12,14 +12,8 @@ DESCRIPTION
     en afspelen via sonos.
 
 CLASSES
-    Admin
     Mc
     sonos_play
-    
-    class Admin
-     |  Methods defined here:
-     |  
-     |  index(self)
     
     class Mc
      |  Mc = music collection

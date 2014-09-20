@@ -1,0 +1,35 @@
+Help on module selections_temp:
+
+NAME
+    selections_temp - Module selections_temp.
+
+FILE
+    /media/rasp163-v/mymc/04-mymc/selections/selections_temp.py
+
+DESCRIPTION
+    Tempates voor selections
+
+FUNCTIONS
+    pageSelection(records)
+        Template voor muteren selecties
+    
+    pageSelectionsList(records)
+        Template voor muteren selecties
+
+DATA
+    TABC = u'</table>'
+    TABO = u'<table>'
+    TDC = u'</td>'
+    TDO = u'<td>'
+    TRC = u'</tr>\n'
+    TRO = u'<tr>'
+    __author__ = 'dp'
+    __date__ = '2014-09'
+
+DATE
+    2014-09
+
+AUTHOR
+    dp
+
+

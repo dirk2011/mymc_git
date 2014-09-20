@@ -17,10 +17,12 @@ __date__    = '2014-09'
 # R0201 - method could be a function
 
 
-import cherrypy         # cherrypy de webinterface
+# import cherrypy         # cherrypy de webinterface
 import os
-import json
+# import json
 import urllib           # vertaal string naar url
+# import cgi
+
 from htable import hTable
 from hTable import Html
 from hTable import hLink, hButton
@@ -1441,116 +1443,4 @@ def pagePlayedHistoryDetails(datum, records):
 
     return h
 
-
-def pageSelections():
-    """Template voor muteren selecties
-    """
-
-    title = "pageSelections"
-    h = html_start(title) + main_navigation() + html_h1("Muteren selecties")
-    
-    hRecord = """
-<style>
-.knop {
-  xtext-transform: uppercase;
-  width: 10em;
-  height: 2em;
-}
-
-#invoer-gebied {
-  display: inline;
-  background-color: #b0c4de;
-  border-style: solid;
-  border-width: 1px;
-  border-color: black;
-}
-
-#invoer-label {
-  background-color: #b0c4de;
-  padding: 0.25em;
-  border-style: solid;
-  border-width: 1px;
-}
-</style>
-
-<script type="text/javascript">
-$(document).ready(function() {
-    $("#btnStore").click(function() {
-        $.ajax({
-            url: "save",
-            type: "POST",
-            data: {txtCode: $("#txtCode").val(), txtDescr: $("#txtDescr").val(),
-                txtCond: $("#txtCond").val()},
-            success: function(response) {
-                alert(response);
-                /* $("#test").html(response); */
-            }
-        });
-        /* alert("I am an alert box!"); */
-    });
-
-    $("#btnDelete").click(function() {
-        $.ajax({
-            url: "delete",
-            type: "POST",
-            data: {txtCode: $("#txtCode").val()},
-            success: function(response) {
-                alert(response);
-                /* $("#test").html(response); */
-            }
-        });
-        /* alert("I am an alert box!"); */
-    });
-
-    $("#btnCancel").click(function() {
-        var a = $( "#testform" ).serialize() ; 
-        alert(a);
-        $.post( "save", $( "#testform" ).serialize() );
-    });
-
-});
-</script>
-
-
-<fieldset id="invoer-gebied"><legend id="invoer-label">Muteren playlist</legend>
-<form id="testform">
-<table>
-  <tr>
-    <td>
-      Selectie
-    </td><td>
-      <input type="text" id="txtCode" size="30" maxlength="30"><br>
-    </td>
-   </tr> 
-
-   <tr>
-    <td>
-      Toelichting 
-    </td><td>
-      <input type="text" id="txtDescr" size="50" maxlength="100"><br>
-    </td>
-  </tr>
-  
-  <tr>
-    <td>
-      Conditie
-    </td><td>
-      <input type="text" id="txtCond" size="100" maxlength="30"><br>
-    </td>
-   </tr> 
-      
-  <tr>
-    <td>
-    </td><td>
-      <button type="button" class="knop" id="btnStore">Opslaan</button>
-      <button type="button" class="knop" id="btnDelete">Verwijderen</button>
-     </td>
-  </tr>
-</table>
-</form>
-</fieldset>
-"""
-
-    h = h + html_page(hRecord) + html_end()
-
-    return h
+# eof

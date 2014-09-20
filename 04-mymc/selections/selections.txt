@@ -1,0 +1,60 @@
+Help on module selections:
+
+NAME
+    selections - Module selections.
+
+FILE
+    /media/rasp163-v/mymc/04-mymc/selections/selections.py
+
+DESCRIPTION
+    Bevat class om table selections te muteren.
+
+CLASSES
+    __builtin__.object
+        pageSelections
+    
+    class pageSelections(__builtin__.object)
+     |  Muteren van de table selections.
+     |  @since: 2014-09
+     |  @version: 1
+     |  
+     |  Methods defined here:
+     |  
+     |  __init__(self)
+     |      Initialisatie
+     |  
+     |  delete(self, txtCode='#')
+     |      Delete button afhandelen, een selection verwijderen.
+     |  
+     |  index(self)
+     |      De webpagina voor het muteren
+     |  
+     |  new(self)
+     |      New buttton afhandelen, voor nieuwe selections toe te voegen.
+     |  
+     |  pageSelection(self, id)
+     |      Pagina voor het muteren van één selectie.
+     |  
+     |  save(self, txtCode='#', txtDescr='#', txtCond='#')
+     |      Save button afhandelen, een selection opslaan.
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |  
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |  
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+
+DATA
+    __author__ = 'dp'
+    __date__ = '2014-09'
+
+DATE
+    2014-09
+
+AUTHOR
+    dp
+
+

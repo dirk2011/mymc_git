@@ -46,7 +46,7 @@ from dbfunc import MyDB
 from dbfunc import dbGetSongInfoPlayed
 from dbfunc import q
 
-import selections           # pagina muteren selecties
+import selections.selections           # pagina muteren selecties
 
 
 # dbconnectie
@@ -1486,11 +1486,6 @@ class sonos_play:
         return h
 
 
-class Admin:
-    @cherrypy.expose
-    def index(self):
-        return "This is a private area"
-
 if __name__ == '__main__' and not 'idlelib.__main__' in sys.modules:
     conf = {
          '/': {
@@ -1507,8 +1502,7 @@ if __name__ == '__main__' and not 'idlelib.__main__' in sys.modules:
     })
 
     root = Mc()
-    root.admin2 = Admin()
     root.sonos_play = sonos_play()
-    root.pageSelections = selections.pageSelections()
+    root.pageSelections = selections.selections.pageSelections()
     
     cherrypy.quickstart(root, '/', conf)
