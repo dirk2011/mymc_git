@@ -177,7 +177,7 @@ $(document).ready(function() {
 
 
 def pageSelectionsList(records):
-    """Pagina template voor een overzicht van bestaande selections.
+    """Pagina template voor een overzicht (lijst) van bestaande selections.
     """
 
     title ="pageSelectionsList"

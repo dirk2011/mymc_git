@@ -47,6 +47,7 @@ from dbfunc import dbGetSongInfoPlayed
 from dbfunc import q
 
 import selections.selections           # pagina muteren selecties
+import searchwithselections.searchwithselections     # pagina om met selecties te zoeken
 
 
 # dbconnectie
@@ -78,6 +79,16 @@ class Mc:
     def __init__(self):
         # list van historische tijdvakken, jaren, maanden, dagen
         self.periods = []
+
+
+    @cherrypy.expose
+    def pageMenuSearch(self):
+        """Menu pagina voor zoeken.
+        """
+
+        h = mymc_html.pageMenuSearch()
+
+        return h
 
 
     @cherrypy.expose
@@ -1504,5 +1515,6 @@ if __name__ == '__main__' and not 'idlelib.__main__' in sys.modules:
     root = Mc()
     root.sonos_play = sonos_play()
     root.pageSelections = selections.selections.pageSelections()
+    root.pageSearchWithSelections = searchwithselections.searchwithselections.pageSearchWithSelections()
     
     cherrypy.quickstart(root, '/', conf)

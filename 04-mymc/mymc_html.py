@@ -82,7 +82,7 @@ def main_navigation():
     h.td(hButton(u'Home', u'btnHome', u'menuknop', u'/index'))
     h.td(hButton(u'Info Mc', u'btnInfoMc', u'menuknop', u'/pageInfoMc'))
     h.td(hButton(u'Artiesten', u'btnArtiesten', u'menuknop', u'/pageListAlbumArtists'))
-    h.td(hButton(u'Zoeken', u'btnZoeken', u'menuknop', u'/pageSearch'))
+    h.td(hButton(u'Zoeken', u'btnZoeken', u'menuknop', u'/pageMenuSearch'))
     h.td(hButton(u'Queue', u'btnQueue', u'menuknop', u'/sonos_playmenu'))
     h.td(hButton(u'Volume', u'btnVolume', u'menuknop', u'/pageSonosSpeakers'))
     h.td(hButton(u'Afgespeeld', u'btnAfgespeeld', u'menuknop', u'/pageAfgespeeld'))
@@ -1442,5 +1442,23 @@ def pagePlayedHistoryDetails(datum, records):
     h = h + html_end()
 
     return h
+
+
+def pageMenuSearch():
+    """Menu pagina voor zoeken.
+    """
+
+    title = 'pageMenuSearch'
+    h = html_start(title) + main_navigation() + html_h1("Zoeken") 
+    
+    table = hTable()
+    link = hLink(u"Vrij zoeken", u"pageSearch")
+    table.td(link, u'beheer')
+    table.tr()
+    link = hLink(u"Zoeken met selecties", u"pageSearchWithSelections")
+    table.td(link, u'beheer')
+    table.tr()
+    
+    return h + html_page(table.exp()) + html_end()
 
 # eof

@@ -1,0 +1,246 @@
+# -*- coding: utf-8 -*-
+
+"""Module selections_temp.
+
+Pagina tempates voor ...........................
+
+"""
+
+
+__author__  = 'dp'
+__date__    = '2014-09'
+
+
+# pylint: disable=C0103, C0301, R0201
+# C0103 - naming convention
+# C0301 - lengte van de regels
+# R0201 - method could be a function
+
+
+from htable import hTable
+from hTable import Html
+from hTable import hLink, hButton
+from hTable import TDO, TDC, TRO, TRC, TABO, TABC
+
+from mymc_html import html_start
+from mymc_html import main_navigation
+from mymc_html import html_page
+from mymc_html import html_h1
+from mymc_html import html_end
+
+
+def pageSearchWithSelections(records1, records2):
+    """Pagina template voor ...................
+    """
+
+    title ="pageSearchWithSelections"
+    h = html_start(title) + main_navigation() + html_h1("Zoeken met selections")
+
+    h_js = """
+<script type="text/javascript">
+$(document).ready(function() {
+    $("[id*=btnSel]").click(function() {
+        /* haal id op van ingedrukte button */
+        var btn = this.id;
+    
+        $.ajax({
+        url: "saveselectie",
+        type: "POST",
+        data: {selection_id: btn },
+        success: function(response) {
+            /* window.location = "index";    /* terug naar de lijst */
+            /* alert(btn); */
+            /* $("#test").html(response); */
+            }
+        });
+
+    });
+
+/*    $("#btnSel56").click(function() {
+        alert("en?");
+    });*/
+
+});
+
+</script>
+
+    """
+
+    h_style = """
+    <style>
+/* zms = zoeken met seletions */
+
+.zmsbtnSel {
+    margin: 5px;
+}
+.zmsbtnCon {
+    margin: 5px;
+}
+.zmsbtnAct {
+    margin: 5px;
+}
+
+/* table1 bevat alles */
+.zmstab1 {
+    width: 800px;
+}
+/* table2 bevat conditie toevoeg knoppen */
+.zmstab2 {
+    width: 100%;
+}
+
+.zmstd {
+    text-align: left;
+      vertical-align: text-top;
+      width: 25%;
+}
+
+.zmscentre {
+    text-align: center;
+}
+
+/* fieldset conditions */
+.zmsfscond {
+     min-height: 100px;     
+}
+
+/* gebieden die ververst moeten worden met gekozen condities
+#zmcCond1 t/m 4
+*/
+
+</style>
+    """
+
+    ## tr1, template, gebied voor laden selecties    
+    ht_tr1 = """
+    <tr>
+    <td colspan="4">
+      <fieldset><legend>Selecties</legend>
+      %s <!-- hier selecties laden -->
+    </fieldset>
+    </td>
+</tr>
+    """
+    
+    ## td1, template, selecties
+    ht_td1 = """
+        <button class="zmsbtnSel" type="button" id="btnSel%(selection_id)s">%(selection)s</button>
+    """
+
+    ## selections verwerken, voor weergave in html table
+    tab1 = Html()
+    for record in records1:
+        tab1.add(ht_td1 % record)
+    tab1 = ht_tr1 % tab1.exp()
+
+
+    ### laden conditie verwerk buttons
+    tab2 = """
+    <tr>
+        <td colspan="4">
+        <fieldset><legend>Voeg toe aan de conditie</legend>
+            <table class="zmstab2"><tr>
+            <td class="zmscentre"><button class="zmsbtnCon" type="button" id="">conditie 1</button>
+            <td class="zmscentre"><button class="zmsbtnCon" type="button" id="">conditie 2</button>
+            <td class="zmscentre"><button class="zmsbtnCon" type="button" id="">conditie 3</button>
+            <td class="zmscentre"><button class="zmsbtnCon" type="button" id="">conditie 4</button>
+            </tr></table>
+        </fieldset>
+        </td>
+    </tr>
+    """
+
+
+    ### laden condities met selecties
+    # structuur (tr)
+    ht3_tr = """    
+    <tr>
+    <td class="zmstd">
+    <fieldset class="zmsfscond"><legend>Conditie 1</legend>
+    <div id="zmcCond1">
+        %s <!-- conditie 1 selecties -->
+      </div>
+      </fieldset>
+    </td>
+    <td class="zmstd">
+    <fieldset class="zmsfscond"><legend>Conditie 2</legend>
+    <div id="zmcCond2">
+        %s <! -- conditie 2 selecties -->
+      </div>
+      </fieldset>
+    </td>
+    <td class="zmstd">
+    <fieldset class="zmsfscond"><legend>Conditie 3</legend>
+    <div id="zmcCond3">
+        %s <! -- conditie 3 selecties -->
+      </div>
+      </fieldset>
+    </td>
+    <td class="zmstd">
+    <fieldset class="zmsfscond"><legend>Conditie 4</legend>
+    <div id="zmcCond4">
+        %s <! -- conditie 4 selecties -->
+      </div>
+      </fieldset>
+    </td>
+</tr>
+ """
+ 
+    # td3, template
+    ht3_td = """
+        <button class="zmsbtnSel" type="button" id="">%s</button>
+    """
+    
+    # conditie 1 opbouwen
+    cond1 = ""
+    for record in records2:
+        if record['condition'] == 1:
+            cond1 = cond1 + ht3_td % record['selection']
+        
+    # conditie 2 opbouwen
+    cond2 = ""
+    for record in records2:
+        if record['condition'] == 2:
+            cond2 = cond2 + ht3_td % record['selection']
+
+    # conditie 3 opbouwen
+    cond3 = ""
+    for record in records2:
+        if record['condition'] == 3:
+            cond3 = cond3 + ht3_td % record['selection']
+
+    # conditie 4 opbouwen
+    cond4 = ""
+    for record in records2:
+        if record['condition'] == 4:
+            cond4 = cond4 + ht3_td % record['selection']
+    
+    tab3 = ht3_tr % (cond1, cond2, cond3, cond4)
+
+
+    ## de hoofd table
+    table = """
+    <table class="zmstab1">
+    %s <!-- table 1: selections -->
+    
+    %s <!-- table 2: conditie verwerk buttons -->
+    
+    %s <!-- table 3: condities met selecties --> 
+    
+    <tr>
+        <td colspan="4">
+            <fieldset><legend>Acties</legend>
+            <button class="zmsbtnAct" type="button" id="">Toepassen</button>
+            <button class="zmsbtnAct" type="button" id="">Wis condities</button>
+            </fieldset>
+        </td>
+    </tr>
+
+    </table>
+    """
+    
+    table = table % (tab1, tab2, tab3)
+
+    return h + html_page(table) + h_style + h_js + html_end()
+
+# eof

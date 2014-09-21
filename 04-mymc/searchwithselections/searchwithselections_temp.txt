@@ -1,0 +1,32 @@
+Help on module searchwithselections_temp:
+
+NAME
+    searchwithselections_temp - Module selections_temp.
+
+FILE
+    /media/rasp163-v/mymc/04-mymc/searchwithselections/searchwithselections_temp.py
+
+DESCRIPTION
+    Pagina tempates voor ...........................
+
+FUNCTIONS
+    pageSearchWithSelections(records1, records2)
+        Pagina template voor ...................
+
+DATA
+    TABC = u'</table>'
+    TABO = u'<table>'
+    TDC = u'</td>'
+    TDO = u'<td>'
+    TRC = u'</tr>\n'
+    TRO = u'<tr>'
+    __author__ = 'dp'
+    __date__ = '2014-09'
+
+DATE
+    2014-09
+
+AUTHOR
+    dp
+
+

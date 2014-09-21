@@ -194,7 +194,9 @@ class Html():
 
 
 def hLink(tekst, url):
-    """"Een link terug geven, input tekst en url. 
+    """"Een link terug geven, input tekst en url.
+    @param tekst: tekst
+    @param url: url
     """
     return u"""<a href="%s">%s</a>""" % (url, tekst)
 

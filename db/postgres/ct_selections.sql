@@ -10,4 +10,7 @@ create table selections
 ,       condition       character varying(100) not null
 ,       adddate         timestamp without time zone NOT NULL DEFAULT now()
 , unique(selection)
+, check(length(trim(selection)) > 0)
+, check(length(trim(condition)) > 0)
 ) ;
+

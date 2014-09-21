@@ -1,0 +1,48 @@
+Help on module searchwithselections:
+
+NAME
+    searchwithselections - Module selections.
+
+FILE
+    /media/rasp163-v/mymc/04-mymc/searchwithselections/searchwithselections.py
+
+DESCRIPTION
+    Bevat ......................
+
+CLASSES
+    __builtin__.object
+        pageSearchWithSelections
+    
+    class pageSearchWithSelections(__builtin__.object)
+     |  Zoeken met selections
+     |  @since: 2014-09
+     |  @version: 1
+     |  
+     |  Methods defined here:
+     |  
+     |  __init__(self)
+     |      Database verbinding wordt hier gemaakt.
+     |      @ivar _db: database
+     |  
+     |  index(self)
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |  
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |  
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+
+DATA
+    __author__ = 'dp'
+    __date__ = '2014-09'
+
+DATE
+    2014-09
+
+AUTHOR
+    dp
+
+
