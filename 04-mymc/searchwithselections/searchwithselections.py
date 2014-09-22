@@ -82,8 +82,9 @@ class pageSearchWithSelections(object):
             from swc
             where condition = 0 and selection_id = %s
         """ % selection_id
+        print 'query: ', query
         records = self._db.dbGetData(query)
-        print 'records: ', records
+        # print 'records: ', records
 
         if len(records) > 0:
             aantal = records[0]['aantal']
@@ -96,3 +97,122 @@ class pageSearchWithSelections(object):
         
         return
 
+
+    @cherrypy.expose
+    def deleteselectie(self, selection_id):
+        """Button selectie verwijderen afhandelen
+        """
+        
+        # ontvangen wordt bijvoorbeeld: btnFil353, 3 is conditie, 53 is selectie
+        condition = selection_id[6:7]
+        selection = selection_id[7:]
+        query = """
+            delete   from swc
+            where    condition = %s
+               and   selection_id = %s
+        """ % (condition, selection)
+        self._db.dbExecute(query)
+
+        return
+
+
+    @cherrypy.expose
+    def deleteall(self, id):
+        """Button alle selecties verwijderen afhandelen
+        """
+
+        query = """
+            delete from swc
+        """
+        self._db.dbExecute(query)
+
+        return
+
+
+    @cherrypy.expose
+    def savecondition(self, condition):
+        """Button conditie afhandelen, selecties aan conditie toevoegen
+        """
+
+        # button bepalen, aangeleverd: btnCondx, btnCond verwijderen
+        condition = condition[7:]
+
+        # condition 0 samen voegen met gekozen condition         
+        query = """
+            insert  into swc (condition, selection_id)
+            select  %s, selection_id
+            from    swc
+            where   condition = 0
+            except
+            select  %s, selection_id
+            from    swc
+            where   condition = %s
+        """ % (condition, condition, condition)
+        print 'query: ', query
+        self._db.dbExecute(query)
+
+        # condition 0 nu verwijderen
+        query = """
+            delete from swc
+            where condition = 0
+        """
+        self._db.dbExecute(query)
+
+        return
+
+
+    @cherrypy.expose
+    def runselection(self):
+        """Button toepassen afhandelen
+        """
+        
+        # haal alle gebruikte condities op
+        query = """
+            select   distinct condition
+            from     swc
+            where    condition > 0
+            order by 1
+        """
+        records1 = self._db.dbGetData(query)
+        
+        where = ""
+        # doorloop alle condities, er zijn max 4 aanwezig
+        for record1 in records1:
+            if len(where) > 0:
+                where = where + " or "
+            where = where + " ("
+            
+            # haal alle selections van de conditie op
+            query = """
+                select   swc.condition, sel.selection, sel.condition
+                from     swc
+                join     selections as sel
+                on       swc.selection_id = sel.selection_id
+                where    swc.condition = %s
+                order by 1
+            """ % record1['condition']
+            records2 = self._db.dbGetData(query)
+            tel = 0
+            for record2 in records2:
+                tel = tel + 1
+                if tel > 1:
+                    where = where + " and "
+                where = where + " %s " % record2['condition']
+            # sluit conditie af
+            where = where + " )"
+
+        if len(where) > 0:
+            where = " where " + where
+
+        # haal records op
+        query = """
+            select * from v_songs
+        """ + where + " limit 100 "
+        print "query: ", query
+        records = self._db.dbGetData(query)
+        # print "record: ", records[0]
+
+        # stel de pagina samen
+        h = searchwithselections_temp.pageRunselection(records)
+
+        return h

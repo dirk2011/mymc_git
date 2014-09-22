@@ -42,7 +42,6 @@ $(document).ready(function() {
     $("[id*=btnSel]").click(function() {
         /* haal id op van ingedrukte button */
         var btn = this.id;
-    
         $.ajax({
         url: "saveselectie",
         type: "POST",
@@ -53,12 +52,73 @@ $(document).ready(function() {
             /* $("#test").html(response); */
             }
         });
-
     });
 
-/*    $("#btnSel56").click(function() {
-        alert("en?");
-    });*/
+    $("[id*=btnCond]").click(function() {
+        /* haal id op van ingedrukte button */
+        var btn = this.id;
+        $.ajax({
+        url: "savecondition",
+        type: "POST",
+        data: {condition: btn },
+        success: function(response) {
+            window.location = "index";
+            /* alert(btn); */
+            /* $("#test").html(response); */
+            }
+        });
+    });
+
+    $("[id*=btnFil]").click(function() {
+        /* haal id op van ingedrukte button */
+        var btn = this.id;
+        $.ajax({
+        url: "deleteselectie",
+        type: "POST",
+        data: {selection_id: btn },
+        success: function(response) {
+            window.location = "index";
+            /* alert(btn); */
+            /* $("#test").html(response); */
+            }
+        });
+    });
+
+    $("#btnDeleteAll").click(function() {
+        /* haal id op van ingedrukte button */
+        var btn = this.id;
+        $.ajax({
+            url: "deleteall",
+            type: "POST",
+            data: {id: btn },
+            success: function(response) {
+            window.location = "index";
+            /* alert(btn); */
+            /* $("#test").html(response); */
+            }
+        });
+    });
+
+    $("#btnRun").click(function() {
+        /* haal id op van ingedrukte button */
+        var btn = this.id;
+        $.ajax({
+            url: "runselection",
+            type: "POST",
+            /* data: {id: btn }, */
+            success: function(response) {
+                window.location = "runselection";
+                /* alert(btn); */
+                /* $("#test").html(response); */
+            }
+        });
+    });
+
+    $("[id*=btnxCond]").click(function() {
+        /* haal id op van ingedrukte button */
+        var btn = this.id;
+        alert(btn);
+    });
 
 });
 
@@ -82,7 +142,7 @@ $(document).ready(function() {
 
 /* table1 bevat alles */
 .zmstab1 {
-    width: 800px;
+    width: 850px;
 }
 /* table2 bevat conditie toevoeg knoppen */
 .zmstab2 {
@@ -138,12 +198,12 @@ $(document).ready(function() {
     tab2 = """
     <tr>
         <td colspan="4">
-        <fieldset><legend>Voeg toe aan de conditie</legend>
+        <fieldset><legend>Voeg toe aan conditie</legend>
             <table class="zmstab2"><tr>
-            <td class="zmscentre"><button class="zmsbtnCon" type="button" id="">conditie 1</button>
-            <td class="zmscentre"><button class="zmsbtnCon" type="button" id="">conditie 2</button>
-            <td class="zmscentre"><button class="zmsbtnCon" type="button" id="">conditie 3</button>
-            <td class="zmscentre"><button class="zmsbtnCon" type="button" id="">conditie 4</button>
+            <td class="zmscentre"><button class="zmsbtnCon" type="button" id="btnCond1">Conditie 1</button>
+            <td class="zmscentre"><button class="zmsbtnCon" type="button" id="btnCond2">Conditie 2</button>
+            <td class="zmscentre"><button class="zmsbtnCon" type="button" id="btnCond3">Conditie 3</button>
+            <td class="zmscentre"><button class="zmsbtnCon" type="button" id="btnCond4">Conditie 4</button>
             </tr></table>
         </fieldset>
         </td>
@@ -188,32 +248,32 @@ $(document).ready(function() {
  
     # td3, template
     ht3_td = """
-        <button class="zmsbtnSel" type="button" id="">%s</button>
+        <button class="zmsbtnSel" type="button" id="btnFil%s">%s</button>
     """
     
     # conditie 1 opbouwen
     cond1 = ""
     for record in records2:
         if record['condition'] == 1:
-            cond1 = cond1 + ht3_td % record['selection']
+            cond1 = cond1 + ht3_td % ('1' + str(record['selection_id']), record['selection'])
         
     # conditie 2 opbouwen
     cond2 = ""
     for record in records2:
         if record['condition'] == 2:
-            cond2 = cond2 + ht3_td % record['selection']
+            cond2 = cond2 + ht3_td % ('2' + str(record['selection_id']), record['selection'])
 
     # conditie 3 opbouwen
     cond3 = ""
     for record in records2:
         if record['condition'] == 3:
-            cond3 = cond3 + ht3_td % record['selection']
+            cond3 = cond3 + ht3_td % ('3' + str(record['selection_id']), record['selection'])
 
     # conditie 4 opbouwen
     cond4 = ""
     for record in records2:
         if record['condition'] == 4:
-            cond4 = cond4 + ht3_td % record['selection']
+            cond4 = cond4 + ht3_td % ('4' + str(record['selection_id']), record['selection'])
     
     tab3 = ht3_tr % (cond1, cond2, cond3, cond4)
 
@@ -230,8 +290,8 @@ $(document).ready(function() {
     <tr>
         <td colspan="4">
             <fieldset><legend>Acties</legend>
-            <button class="zmsbtnAct" type="button" id="">Toepassen</button>
-            <button class="zmsbtnAct" type="button" id="">Wis condities</button>
+            <button class="zmsbtnAct" type="button" id="btnRun">Toepassen</button>
+            <button class="zmsbtnAct" type="button" id="btnDeleteAll">Wis condities</button>
             </fieldset>
         </td>
     </tr>
@@ -242,5 +302,48 @@ $(document).ready(function() {
     table = table % (tab1, tab2, tab3)
 
     return h + html_page(table) + h_style + h_js + html_end()
+
+
+def pageRunselection(records):
+    """Pagina template voor ...................
+    """
+
+    title ="pageRunselection"
+    h = html_start(title) + main_navigation() + html_h1("Zoek resultaat")
+
+    ht_th = """
+    """
+
+    ht_td = """<tr>
+        <td class="info">
+            <a href="/pageSong?song_id=%(song_id)s">Info</a>
+        </td>
+        
+        <td class="track">
+            %(volgnr)s
+        </td>
+        
+        <td class="title">
+            <a href="/playAlsoSong?song_id=%(song_id)s">
+                %(title)s
+            </a>
+        </td>
+        
+        <td class="artist">%(artist)s</td>
+        <td class="album">%(album)s</td>
+    </tr>"""
+
+    table = Html()
+    table.add(TABO)
+    if len(records) == 0:
+        # zijn er wel gegevens gevonden
+        table.add(TRO + TDO + "Geen gegevens gevonden :(" + TDC + TRC)
+    else:
+        # laat gevonden gegevens zien
+        for record in records:
+            table.add(ht_td % record)
+    table.add(TABC)
+
+    return h + html_page(table.exp()) + html_end()
 
 # eof

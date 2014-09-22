@@ -694,7 +694,7 @@ class Mc:
         if where == "" and playdate == "" and period == "":
             return records
 
-        # bouw query op om gegevens op te halen
+        # bouw query op om gegevens op te halen (geen group bys omdat de details nodig zijn!)
         query = """
             select songs.song_id, songs.title, songs.artist, songs.year, songs.tracknumber
                 , songs.album, songs.album_id
@@ -705,7 +705,7 @@ class Mc:
             on songs.song_id = songsinfo.song_id
             left join played
             on songs.song_id = played.song_id
-            """
+        """
 
         # where, playdate
         playdate = str(playdate)
