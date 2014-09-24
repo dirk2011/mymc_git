@@ -7,14 +7,14 @@ FILE
     /media/rasp163-v/mymc/04-mymc/searchwithselections/searchwithselections_temp.py
 
 DESCRIPTION
-    Pagina tempates voor ...........................
+    Pagina tempates voor SearchWithSelections.
 
 FUNCTIONS
     pageRunselection(records)
-        Pagina template voor ...................
+        Template voor paginga "zoek songs via de selecties".
     
     pageSearchWithSelections(records1, records2)
-        Pagina template voor ...................
+        Template voor index pagina, searchwithselections.
 
 DATA
     TABC = u'</table>'

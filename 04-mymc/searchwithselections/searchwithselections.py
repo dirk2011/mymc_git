@@ -163,6 +163,50 @@ class searchWithSelections(object):
 
 
     @cherrypy.expose
+    def saveSuperSelection(self, txtCode="#", txtDescr="#"):
+        """Button saveSuperSelection afhandelen
+        Nieuwe superselectie opslaan.
+        """
+
+        query = """
+            insert into superselections (ss_code, ss_descr)
+            values ('%s', '%s')
+        """ % (q(txtCode), q(txtDescr))
+        self._db.dbExecute(query)
+
+
+    @cherrypy.expose
+    def deleteSuperSelection(self, txtCode="#"):
+        """Button deleteSuperSelection afhandelen.
+        SuperSelectie verwijderen.
+        """
+        
+        query = """
+            delete from superselections
+            where ss_code = '%s' 
+        """ % q(txtCode)
+        self._db.dbExecute(query)
+
+
+    @cherrypy.expose
+    def manageconditions(self):
+        """Beheer conditions, sla op en roep ze weer op
+        """
+        
+        # haal conditions op
+        query = """
+            select   *
+            from     superselections
+            order by ss_code
+        """
+        records = self._db.dbGetData(query)
+        
+        h = searchwithselections_temp.pageManageConditions(records)
+        
+        return h
+
+
+    @cherrypy.expose
     def runselection(self):
         """Button toepassen afhandelen, zoek songs via de selecties.
         """

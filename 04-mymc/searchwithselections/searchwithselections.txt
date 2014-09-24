@@ -7,13 +7,14 @@ FILE
     /media/rasp163-v/mymc/04-mymc/searchwithselections/searchwithselections.py
 
 DESCRIPTION
-    Bevat ......................
+    Bevat class SearchWithSelections, 
+    zoeken met selecties.
 
 CLASSES
     __builtin__.object
-        pageSearchWithSelections
+        searchWithSelections
     
-    class pageSearchWithSelections(__builtin__.object)
+    class searchWithSelections(__builtin__.object)
      |  Zoeken met selections
      |  @since: 2014-09
      |  @version: 1
@@ -21,25 +22,26 @@ CLASSES
      |  Methods defined here:
      |  
      |  __init__(self)
-     |      Database verbinding wordt hier gemaakt.
+     |      Database verbinding maken.
      |      @ivar _db: database
      |  
      |  deleteall(self, id)
-     |      Button alle selecties verwijderen afhandelen
+     |      Button alle selecties verwijderen afhandelen.
      |  
      |  deleteselectie(self, selection_id)
-     |      Button selectie verwijderen afhandelen
+     |      Button selectie verwijderen afhandelen.
      |  
      |  index(self)
+     |      Index toon inhoud swc table (search with selections).
      |  
      |  runselection(self)
-     |      Button toepassen afhandelen
+     |      Button toepassen afhandelen, zoek songs via de selecties.
      |  
      |  savecondition(self, condition)
-     |      Button conditie afhandelen, selecties aan conditie toevoegen
+     |      Button conditie afhandelen, selecties aan conditie toevoegen.
      |  
      |  saveselectie(self, selection_id)
-     |      Button selectie afhandelen, er is een nieuwe selectie gekozen
+     |      Button selectie afhandelen, er is een nieuwe selectie gekozen.
      |  
      |  ----------------------------------------------------------------------
      |  Data descriptors defined here:

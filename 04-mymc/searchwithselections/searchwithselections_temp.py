@@ -103,6 +103,11 @@ $(document).ready(function() {
         window.location = "runselection";
     });
 
+    $("#btnManCond").click(function() {
+        window.location = "manageconditions";
+    });
+
+
     $("[id*=btnxCond]").click(function() {
         /* haal id op van ingedrukte button */
         var btn = this.id;
@@ -279,8 +284,9 @@ $(document).ready(function() {
     <tr>
         <td colspan="4">
             <fieldset><legend>Acties</legend>
-            <button class="zmsbtnAct" type="button" id="btnRun">Toepassen</button>
+            <button class="zmsbtnAct" type="button" id="btnRun">Zoeken</button>
             <button class="zmsbtnAct" type="button" id="btnDeleteAll">Wis condities</button>
+            <button class="zmsbtnAct" type="button" id="btnManCond">Beheer condities</button>
             </fieldset>
         </td>
     </tr>
@@ -358,5 +364,102 @@ def pageRunselection(records):
     table.add(TABC)
 
     return h + html_page(table.exp()) + html_end()
+
+
+def pageManageConditions(records):
+    """Template voor paginga "zoek songs via de selecties".
+    """
+
+    title ="pageManageConditions"
+    h = html_start(title) + main_navigation() + html_h1("Beheer condities")
+
+    h_js = """
+<script type="text/javascript">
+$(document).ready(function() {
+    $("[id*=btnSel]").click(function() {
+        /* haal id op van ingedrukte button */
+        var btn = this.id;
+        $.ajax({
+        url: "saveselectie",
+        type: "POST",
+        data: {selection_id: btn },
+        success: function(response) {
+            /* window.location = "index";    /* terug naar de lijst */
+            /* alert(btn); */
+            /* $("#test").html(response); */
+            }
+        });
+    });
+
+    $("#btnStore").click(function() {
+        $.ajax({
+            url: "saveSuperSelection",
+            type: "POST",
+            data: {txtCode: $("#txtCode").val(), txtDescr: $("#txtDescr").val()},
+            success: function(response) {
+                /* window.location = "index"; */
+                /* alert(btn); */
+                /* $("#test").html(response); */
+            }
+        });
+    });
+});
+</script>
+    """
+
+    ht_th = """
+    <tr>
+        <th>Code</th>
+        <th>Toelichting</th>
+    </tr>
+    """
+    
+    ht_td = """
+    <tr>
+        <td>
+            <input type="text" id="txtCode" size="30" maxlength="30" value="%(ss_code)s">
+        </td>
+        <td>
+            <input type="text" id="txtDescr" size="80" maxlength="80" value="%(ss_descr)s">
+        </td>
+        <td>
+            <button type="button" class="knop" id="">Laden</button>
+            <button type="button" class="knop" id="">Opslaan</button>
+            <button type="button" class="knop" id="">Verwijder</button>
+        </td>
+    </tr>
+    """
+
+    # nr = new record
+    ht_nr = """
+<form id="testform">
+    <tr>
+        <td colspan="3"> Nieuwe conditie </td>
+    </tr>
+    <tr>
+        <td>
+            <input type="text" id="txtCode" size="30" maxlength="30">
+        </td><td rowspan="2">
+            <input type="text" id="txtDescr" size="80" maxlength="80">
+        </td><td rowspan="2">
+            <button type="button" class="knop" id="btnStore">Opslaan</button>
+        </td>
+   </tr> 
+</form>
+    """
+
+    table = Html()
+    table.add(TABO)
+    table.add(ht_th)
+    if len(records) == 0:
+        # geen gegevens
+        table.add(TRO + TDO + "Geen gegevens gevonden." + TDC + TRC)
+    else:
+        for record in records:
+            table.add(ht_td % record)
+    table.add(ht_nr)
+    table.add(TABC)
+
+    return h + html_page(table.exp()) + h_js + html_end()
 
 # eof

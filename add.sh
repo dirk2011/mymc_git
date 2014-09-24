@@ -1,3 +1,4 @@
+clear
 
 # verwijderen ~ bestanden
 find ./ -name "*~"    -ls -delete
