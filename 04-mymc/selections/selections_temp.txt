@@ -7,14 +7,14 @@ FILE
     /media/rasp163-v/mymc/04-mymc/selections/selections_temp.py
 
 DESCRIPTION
-    Tempates voor selections
+    Pagina tempates voor om table selections te bewerken.
 
 FUNCTIONS
     pageSelection(records)
-        Template voor muteren selecties
+        Pagina template voor muteren van één selection.
     
     pageSelectionsList(records)
-        Template voor muteren selecties
+        Pagina template voor een overzicht (lijst) van bestaande selections.
 
 DATA
     TABC = u'</table>'

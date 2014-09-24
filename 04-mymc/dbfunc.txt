@@ -35,6 +35,10 @@ FUNCTIONS
     dbGetSongInfoPlayed(song_id='0')
         Haal afspeel gegevens over een song op: eerste en laatste keer, en aantal keer
     
+    dbLogPlayedSong(song_id=-1)
+        Log afgespeelde song, in table: played en in: played_history (jaar, maand, dag).
+        -1 is voor testen.
+    
     dbSongsUpdateAlbumArtistId()
         Update table songs, vul albumartist_id als deze nog leeg is, zoek op in table albumartists.
     

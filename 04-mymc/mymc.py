@@ -77,6 +77,11 @@ class Mc:
     connection = None
 
     def __init__(self):
+        """Initialiseren Mc object.
+        """
+        #  database openen
+        _db = MyDB()
+        
         # list van historische tijdvakken, jaren, maanden, dagen
         self.periods = []
 
@@ -1263,7 +1268,47 @@ class Mc:
             h = h + table.exp()
 
         return h
-    
+
+
+    @cherrypy.expose
+    def playAlsoSong2(self, song_id=0):
+        """Song toevoegen aan de afspeeld lijst.
+        Versie 2, om aan te roepen vanuit jquery.
+        """
+
+        song_id = int(song_id)
+
+        query = """
+            select * from songs where song_id = %s
+        """ % song_id
+        records = _db.dbGetData(query)
+        
+        # als song gevonden
+        if len(records) == 1:
+            record = records[0]
+            ## uri samenstellen van de song
+            uri = "/muzik3" + record['location'] + "/" + record['filename']
+            print uri
+
+            ## stuur nummer naar sonos
+            sonos = SoCo(COORDINATOR)
+            # zonder encode werkte niet voor bijvoorbeeld: Nånting Är På Väg
+            uri = urllib.quote(uri).encode('utf8')
+            uri = MCSERVER + uri
+            # print uri
+            sonos.add_uri_to_queue(uri)
+
+            ## log song als afgespeeld
+            ############### eerst testen, daarna pas logging aan ###################
+            # TODO: testen !
+            # dbLogPlayedSong()
+            
+            # stop song_id in queue table
+            query = """
+                insert into queue (song_id) values (%s) 
+            """ % song_id
+            _db.dbExecute(query)
+
 
     @cherrypy.expose
     def playAlsoSong(self, song_id=0):
@@ -1283,8 +1328,8 @@ class Mc:
 
         # uri samenstellen van de song
         uri = "/muzik3" + record['location'] + "/" + record['filename']
-        print uri
-        print type(uri)
+        # print uri
+        # print type(uri)
 
         # een pagina maken, deze geeft browser meteen opdracht terug te gaan naar vorige pagina
         h = """
@@ -1515,6 +1560,6 @@ if __name__ == '__main__' and not 'idlelib.__main__' in sys.modules:
     root = Mc()
     root.sonos_play = sonos_play()
     root.pageSelections = selections.selections.pageSelections()
-    root.pageSearchWithSelections = searchwithselections.searchwithselections.pageSearchWithSelections()
+    root.pageSearchWithSelections = searchwithselections.searchwithselections.searchWithSelections()
     
     cherrypy.quickstart(root, '/', conf)

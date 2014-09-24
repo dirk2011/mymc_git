@@ -2,7 +2,7 @@
 
 """Module selections_temp.
 
-Pagina tempates voor ...........................
+Pagina tempates voor SearchWithSelections.
 
 """
 
@@ -30,7 +30,7 @@ from mymc_html import html_end
 
 
 def pageSearchWithSelections(records1, records2):
-    """Pagina template voor ...................
+    """Template voor index pagina, searchwithselections. 
     """
 
     title ="pageSearchWithSelections"
@@ -100,18 +100,7 @@ $(document).ready(function() {
     });
 
     $("#btnRun").click(function() {
-        /* haal id op van ingedrukte button */
-        var btn = this.id;
-        $.ajax({
-            url: "runselection",
-            type: "POST",
-            /* data: {id: btn }, */
-            success: function(response) {
-                window.location = "runselection";
-                /* alert(btn); */
-                /* $("#test").html(response); */
-            }
-        });
+        window.location = "runselection";
     });
 
     $("[id*=btnxCond]").click(function() {
@@ -305,13 +294,24 @@ $(document).ready(function() {
 
 
 def pageRunselection(records):
-    """Pagina template voor ...................
+    """Template voor paginga "zoek songs via de selecties".
     """
 
     title ="pageRunselection"
     h = html_start(title) + main_navigation() + html_h1("Zoek resultaat")
 
-    ht_th = """
+    ht_th = """<tr>
+        <th class="info">Info</th> 
+        <th class="track">#</th> 
+        <th class="title">
+            Titel
+            <br>(voeg aan afspeellijst toe)
+        </th> 
+        <th class="artist">Artiest</th>
+        <th class="album">Album
+            <br>Rating/Jaar/Gespeeld/Laatst
+        </th>
+    </tr>
     """
 
     ht_td = """<tr>
@@ -329,8 +329,19 @@ def pageRunselection(records):
             </a>
         </td>
         
-        <td class="artist">%(artist)s</td>
-        <td class="album">%(album)s</td>
+        <td class="artist">
+            <a href="/pageListAlbums_AlbumArtist?albumartist_id=%(albumartist_id)s">
+                %(albumartist)s
+            </a>
+            <br>%(artist)s
+        </td>
+        
+        <td class="album">
+            <a href="/listAlbumTracks?album_id=%(album_id)s">
+                %(album)s
+            </a>
+            <br>%(rating)s / %(year)s / %(played)s / %(lastplayed)s
+        </td>
     </tr>"""
 
     table = Html()
@@ -339,8 +350,10 @@ def pageRunselection(records):
         # zijn er wel gegevens gevonden
         table.add(TRO + TDO + "Geen gegevens gevonden :(" + TDC + TRC)
     else:
+        table.add(ht_th)
         # laat gevonden gegevens zien
         for record in records:
+            # print "record: ", record
             table.add(ht_td % record)
     table.add(TABC)
 

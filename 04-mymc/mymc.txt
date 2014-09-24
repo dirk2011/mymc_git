@@ -21,6 +21,7 @@ CLASSES
      |  Methods defined here:
      |  
      |  __init__(self)
+     |      Initialiseren Mc object.
      |  
      |  createLinkFolderJpg(self, location='')
      |      createLinkFolderJpg, link maken naar folder.jpg bestand
@@ -91,6 +92,9 @@ CLASSES
      |  pageListAlbums_AlbumArtist(self, albumartist_id='0')
      |      ageListAlbumArtists, alle album artiesten uitlijsten
      |  
+     |  pageMenuSearch(self)
+     |      Menu pagina voor zoeken.
+     |  
      |  pagePlayedArtists(self)
      |      Afgespeelde songs per artiest, 1e selectie, welke periode
      |  
@@ -134,6 +138,10 @@ CLASSES
      |  
      |  playAlsoSong(self, song_id=0)
      |      playAlsoSong, nummer toevoegen aan afspeellijst, met: add_uri_to_queue(uri)
+     |  
+     |  playAlsoSong2(self, song_id=0)
+     |      Song toevoegen aan de afspeeld lijst.
+     |      Versie 2, om aan te roepen vanuit jquery.
      |  
      |  playSong(self, song_id=0)
      |      playSong, song naar sonos sturen om af te spelen

@@ -67,7 +67,7 @@ $(document).ready(function() {
     }
 
     $("#btnStore").click(function() {
-        $("#info").html("niets aan de hand");
+        $("#info").html(" ");    /* meldingen gebied leegmaken */
         if ( $("#txtCode").val().length < 1 || $("#txtCond").val().length < 1 ) {  
             if ( $("#txtCond").val().length < 1 ) {
                 $("#info").html("Conditie invullen svp");
@@ -81,7 +81,7 @@ $(document).ready(function() {
                 url: "save",
                 type: "POST",
                 data: {txtCode: $("#txtCode").val(), txtDescr: $("#txtDescr").val(),
-                    txtCond: $("#txtCond").val()},
+                    txtCond: $("#txtCond").val(), txtId: $("#txtId").val() },
                 success: function(response) {
                     window.location = "index";    /* terug naar de lijst */
                     /* alert(response); */
@@ -129,7 +129,7 @@ $(document).ready(function() {
       Selectie
     </td><td>
       <input type="text" id="txtCode" size="30" maxlength="30" value="%(selection)s">
-      <input type="hidden" type="text" id="txtId" size="10" value="%(selection_id)s">
+      <input type="text" id="txtId" size="10" value="%(selection_id)s" readonly tabindex="-1">
     </td>
    </tr> 
 

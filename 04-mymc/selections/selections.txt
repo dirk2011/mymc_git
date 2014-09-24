@@ -21,7 +21,7 @@ CLASSES
      |  Methods defined here:
      |  
      |  __init__(self)
-     |      Database verbinding wordt hier gemaakt.
+     |      Database verbinding maken.
      |      @ivar _db: database
      |  
      |  delete(self, txtCode='#')
@@ -29,7 +29,7 @@ CLASSES
      |  
      |  index(self)
      |      Hoofd ingang muteren selections. 
-     |      Index geeft een lijst van bestande selecties.
+     |      Pagina geeft een lijst van bestaande selections.
      |  
      |  new(self)
      |      Buttton new afhandelen, om nieuwe selections toe te voegen.
@@ -37,7 +37,7 @@ CLASSES
      |  pageSelection(self, id)
      |      Pagina voor het muteren van één selectie.
      |  
-     |  save(self, txtCode='#', txtDescr='#', txtCond='#')
+     |  save(self, txtCode='#', txtDescr='#', txtCond='#', txtId='#')
      |      Button saven afhandelen, een selection opslaan.
      |  
      |  ----------------------------------------------------------------------

@@ -24,7 +24,22 @@ CLASSES
      |      Database verbinding wordt hier gemaakt.
      |      @ivar _db: database
      |  
+     |  deleteall(self, id)
+     |      Button alle selecties verwijderen afhandelen
+     |  
+     |  deleteselectie(self, selection_id)
+     |      Button selectie verwijderen afhandelen
+     |  
      |  index(self)
+     |  
+     |  runselection(self)
+     |      Button toepassen afhandelen
+     |  
+     |  savecondition(self, condition)
+     |      Button conditie afhandelen, selecties aan conditie toevoegen
+     |  
+     |  saveselectie(self, selection_id)
+     |      Button selectie afhandelen, er is een nieuwe selectie gekozen
      |  
      |  ----------------------------------------------------------------------
      |  Data descriptors defined here:

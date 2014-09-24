@@ -35,10 +35,11 @@ class pageSelections(object):
     """
 
     def __init__(self):
-        """Database verbinding wordt hier gemaakt.
+        """Database verbinding maken.
         @ivar _db: database  
         """
         self._db = MyDB() 
+
 
     @cherrypy.expose
     def index(self):
@@ -52,7 +53,6 @@ class pageSelections(object):
             from       selections
             order by   selection 
         """
-        # self._db = MyDB()
         records = self._db.dbGetData(query)
 
         h = selections_temp.pageSelectionsList(records)
@@ -85,7 +85,6 @@ class pageSelections(object):
             where      selection_id = %s
             order by   selection 
         """ % id
-        # db = MyDB()
         records = self._db.dbGetData(query)
 
         h = selections_temp.pageSelection(records)
@@ -95,18 +94,27 @@ class pageSelections(object):
 
     @cherrypy.expose
     @cherrypy.tools.json_out()
-    def save(self, txtCode="#", txtDescr="#", txtCond="#"):
+    def save(self, txtCode="#", txtDescr="#", txtCond="#", txtId="#"):
         """Button saven afhandelen, een selection opslaan.
         """
 
-        # db = MyDB()
-        query = "delete from selections where selection = '%s'" % txtCode
-        self._db.dbExecute(query)
-        query = """insert into selections (selection, description, condition) 
-            values ('%s', '%s', '%s') """ % (q(txtCode), q(txtDescr), q(txtCond))
+        # probeer een update, deze lukt indien conditie al bestaat
+        if len(txtId) > 1:
+            query = """
+                update selections set selection = '%s', description = '%s', condition = '%s'
+                where selection_id = '%s'
+            """ % (q(txtCode), q(txtDescr), q(txtCond), txtId)
+            print "update query: ", query
+            self._db.dbExecute(query)
+        
+        # probeer een insert, deze lukt indien conditie nog niet bestaat
+        query = """
+            insert into selections (selection, description, condition) 
+            select '%s', '%s', '%s'
+            where not exists (select 1 from selections where selection = '%s') 
+        """ % (q(txtCode), q(txtDescr), q(txtCond), q(txtCode))
         self._db.dbExecute(query)
 
-        # return """alert("1: %s, 2: %s, 3: %s);""" % (q(txtCode), q(txtDescr), q(txtCond))
         return 
 
 
@@ -115,8 +123,7 @@ class pageSelections(object):
         """Button delete afhandelen, een selection verwijderen. 
         """
 
-        # db = MyDB()
         query = "delete from selections where selection = '%s'" % txtCode
         self._db.dbExecute(query)
 
-        return """alert(verwijderd"""
+        return

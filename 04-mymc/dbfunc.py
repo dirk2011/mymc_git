@@ -22,6 +22,7 @@ import psycopg2             # postgres db
 import psycopg2.extras      # dictionary cursor
 import urllib               # vertaal string naar url
 import codecs               # voor utf-8 bestanden
+import datetime
 
 # dbconnectie
 DBNAME="dbmc"
@@ -105,6 +106,69 @@ class MyDB():
         self._db_cur.execute(query)
         # print 'query', query
         self._db_connection.commit()
+
+
+def dbLogPlayedSong(song_id=-1):
+    """Log afgespeelde song, in table: played en in: played_history (jaar, maand, dag).
+    -1 is voor testen.
+    """
+
+    ### db connectie maken
+    _db = MyDB()
+
+    ### log song in table: played
+    query = "insert into played (song_id) values(%s)" % song_id
+    _db.dbExecute(query)
+
+    ### log song in table: played_history, 3x jaar, maand en dag
+    vandaag = datetime.datetime.now()
+
+    ## werk jaar bij, voor als jaar bestaat
+    query = """
+        update played_history set played = played + 1
+        where year = %s and month = 0 and day = 0
+    """ % vandaag.year
+    _db.dbExecute(query)
+
+    ## werk jaar bij, voor als jaar niet bestaat
+    query = """
+        insert into played_history (year, month, day, played)
+        select %s, 0, 0, 1
+        where not exists (select 1 from played_history where year = %s and month = 0 and day = 0)
+    """ % (vandaag.year, vandaag.year)
+    _db.dbExecute(query)
+
+    ## werk maand bij, voor als maand bestaat
+    query = """
+        update played_history set played = played + 1
+        where year = %s and month = %s and day = 0
+    """ % (vandaag.year, vandaag.month)
+    _db.dbExecute(query)
+
+    ## werk maand bij, voor als maand niet bestaat
+    query = """
+        insert into played_history (year, month, day, played)
+        select %s, %s, 0, 1
+        where not exists (select 1 from played_history where year = %s and month = %s and day = 0)
+    """ % (vandaag.year, vandaag.month, vandaag.year, vandaag.month)
+    _db.dbExecute(query)
+
+    ## werk dag bij, voor als dag bestaat
+    query = """
+        update played_history set played = played + 1
+        where year = %s and month = %s and day = %s
+    """ % (vandaag.year, vandaag.month, vandaag.day)
+    _db.dbExecute(query)
+
+    ## werk dag bij, voor als dag niet bestaat
+    query = """
+        insert into played_history (year, month, day, played)
+        select %s, %s, %s, 1
+        where not exists (select 1 from played_history where year = %s and month = %s and day = %s)
+    """ % (vandaag.year, vandaag.month, vandaag.day, vandaag.year, vandaag.month, vandaag.day)
+    _db.dbExecute(query)
+
+    return
 
 
 def q(inString):

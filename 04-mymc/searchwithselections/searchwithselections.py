@@ -2,7 +2,8 @@
 
 """Module selections.
 
-Bevat ......................
+Bevat class SearchWithSelections, 
+zoeken met selecties.
 
 """
 
@@ -28,21 +29,21 @@ from dbfunc import MyDB
 from dbfunc import q
 
 
-class pageSearchWithSelections(object):
+class searchWithSelections(object):
     """Zoeken met selections
         @since: 2014-09
         @version: 1
     """
 
     def __init__(self):
-        """Database verbinding wordt hier gemaakt.
+        """Database verbinding maken.
         @ivar _db: database  
         """
         self._db = MyDB() 
 
     @cherrypy.expose
     def index(self):
-        """
+        """Index toon inhoud swc table (search with selections).
         """
 
         # query1, selections laden
@@ -70,7 +71,7 @@ class pageSearchWithSelections(object):
 
     @cherrypy.expose
     def saveselectie(self, selection_id):
-        """Button selectie afhandelen, er is een nieuwe selectie gekozen
+        """Button selectie afhandelen, er is een nieuwe selectie gekozen.
         """
 
         # ontvangen wordt bijvoorbeeld: btnSel54 
@@ -100,7 +101,7 @@ class pageSearchWithSelections(object):
 
     @cherrypy.expose
     def deleteselectie(self, selection_id):
-        """Button selectie verwijderen afhandelen
+        """Button selectie verwijderen afhandelen.
         """
         
         # ontvangen wordt bijvoorbeeld: btnFil353, 3 is conditie, 53 is selectie
@@ -118,7 +119,7 @@ class pageSearchWithSelections(object):
 
     @cherrypy.expose
     def deleteall(self, id):
-        """Button alle selecties verwijderen afhandelen
+        """Button alle selecties verwijderen afhandelen.
         """
 
         query = """
@@ -131,7 +132,7 @@ class pageSearchWithSelections(object):
 
     @cherrypy.expose
     def savecondition(self, condition):
-        """Button conditie afhandelen, selecties aan conditie toevoegen
+        """Button conditie afhandelen, selecties aan conditie toevoegen.
         """
 
         # button bepalen, aangeleverd: btnCondx, btnCond verwijderen
@@ -163,7 +164,7 @@ class pageSearchWithSelections(object):
 
     @cherrypy.expose
     def runselection(self):
-        """Button toepassen afhandelen
+        """Button toepassen afhandelen, zoek songs via de selecties.
         """
         
         # haal alle gebruikte condities op

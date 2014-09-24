@@ -63,6 +63,9 @@ FUNCTIONS
     pageListAlbums_AlbumArtist(records)
         Geef pagina terug met alle albums van een albumartiest.
     
+    pageMenuSearch()
+        Menu pagina voor zoeken.
+    
     pagePartSongRating(song_id, rating)
         Stukje html etc, voor rating van songs, om in te voegen in andere pagina's,
         nodig: song_id, en huidige rating.
