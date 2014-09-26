@@ -103,8 +103,8 @@ $(document).ready(function() {
         window.location = "runselection";
     });
 
-    $("#btnManCond").click(function() {
-        window.location = "manageconditions";
+    $("#btnManSS").click(function() {
+        window.location = "manageSuperSelections";
     });
 
 
@@ -286,7 +286,7 @@ $(document).ready(function() {
             <fieldset><legend>Acties</legend>
             <button class="zmsbtnAct" type="button" id="btnRun">Zoeken</button>
             <button class="zmsbtnAct" type="button" id="btnDeleteAll">Wis condities</button>
-            <button class="zmsbtnAct" type="button" id="btnManCond">Beheer condities</button>
+            <button class="zmsbtnAct" type="button" id="btnManSS">Beheer super selecties</button>
             </fieldset>
         </td>
     </tr>
@@ -366,45 +366,104 @@ def pageRunselection(records):
     return h + html_page(table.exp()) + html_end()
 
 
-def pageManageConditions(records):
-    """Template voor paginga "zoek songs via de selecties".
+def pageManageSuperSelections(records):
+    """Template voor paginga "zoek songs via de superselecties".
     """
 
-    title ="pageManageConditions"
-    h = html_start(title) + main_navigation() + html_h1("Beheer condities")
+    title ="pageManageSuperSelections"
+    h = html_start(title) + main_navigation() + html_h1("Beheer super selecties")
 
     h_js = """
 <script type="text/javascript">
 $(document).ready(function() {
-    $("[id*=btnSel]").click(function() {
-        /* haal id op van ingedrukte button */
-        var btn = this.id;
-        $.ajax({
-        url: "saveselectie",
-        type: "POST",
-        data: {selection_id: btn },
-        success: function(response) {
-            /* window.location = "index";    /* terug naar de lijst */
-            /* alert(btn); */
-            /* $("#test").html(response); */
-            }
-        });
-    });
+    $("[id*=Opslaan]").click(function() {
+        var btn = this.id ;
+        var txtId = btn.substr(10) ;
 
-    $("#btnStore").click(function() {
+        var Code = "txtCode" + txtId ;
+        var txtCode = $("#" + Code).val() ;
+
+        var txtDescr = "txtDescr" + txtId ;
+        txtDescr = $("#" + txtDescr).val() ;
+    
         $.ajax({
             url: "saveSuperSelection",
             type: "POST",
-            data: {txtCode: $("#txtCode").val(), txtDescr: $("#txtDescr").val()},
+            data: { txtId: txtId, txtCode: txtCode, txtDescr: txtDescr },
             success: function(response) {
                 /* window.location = "index"; */
-                /* alert(btn); */
+                /* alert("button saveSuperSelection"); */
                 /* $("#test").html(response); */
             }
         });
     });
+
+    $("[id*=Verwijder]").click(function() {
+        var btn = this.id ;
+        var txtId = btn.substr(12) ;
+
+        $.ajax({
+            url: "deleteSuperSelection",
+            type: "POST",
+            data: { txtId: txtId },
+            success: function(response) {
+                /* window.location = "index"; */
+                /* alert("button saveSuperSelection"); */
+                /* $("#test").html(response); */
+            }
+        });
+    });
+
+    $("[id*=Laden]").click(function() {
+        var btn = this.id ;
+        var txtId = btn.substr(8) ;
+
+        $.ajax({
+            url: "loadSuperSelection",
+            type: "POST",
+            data: { txtId: txtId },
+            success: function(response) {
+                /* window.location = "index"; */
+                /* alert("button saveSuperSelection"); */
+                /* $("#test").html(response); */
+            }
+        });
+    });
+
+    $("#btnRun").click(function() {
+        window.location = "runselection";
+    });
+
+    $("#btnZMS").click(function() {
+        window.location = "/pageSearchWithSelections";
+    });
 });
 </script>
+    """
+
+    h_style = """
+    <style>
+
+.tab1 {
+    width: 890px;
+}
+.superselectie {
+    height: 2em;
+}
+
+</style>
+    """
+
+    ht_tab1 = """
+        <table class="tab1"><tr><td>
+        <fieldset><legend>Bestaande super selecties</legend>
+            <table><tr>
+                %s    <!-- table header -->
+                %s    <!-- ht_intro -->
+                %s    <!-- bestaande records -->
+            </tr></table>
+        </fieldset>
+        </td></tr></table>
     """
 
     ht_th = """
@@ -413,53 +472,71 @@ $(document).ready(function() {
         <th>Toelichting</th>
     </tr>
     """
+
+    ht_intro = """
+    <tr></td><td><td colspan="3">Om te wijzigen, kies eerst laden en daarna opslaan!</td></tr>
+    """
     
     ht_td = """
     <tr>
-        <td>
-            <input type="text" id="txtCode" size="30" maxlength="30" value="%(ss_code)s">
-        </td>
-        <td>
-            <input type="text" id="txtDescr" size="80" maxlength="80" value="%(ss_descr)s">
-        </td>
-        <td>
-            <button type="button" class="knop" id="">Laden</button>
-            <button type="button" class="knop" id="">Opslaan</button>
-            <button type="button" class="knop" id="">Verwijder</button>
+        <td class="superselectie">
+            <button type="button" class="knop" id="btnLaden%(ss_id)s">Laden</button>
+        </td><td>
+            <input type="text" id="txtCode%(ss_id)s" size="25" maxlength="30" value="%(ss_code)s">
+            <input type="hidden" id="txtId" size="10" maxlength="10" value="%(ss_id)s">
+        </td><td>
+            <input type="text" id="txtDescr%(ss_id)s" size="60" maxlength="80" value="%(ss_descr)s">
+        </td><td>
+            <button type="button" class="knop" id="btnOpslaan%(ss_id)s">Opslaan</button>
+            <button type="button" class="knop" id="btnVerwijder%(ss_id)s">Verwijder</button>
         </td>
     </tr>
     """
 
     # nr = new record
-    ht_nr = """
-<form id="testform">
-    <tr>
-        <td colspan="3"> Nieuwe conditie </td>
-    </tr>
-    <tr>
-        <td>
-            <input type="text" id="txtCode" size="30" maxlength="30">
-        </td><td rowspan="2">
-            <input type="text" id="txtDescr" size="80" maxlength="80">
-        </td><td rowspan="2">
-            <button type="button" class="knop" id="btnStore">Opslaan</button>
-        </td>
-   </tr> 
-</form>
+    ht_tab2 = """
+    <table class="tab1"><tr><td>
+    <fieldset><legend>Nieuwe super selectie toevoegen</legend>
+    <table>
+        <tr>
+            <th>Code</th>
+            <th>Toelichting</th>
+        </tr>
+        <tr>
+            <td>
+                <input type="text" id="txtCode" size="25" maxlength="30">
+            </td><td>
+                <input type="text" id="txtDescr" size="50" maxlength="80">
+            </td><td>
+                <button type="button" class="knop" id="btnOpslaan">Opslaan</button>
+            </td>
+        </tr>
+    </table>
+    </fieldset>
+    </td></tr></table>
+    """
+
+    # formulier knoppen
+    ht_tab3 = """
+    <table class="tab1"><tr><td>
+    <fieldset><legend>Acties</legend>
+        <button class="zmsbtnAct" type="button" id="btnRun">Zoeken</button>
+        <button class="zmsbtnAct" type="button" id="btnZMS">Beheer zoeken met selecties</button>
+    </fieldset>
+    </td></tr></table>
     """
 
     table = Html()
-    table.add(TABO)
-    table.add(ht_th)
     if len(records) == 0:
         # geen gegevens
         table.add(TRO + TDO + "Geen gegevens gevonden." + TDC + TRC)
     else:
         for record in records:
             table.add(ht_td % record)
-    table.add(ht_nr)
-    table.add(TABC)
 
-    return h + html_page(table.exp()) + h_js + html_end()
+    h = h + html_page(ht_tab1 % (ht_th, ht_intro, table.exp()) + \
+        ht_tab2 + ht_tab3) 
+
+    return h + h_style + h_js + html_end()
 
 # eof

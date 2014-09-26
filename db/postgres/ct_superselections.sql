@@ -16,10 +16,12 @@ create table superselections (
 drop table superselections_details ;
 
 create table superselections_details (
-        ss_id           serial                 primary key
+        ssd_id          serial                 primary key
+,       ss_id           integer                not null
 ,       condition       integer                not null
 ,       selection_id    integer                not null
 ,       adddate         timestamp              without time zone NOT NULL DEFAULT now()
+,	unique (ss_id, condition, selection_id)
 ,	check (condition between 1 and 4)
 ) ;
 

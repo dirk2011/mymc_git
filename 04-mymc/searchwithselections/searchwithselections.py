@@ -163,33 +163,104 @@ class searchWithSelections(object):
 
 
     @cherrypy.expose
-    def saveSuperSelection(self, txtCode="#", txtDescr="#"):
+    def saveSuperSelection(self, txtId=0, txtCode="#", txtDescr="#"):
         """Button saveSuperSelection afhandelen
         Nieuwe superselectie opslaan.
         """
-
-        query = """
-            insert into superselections (ss_code, ss_descr)
-            values ('%s', '%s')
-        """ % (q(txtCode), q(txtDescr))
+        
+        print "saveSuperSelection txtId", txtId, "txtCode", txtCode, "txtDesc", txtDescr
+        
+        # hoofdrecord
+        if len(txtId) == 0:
+            # nieuw !
+            query = """
+                insert into superselections (ss_code, ss_descr)
+                values ('%s', '%s')
+                """ % (q(txtCode), q(txtDescr))
+            self._db.dbExecute(query)
+            
+            # zoek Id op van zojuist opgeslagen record
+            query = """
+                select ss_id from superselections
+                where ss_code = '%s'
+            """ % q(txtCode)
+            records = self._db.dbGetData(query)
+            
+            if len(records) == 1:
+                txtId = records[0]['ss_id']
+                print "nieuwe txtId: ", txtId
+            
+        else:
+            # wijziging
+            query = """
+                update superselections set ss_code = '%s', ss_descr = '%s'
+                where ss_id = %s
+            """ % (q(txtCode), q(txtDescr), txtId)
         self._db.dbExecute(query)
+
+        ## details opslaan
+        # oude verwijderen
+        query = """
+            delete from superselections_details
+            where ss_id = %s
+        """ % txtId
+        self._db.dbExecute(query)
+        # nieuwe opslaan
+        query = """
+            insert into superselections_details (ss_id, condition, selection_id)
+            select %s, condition, selection_id
+            from    swc
+            where   condition > 0
+        """ % txtId
+        self._db.dbExecute(query)        
 
 
     @cherrypy.expose
-    def deleteSuperSelection(self, txtCode="#"):
+    def deleteSuperSelection(self, txtId=0):
         """Button deleteSuperSelection afhandelen.
         SuperSelectie verwijderen.
         """
         
-        query = """
-            delete from superselections
-            where ss_code = '%s' 
-        """ % q(txtCode)
-        self._db.dbExecute(query)
+        print "deleteSuperSelection txtId", txtId
+
+        if len(txtId) != 0:
+            query = """
+                delete from superselections
+                where ss_id = %s 
+            """ % txtId
+            self._db.dbExecute(query)
+            query = """
+                delete from superselections_details
+                where ss_id = %s
+            """ % txtId
+            self._db.dbExecute(query)
 
 
     @cherrypy.expose
-    def manageconditions(self):
+    def loadSuperSelection(self, txtId=0):
+        """Button Laden SuperSelection afhandelen.
+        """
+
+        print "loadSuperSelection txtId", txtId
+
+        # swc eerst leegmaken
+        query = """
+            delete from swc 
+        """
+        self._db.dbExecute(query)
+
+        # swc vullen vanuit superselections_details
+        query = """
+            insert into swc (condition, selection_id)
+            select condition, selection_id
+            from superselections_details
+            where ss_id = %s
+            """ % txtId
+        self._db.dbExecute(query)        
+
+
+    @cherrypy.expose
+    def manageSuperSelections(self):
         """Beheer conditions, sla op en roep ze weer op
         """
         
@@ -201,7 +272,7 @@ class searchWithSelections(object):
         """
         records = self._db.dbGetData(query)
         
-        h = searchwithselections_temp.pageManageConditions(records)
+        h = searchwithselections_temp.pageManageSuperSelections(records)
         
         return h
 
