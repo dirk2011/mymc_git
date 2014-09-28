@@ -10,6 +10,9 @@ DESCRIPTION
     Pagina tempates voor SearchWithSelections.
 
 FUNCTIONS
+    pageManageSuperSelections(records)
+        Template voor paginga "zoek songs via de superselecties".
+    
     pageRunselection(records)
         Template voor paginga "zoek songs via de selecties".
     

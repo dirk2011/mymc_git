@@ -23,12 +23,12 @@ import os
 import os.path
 import datetime
 from datetime import timedelta
-# import sqlite3              # sqlite database
 import psycopg2             # postgres db
 import psycopg2.extras      # dictionary cursor
 import cherrypy             # cherrypy de webinterface
 import urllib               # vertaal string naar url
-from soco import SoCo       # sonos
+import soco                 # sonos
+from soco import SoCo
 
 import mymc_html            # web pagina's
 reload(mymc_html)
@@ -46,6 +46,7 @@ from dbfunc import MyDB
 from dbfunc import dbGetSongInfoPlayed
 from dbfunc import q
 
+import queuebeheer.queuebeheer
 import selections.selections           # pagina muteren selecties
 import searchwithselections.searchwithselections     # pagina om met selecties te zoeken
 
@@ -68,6 +69,7 @@ CACHING = True
 GENERATEDAYS = 100
 DEBUG = True # print commando's aan of uit
 
+
 class Mc:
     """Mc = music collection
     """
@@ -80,10 +82,18 @@ class Mc:
         """Initialiseren Mc object.
         """
         #  database openen
-        _db = MyDB()
+        self._db = MyDB()
         
         # list van historische tijdvakken, jaren, maanden, dagen
         self.periods = []
+
+
+    @cherrypy.expose
+    def index(self):
+        """Start pagina van mymc.
+        """
+        
+        return mymc_html.pageIndex()
 
 
     @cherrypy.expose
@@ -124,18 +134,17 @@ class Mc:
         print 'period', period
         print 'artist_id', artist_id
 
-        query = """select * from played_artists
+        query = """
+            select * from played_artists
             where period = '%s' and aat = 'albums' and artist_id = %s
             order by played desc
-            """ % (period, int(artist_id))
-        records = self.dbGetData(query)
+        """ % (period, int(artist_id))
+        records = self._db.dbGetData(query)
         print 'records', records
 
         h = mymc_html.pagePlayedArtistsPeriodAlbums(period, artist_id, records)
 
         return h
-
-        # return ("""period: %s, artist %s: """ % (str(period), str(artist)))
 
 
     @cherrypy.expose
@@ -1027,8 +1036,16 @@ class Mc:
         # print 'song_playinfo', song_playinfo
 
         # 3 - rating ophalen
-        song_info = self.dbGetInfoSong(song_id)
-        if len(song_info.keys()) < 1:
+        query = """
+            select *
+            from songsinfo
+            where song_id = %s
+        """ % int(song_id)
+        song_info = self._db.dbGetData(query)
+        if len(song_info) == 1:
+            song_info = song_info[0]
+        else:
+            song_info = {}
             song_info['rating'] = 0
             song_info['notes'] = u""
         # print 'song_info', song_info
@@ -1047,39 +1064,6 @@ class Mc:
         return h
 
 
-    def dbGetInfoSong(self, song_id=0):
-        """dbGetInfoSong, get a song record from the database with 1 song
-        """
-
-        ## controleer song_id
-        if song_id < 1:
-            return []
-        
-        # connection = sqlite3.connect(DBNAME)
-        # connection.row_factory = sqlite3.Row
-        # cursor = connection.cursor()
-
-        # zoek de song op in de database
-        self.dbOpen()
-        Mc.cursor.execute("""
-            select *
-            from songsinfo
-            where song_id = %s
-            """ % int(song_id))
-        recordset = Mc.cursor.fetchall()
-        print 'recordset', recordset
-        
-        record = {}
-        if len(recordset) > 0:
-            recordset = recordset[0]
-
-            columns = recordset.keys()
-            for column in columns:
-                record[column] = recordset[column]
-
-        return record
-
-
     def dbGetSong(self, song_id=0):
         """dbGetSong, get a song record from the database with 1 song
         """
@@ -1089,12 +1073,12 @@ class Mc:
             return []
         
         # zoek de song op in de database
-        db = MyDB()
-        records = db.dbGetData("""
+        query = """
             select *
             from songs
             where song_id = %s
-            """ % int(song_id))
+            """ % int(song_id)
+        records = self._db.dbGetData(query)
 
         if len(records) == 1:
             record = records[0]
@@ -1111,163 +1095,6 @@ class Mc:
             # print 'dbGetSong record', record
 
         return record
-
-
-    @cherrypy.expose
-    def sonos_next(self):
-        """Afspeellijst <Next> button, gaat naar volgende nummer in afspeellijst.
-        """
-        
-        # pagina laden voor als antwoord terug aan de server
-        h = mymc_html.sonos_next()
-                
-        ##
-        sonos = SoCo(COORDINATOR)
-        sonos.next()
-
-        return h
-
-
-    @cherrypy.expose
-    def sonos_previous(self):
-        """Afspeellijst, <Previous> button, gaat naar vorige nummer, in de afspeellijst.
-        """
-        
-        # pagina laden voor als antwoord terug aan de server
-        h = mymc_html.sonos_previous()
-                
-        ##
-        sonos = SoCo(COORDINATOR)
-        sonos.previous()
-
-        return h
-
-
-    @cherrypy.expose
-    def sonos_pause(self):
-        """Afspeellijst, <pause> button, afspelen pauzeren.
-        """
-        
-        # pagina laden voor als antwoord terug aan de server
-        h = mymc_html.sonos_pause()
-                
-        ## sonos, afspelen pauzeren
-        sonos = SoCo(COORDINATOR)
-        sonos.pause()
-
-        return h
-
-
-    @cherrypy.expose
-    def sonos_clear_queue(self):
-        """sonos_clear_queue, maak sonos afspeellijst leeg
-        """
-        
-        # pagina laden voor als antwoord terug aan de server
-        h = mymc_html.sonos_clear_queue
-                
-        ## queue leegmaken als er wat in zit
-        sonos = SoCo(COORDINATOR)
-        # als de sonos queue niet leeg is
-        if len(sonos.get_queue()) > 0:
-            ## sonos queue leegmaken
-            sonos.clear_queue()
-
-            ## table queue leegmaken
-            # connection = sqlite3.connect(DBNAME)
-            # cursor = connection.cursor()
-
-            self.dbOpen()
-            query = """delete from queue"""
-            Mc.cursor.execute(query)
-            Mc.connection.commit()
-            # cursor.close()
-            # connection.close()
-
-        return h
-
-
-    @cherrypy.expose
-    def sonos_play_from_queue(self):
-        """sonos_play_from_queue, speelt queue af
-        """
-        
-        # pagina laden voor als antwoord terug aan de server
-        h = mymc_html.sonos_play_from_queue
-
-        # queue afspelen als deze niet leeg is
-        sonos = SoCo(COORDINATOR)
-        if len(sonos.get_queue()) > 0:
-            sonos.play_from_queue(0)
-
-        return h
-
-
-    @cherrypy.expose
-    def sonos_playmenu(self):
-        """sonos_menu, menu om commando's aan sonos te geven en info op te halen
-        """
-
-        # haal pagina op
-        h = mymc_html.sonos_playmenu()
-
-        # verbinding maken met sonos
-        sonos = SoCo(COORDINATOR)
-
-        # wat speelt er nu, als het nummer niet uit playlist komt, is current_track niet gevuld
-        current_song = sonos.get_current_track_info()
-        current_track = int(current_song['playlist_position'])
-
-        # haal queue uit database op
-        query = """select * from queue order by queue_id"""
-        records = self.dbGetData(query)
-        # print 'queue records', records
-
-        # list songs in sonos queue
-        if len(sonos.get_queue()) > 0:
-            table = hTable()
-            table.insert("""
-<h2> </h2>""")
-            table.insert("""
-<h2>Sonos queue</h2>""")
-
-            table.add("""<tr><th class="info">Info</th> 
-                <th class="track">Track</th> <th class="title">Titel</th>  
-                <th class="artist">Artiest</th> <th class="album">Album</th></tr>""")
-            tel = 0
-            for song in sonos.get_queue():
-                tel = tel + 1
-                table.add(TRO)
-
-                table.add('<td class="info">')
-                if (tel - 1) < len(records):
-                    record = records[tel - 1]
-                    song_id = record['song_id']
-                    table.add('<a href="pageSong?song_id=%s">Info</a>' % song_id)
-                table.add("</td>")
-                    
-                if tel == current_track:
-                    table.add('<td class="track">' + ">" + str(tel) + "< </td>")
-                else:
-                    table.add('<td class="track">' + str(tel) + "</td>")
-
-                table.add('<td class="title">' + song.title + "</td>")
-                # gegevens kunnen None zijn als de sonos server de gegevens nog niet heeft opgehaald
-                if song.creator is None:
-                    table.add('<td class="artist">' + "</td>")
-                else:
-                    table.add('<td class="artist">' + song.creator + "</td>")
-                    
-                if song.album is None:
-                    table.add('<td class="album">' + "</td>")
-                else:
-                    table.add('<td class="album">' + song.album + "</td>")
-
-                table.add(TRC)
-                
-            h = h + table.exp()
-
-        return h
 
 
     @cherrypy.expose
@@ -1433,10 +1260,10 @@ class Mc:
             return h
         
         # haal tracks op
-        db = MyDB()
-        query = """select * from songs where album_id = %s order by tracknumber """ % int(album_id)
-        db.dbGetData(query)
-        records = self.dbGetData(query)
+        query = """
+            select * from songs where album_id = %s order by tracknumber
+        """ % int(album_id)
+        records = self._db.dbGetData(query)
         
         # pagina samenstellen, met records en template
         h = mymc_html.listAlbumTracks(album_id, records)
@@ -1448,11 +1275,46 @@ class Mc:
 
 
     @cherrypy.expose
-    def index(self):
-        """Start pagina van mymc.
+    def pageSoftwareVersions(self):
+        """Toon software versies
         """
-        
-        return mymc_html.pageIndex()
+
+        records = {}
+        # python versie
+        records['python'] = sys.version
+        # cherrypy versie
+        records['cherrypy'] = cherrypy.__version__
+        # soco (sonos) versie
+        records['soco'] = soco.__version__
+
+        h = mymc_html.pageSoftwareVersions(records)
+
+        return h
+
+
+    @cherrypy.expose
+    def pageAboutMe(self):
+        """pagina over deze applicatie
+        """
+
+        records = {}
+        records['info'] = """
+            MC, Music Collection <br>
+            <br>
+            Python applicatie om muziek collectie te beheren. <br>
+            - uniek nummeren muziek nummers <br>
+            - laden in postgres database <br>
+            - afspelen van de muziek op Sonos systeem <br>
+            - bijhouden wat afgespeeld is, en wanneer <br>
+            - rating (0-5 punten) muziek nummers <br>
+            - vrij zoeken <br>
+            - zoeken met selecties <br>
+            - zoeken met super selecties <br>
+        """
+
+        h = mymc_html.pageAboutMe(records)
+
+        return h
 
 
     def dbExecute(self, query):
@@ -1505,41 +1367,11 @@ class Mc:
             print 'Error %s' % e
 
 
-def saveHTMLToFile(filename, page):
-    """HTML opslaan als een bestand, tbv debugging
-    """
-
-    # page = unicode(page, 'utf-8', errors='replace')
-    filename = filename + "-debug.html"
-    f = codecs.open(filename, 'w', "utf-8")
-    f.write(page)
-    f.close()
-
-    return page
-
-
 def debug(input):
     """print debug meldingen
     """
     if DEBUG:
         print input
-
-
-class sonos_play:
-
-    @cherrypy.expose
-    def index(self):
-        """Afspeellijst, <play> button, afspelen of doorgaan na een pauze.
-        """
-        
-        # pagina laden voor als antwoord terug aan de server
-        h = mymc_html.sonos_play()
-                
-        ## sonos, afspelen
-        sonos = SoCo(COORDINATOR)
-        sonos.play()
-
-        return h
 
 
 if __name__ == '__main__' and not 'idlelib.__main__' in sys.modules:
@@ -1558,8 +1390,9 @@ if __name__ == '__main__' and not 'idlelib.__main__' in sys.modules:
     })
 
     root = Mc()
-    root.sonos_play = sonos_play()
+    root.queuebeheer = queuebeheer.queuebeheer.queuebeheer()
     root.pageSelections = selections.selections.pageSelections()
     root.pageSearchWithSelections = searchwithselections.searchwithselections.searchWithSelections()
     
     cherrypy.quickstart(root, '/', conf)
+

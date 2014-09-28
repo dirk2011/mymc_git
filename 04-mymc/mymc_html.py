@@ -23,6 +23,7 @@ import os
 import urllib           # vertaal string naar url
 # import cgi
 
+import htable
 from htable import hTable
 from hTable import Html
 from hTable import hLink, hButton
@@ -83,7 +84,7 @@ def main_navigation():
     h.td(hButton(u'Info Mc', u'btnInfoMc', u'menuknop', u'/pageInfoMc'))
     h.td(hButton(u'Artiesten', u'btnArtiesten', u'menuknop', u'/pageListAlbumArtists'))
     h.td(hButton(u'Zoeken', u'btnZoeken', u'menuknop', u'/pageMenuSearch'))
-    h.td(hButton(u'Queue', u'btnQueue', u'menuknop', u'/sonos_playmenu'))
+    h.td(hButton(u'Queue', u'btnQueue', u'menuknop', u'/queuebeheer'))
     h.td(hButton(u'Volume', u'btnVolume', u'menuknop', u'/pageSonosSpeakers'))
     h.td(hButton(u'Afgespeeld', u'btnAfgespeeld', u'menuknop', u'/pageAfgespeeld'))
     h.td(hButton(u'Beheer', u'btnBeheer', u'menuknop', u'/pageBeheer'))
@@ -259,146 +260,6 @@ def pageSong():
 
 </table>
 """) + html_end()
-
-
-def sonos_playmenu():
-    """Geef webpagina terug om afspeellijst (queue) te beheren.
-    
-    De queue kan afgespeeld en leeggemaakt worden. Tevens zijn er knoppen 
-    voor previous, next, stop en pause.
-    Oude naam: sonos_menu.
-    """
-
-    title = "sonos_playmenu" 
-    h = html_start(title) + main_navigation() + html_h1("Queue beheer")
-    
-    table = hTable()
-    
-    table.td(TDO + """
-        <form action="sonos_previous">
-        <input type="submit" value="Previous">
-        </form>
-        """ + TDC)
-    
-    table.td(TDO + """
-        <form action="sonos_pause">
-        <input type="submit" value="Pause">
-        </form>
-    """ + TDC)
-    
-    table.td(TDO + """
-        <form action="sonos_play">
-        <input type="submit" value="Play">
-        </form>
-    """ + TDC)
-
-    table.td(TDO + """
-        <form action="sonos_next">
-        <input type="submit" value="Next">
-        </form>
-    """ + TDC)
-
-    table.td(TDO + """
-        <form action="sonos_clear_queue">
-        <input type="submit" value="Clear queue">
-        </form>
-    """ + TDC)
-
-    table.td(TDO + """
-        <form action="sonos_play_from_queue">
-        <input type="submit" value="Play queue">
-        </form>
-    """ + TDC)
-
-    return h + html_page(table.exp())
-
-
-def sonos_next():
-    """Dummy pagina voor de next button.
-    """
-    
-    return u"""
-    <html>
-    sonos_next</br>
-
-    <script>
-	    window.history.back();
-    </script>
-
-    </html>
-"""
-
-
-def sonos_previous():
-    """Dummy pagina voor de previous button.
-    """
-    
-    return u"""
-    <html>
-    sonos_previous</br>
-
-    <script>
-	    window.history.back();
-    </script>
-
-    </html>
-"""
-
-
-def sonos_play():
-    """Dummy pagina voor de play button.
-    """
-    
-    return u"""
-    <html>
-    sonos_play</br>
-
-    <script>
-	    window.history.back();
-    </script>
-
-    </html>
-"""
-
-
-def sonos_pause():
-    """Dummy pagina voor de pause button.
-    """
-    
-    return u"""
-    <html>
-    sonos_pause</br>
-
-    <script>
-	    window.history.back();
-    </script>
-
-    </html>
-"""
-
-
-sonos_clear_queue = u"""
-    <html>
-    sonos_clear_queue</br>
-
-    <script>
-	    window.history.back();
-    </script>
-
-    </html>
-"""
-
-
-sonos_play_from_queue = u"""
-    <html>
-    sonos_play_from_queue</br>
-
-    <script>
-	    window.history.back();
-    </script>
-
-    </html>
-"""
 
 
 pageSongSave = u"""
@@ -660,21 +521,6 @@ def sonosSetVolume(record):
 
     </html>
     """ % record
-
-
-def pageIndex():
-    """Index (start) pagina van mymc.
-    """
-    
-    page = u"""
-    
-    <img src="/static/images/music_017.jpg">
-
-    """
-    title = u'pageIndex'
-    h_page = html_start(title) + main_navigation() + html_h1(u'My Music Collection') + html_page(page) + html_end()
-    
-    return h_page
 
 
 def pageSearch():
@@ -956,9 +802,6 @@ def pageBeheer():
     h = html_start(title) + main_navigation() + html_h1("Beheer") 
     
     table = hTable()
-    link = hLink(u"Selecties muteren", u"pageSelections")
-    table.td(link, u'beheer')
-    table.tr()
     link = hLink(u"Toon pagina's in cache", u"pageShowCache")
     table.td(link, u'beheer')
     table.tr()
@@ -971,7 +814,13 @@ def pageBeheer():
     link = hLink(u"Ververs played artists", u"pageRefreshPlayedArtists")
     table.td(link, u'beheer')
     table.tr()
-    
+    link = hLink(u"Software versies", u"pageSoftwareVersions")
+    table.td(link, u'beheer')
+    table.tr()
+    link = hLink(u"About me / over mij", u"pageAboutMe")
+    table.td(link, u'beheer')
+    table.tr()
+
     return h + html_page(table.exp()) + html_end()
 
 
@@ -1450,15 +1299,77 @@ def pageMenuSearch():
 
     title = 'pageMenuSearch'
     h = html_start(title) + main_navigation() + html_h1("Zoeken") 
-    
+
     table = hTable()
-    link = hLink(u"Vrij zoeken", u"pageSearch")
-    table.td(link, u'beheer')
+    table.td(hButton(u'Vrij zoeken', u'btn1', u'menuknop2', u'pageSearch'))
     table.tr()
-    link = hLink(u"Zoeken met selecties", u"pageSearchWithSelections")
-    table.td(link, u'beheer')
+    table.td(hButton(u'Zoeken met selecties', u'btn2', u'menuknop2', u'pageSearchWithSelections'))
+    table.tr()
+    table.td(hButton(u'Beheer selecties', u'btn3', u'menuknop2', u'/pageSelections'))
+    table.tr()
+    table.td(hButton(u'Beheer super selecties', u'btn4', u'menuknop2', u'/pageSearchWithSelections/manageSuperSelections'))
     table.tr()
     
     return h + html_page(table.exp()) + html_end()
+
+
+def pageIndex():
+    """Index (start) pagina van mymc.
+    """
+    
+    page = u"""
+    <img src="/static/images/music_017.jpg">
+    """
+    title = u'pageIndex'
+    h_page = html_start(title) + main_navigation() + html_h1(u'MY Music Collection') + html_page(page) + html_end()
+    
+    return h_page
+
+
+def pageSoftwareVersions(records):
+    """Template pagina voor tonen versies gebruikte python software
+    """
+
+    title = 'pageSoftwareVersions'
+    h = html_start(title) + main_navigation() + html_h1("Gebruikte python software versies")
+
+    ht_page = """
+    <table>
+        <tr>
+            <td class="software">Python versie: </td> 
+            <td class="software">%(python)s</td>
+        </tr></tr>
+            <td class="software">Cherrypy versie: </td> 
+            <td class="software">%(cherrypy)s</td>
+        </tr></tr>
+            <td class="software">Soco versie: </td> 
+            <td class="software">%(soco)s</td>
+        </tr>
+    </table>
+    """ % records
+
+    h = h + html_page(ht_page) + html_end() 
+
+    return h
+
+
+def pageAboutMe(records):
+    """Template pagina voor informatie over deze applicatie
+    """
+
+    title = 'pageAboutMe'
+    h = html_start(title) + main_navigation() + html_h1("About me / over mij")
+
+    ht_page = """
+    <table>
+        <tr>
+            <td> %(info)s </td>
+        </tr>
+    </table>
+    """ % records
+
+    h = h + html_page(ht_page) + html_end() 
+
+    return h
 
 # eof

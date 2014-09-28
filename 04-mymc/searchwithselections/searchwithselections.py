@@ -43,7 +43,7 @@ class searchWithSelections(object):
 
     @cherrypy.expose
     def index(self):
-        """Index toon inhoud swc table (search with selections).
+        """Index pagina, toon inhoud swc table (search with selections).
         """
 
         # query1, selections laden
@@ -261,7 +261,7 @@ class searchWithSelections(object):
 
     @cherrypy.expose
     def manageSuperSelections(self):
-        """Beheer conditions, sla op en roep ze weer op
+        """Beheer super selections pagina.
         """
         
         # haal conditions op

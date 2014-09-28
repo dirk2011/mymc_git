@@ -34,20 +34,22 @@ DBPORT="5432"
 class MyDB():
     _db_connection = None
     _db_cur = None
-    
+
+    # @classmethod
     def __init__(self):
         """Connectie met postgresql database maken, en een cursor maken.
         """
 
         try:
-            self._db_connection = psycopg2.connect(database=DBNAME, user=DBUSER, host=DBHOST, port=DBPORT)
-            # gewone cursor
-            # Mc.cursor = Mc.connection.cursor()
-            # dictionary cursor
-            self._db_cur = self._db_connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-            self._db_cur.execute('select version()')
-            ver = self._db_cur.fetchone()
-            print ver
+            if self._db_cur is None:
+                self._db_connection = psycopg2.connect(database=DBNAME, user=DBUSER, host=DBHOST, port=DBPORT)
+                # gewone cursor
+                # Mc.cursor = Mc.connection.cursor()
+                # dictionary cursor
+                self._db_cur = self._db_connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
+                self._db_cur.execute('select version()')
+                ver = self._db_cur.fetchone()
+                print ver
 
         except psycopg2.DatabaseError, e:
             print 'Error %s' % e

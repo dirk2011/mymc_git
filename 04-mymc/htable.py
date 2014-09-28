@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 
-"""Module om html code te genereren.
+"""Module om o.a. html code te genereren.
 
 O.a. een tabel, link, button.
 """
@@ -203,6 +203,10 @@ def hLink(tekst, url):
 
 def hButton(text="", id="", classs="", onclick=""):
     """button aanmaken, parameters: text, class, id, onclick.
+    @param text: de tekst van de knop
+    @param id: css id van de knop
+    @param classs: css class
+    @param onclick: locatie die aangroepen moet worden
     """
 
     if text == "":
@@ -218,6 +222,19 @@ def hButton(text="", id="", classs="", onclick=""):
         onclick = """ onclick="location.href='%s'" """ % onclick
 
     return """<button%s%s%s>""" % (classs, id, onclick) + text + "</button>"
+
+
+def saveHTMLToFile(filename, page):
+    """HTML opslaan als een bestand, tbv debugging
+    """
+
+    # page = unicode(page, 'utf-8', errors='replace')
+    filename = filename + "-debug.html"
+    f = codecs.open(filename, 'w', "utf-8")
+    f.write(page)
+    f.close()
+
+    return page
 
 
 if __name__ == "__main__":

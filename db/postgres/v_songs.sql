@@ -18,8 +18,9 @@ select 	songs.song_id
 ,       case when max(songsinfo.rating) is null then 0 else max(songsinfo.rating) end as rating
 --      laatste keer gespeeld, format: yyyymmdd
 ,       max(to_char(played.playdate, 'dd-mm-yyyy')) as lastplayed
---      laatste keer afgespeeld in dagen geleden
-,       extract(day from now() - max(played.playdate)) as daysago
+--      laatste keer afgespeeld in dagen geleden, is 999 als nog nooit
+,	case when extract(day from now() - max(played.playdate)) is null then 999
+             else extract(day from now() - max(played.playdate)) end as daysago
 ,       count(played.playdate) as played
 from 	songs
 left join songsinfo

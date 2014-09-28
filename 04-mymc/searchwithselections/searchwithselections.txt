@@ -25,6 +25,10 @@ CLASSES
      |      Database verbinding maken.
      |      @ivar _db: database
      |  
+     |  deleteSuperSelection(self, txtId=0)
+     |      Button deleteSuperSelection afhandelen.
+     |      SuperSelectie verwijderen.
+     |  
      |  deleteall(self, id)
      |      Button alle selecties verwijderen afhandelen.
      |  
@@ -32,10 +36,20 @@ CLASSES
      |      Button selectie verwijderen afhandelen.
      |  
      |  index(self)
-     |      Index toon inhoud swc table (search with selections).
+     |      Index pagina, toon inhoud swc table (search with selections).
+     |  
+     |  loadSuperSelection(self, txtId=0)
+     |      Button Laden SuperSelection afhandelen.
+     |  
+     |  manageSuperSelections(self)
+     |      Beheer super selections pagina.
      |  
      |  runselection(self)
      |      Button toepassen afhandelen, zoek songs via de selecties.
+     |  
+     |  saveSuperSelection(self, txtId=0, txtCode='#', txtDescr='#')
+     |      Button saveSuperSelection afhandelen
+     |      Nieuwe superselectie opslaan.
      |  
      |  savecondition(self, condition)
      |      Button conditie afhandelen, selecties aan conditie toevoegen.
