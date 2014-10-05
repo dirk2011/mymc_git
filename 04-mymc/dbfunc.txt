@@ -32,9 +32,6 @@ CLASSES
      |      @return: de data in de vorm: list, genest meerdere dictionries
 
 FUNCTIONS
-    dbGetSongInfoPlayed(song_id='0')
-        Haal afspeel gegevens over een song op: eerste en laatste keer, en aantal keer
-    
     dbLogPlayedSong(song_id=-1)
         Log afgespeelde song, in table: played en in: played_history (jaar, maand, dag).
         -1 is voor testen.
@@ -57,6 +54,7 @@ DATA
     DBNAME = 'dbmc'
     DBPORT = '5432'
     DBUSER = 'pi'
+    MCSERVER = 'http://192.168.1.163'
     __author__ = 'dp'
     __date__ = '2014-09'
 

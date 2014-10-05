@@ -13,7 +13,6 @@ __date__    = '2014-09'
 
 # pylint: disable=C0103, C0301, R0201
 # C0103 - naming convention
-# C0301 - lengte van de regels
 # R0201 - method could be a function
 
 
@@ -30,14 +29,11 @@ COORDINATOR = '192.168.1.21'
 
 
 class queuebeheer(object):
-    """Class om afspeel queue te beheren.
-    """
+    """Class om afspeel queue te beheren."""
 
 
     def __init__(self):
-        """Database verbinding maken.
-        @ivar _db: database  
-        """
+        """Database verbinding maken."""
         self._db = MyDB() 
 
 

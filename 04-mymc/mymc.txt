@@ -13,7 +13,6 @@ DESCRIPTION
 
 CLASSES
     Mc
-    sonos_play
     
     class Mc
      |  Mc = music collection
@@ -37,12 +36,6 @@ CLASSES
      |      dbGetData, input query uitvoeren, en data terug leveren
      |      input: een query
      |      output: de data in de vorm: list, genest meerdere dictionries
-     |  
-     |  dbGetInfoSong(self, song_id=0)
-     |      dbGetInfoSong, get a song record from the database with 1 song
-     |  
-     |  dbGetSong(self, song_id=0)
-     |      dbGetSong, get a song record from the database with 1 song
      |  
      |  dbGetSongs(self, where='', having='', playdate='', artist='', period='', orderby='')
      |      Haal songs op, om te tonen in een table.
@@ -74,6 +67,9 @@ CLASSES
      |  listAlbumTracks(self, album_id='0')
      |      Toon alle songs van een album.
      |  
+     |  pageAboutMe(self)
+     |      pagina over deze applicatie
+     |  
      |  pageAfgespeeld(self)
      |      Menu pagina voor afgespeeld
      |  
@@ -95,6 +91,9 @@ CLASSES
      |  pageMenuSearch(self)
      |      Menu pagina voor zoeken.
      |  
+     |  pagePlayedAlbumsArtists(self, year=0, month=0)
+     |      Pagina toon, afgespeelde album artiesten per jaar / maand
+     |  
      |  pagePlayedArtists(self)
      |      Afgespeelde songs per artiest, 1e selectie, welke periode
      |  
@@ -108,6 +107,12 @@ CLASSES
      |      Toon per jaar, maand en dag, aantal afgespeelde songs.
      |  
      |  pagePlayedHistoryDetails(self, datum='#')
+     |  
+     |  pageRefreshPlayedAlbums(self)
+     |      Verversen / aanvullen afgespeelde albums info, per jaar / maand.
+     |  
+     |  pageRefreshPlayedAlbumsArtists(self)
+     |      Verversen / aanvullen afgespeelde artiesten-albums info, per jaar / maand.
      |  
      |  pageRefreshPlayedArtists(self)
      |      Verversen cijfers voor played artists.
@@ -123,6 +128,9 @@ CLASSES
      |  
      |  pageShowCache(self)
      |      Toon bestanden in cache.
+     |  
+     |  pageSoftwareVersions(self)
+     |      Toon software versies
      |  
      |  pageSong(self, song_id='0')
      |      Presenteer pagina om een song te raadplegen, en waardering op te geven.
@@ -149,24 +157,6 @@ CLASSES
      |  sonosSetVolume(self, speaker='192.168.1.21', volume=10)
      |      sonosSetVolume, volume voor speaker instellen
      |  
-     |  sonos_clear_queue(self)
-     |      sonos_clear_queue, maak sonos afspeellijst leeg
-     |  
-     |  sonos_next(self)
-     |      Afspeellijst <Next> button, gaat naar volgende nummer in afspeellijst.
-     |  
-     |  sonos_pause(self)
-     |      Afspeellijst, <pause> button, afspelen pauzeren.
-     |  
-     |  sonos_play_from_queue(self)
-     |      sonos_play_from_queue, speelt queue af
-     |  
-     |  sonos_playmenu(self)
-     |      sonos_menu, menu om commando's aan sonos te geven en info op te halen
-     |  
-     |  sonos_previous(self)
-     |      Afspeellijst, <Previous> button, gaat naar vorige nummer, in de afspeellijst.
-     |  
      |  storeInCache(self, page='#', pagename='#', key1='#')
      |      Web pagina voor hergebruik opslaan op schijf.
      |  
@@ -176,19 +166,10 @@ CLASSES
      |  connection = None
      |  
      |  cursor = None
-    
-    class sonos_play
-     |  Methods defined here:
-     |  
-     |  index(self)
-     |      Afspeellijst, <play> button, afspelen of doorgaan na een pauze.
 
 FUNCTIONS
     debug(input)
         print debug meldingen
-    
-    saveHTMLToFile(filename, page)
-        HTML opslaan als een bestand, tbv debugging
 
 DATA
     CACHE = '../cache'

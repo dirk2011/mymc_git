@@ -98,8 +98,7 @@ def sonos_playmenu(records, sonos, current_track):
 
 
 def sonos_next():
-    """Dummy pagina voor de next button.
-    """
+    """Dummy pagina voor de next button."""
     
     return u"""
     <html>
@@ -114,8 +113,7 @@ def sonos_next():
 
 
 def sonos_previous():
-    """Dummy pagina voor de previous button.
-    """
+    """Dummy pagina voor de previous button."""
     
     return u"""
     <html>
@@ -130,8 +128,7 @@ def sonos_previous():
 
 
 def sonos_play():
-    """Dummy pagina voor de play button.
-    """
+    """Dummy pagina voor de play button."""
     
     return u"""
     <html>
@@ -146,8 +143,7 @@ def sonos_play():
 
 
 def sonos_pause():
-    """Dummy pagina voor de pause button.
-    """
+    """Dummy pagina voor de pause button."""
     
     return u"""
     <html>
@@ -162,8 +158,7 @@ def sonos_pause():
 
 
 def sonos_clear_queue():
-    """Dummy pagina voor clear queue button.
-    """
+    """Dummy pagina voor clear queue button."""
     
     return u"""
     <html>
@@ -178,8 +173,7 @@ def sonos_clear_queue():
 
 
 def sonos_play_from_queue():
-    """Dummy pagina voor button play from queue.
-    """
+    """Dummy pagina voor button play from queue."""
     
     return u"""
     <html>

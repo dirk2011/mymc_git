@@ -11,6 +11,9 @@ DESCRIPTION
     te genereren.
 
 FUNCTIONS
+    sonos_clear_queue()
+        Dummy pagina voor clear queue button.
+    
     sonos_next()
         Dummy pagina voor de next button.
     
@@ -19,6 +22,9 @@ FUNCTIONS
     
     sonos_play()
         Dummy pagina voor de play button.
+    
+    sonos_play_from_queue()
+        Dummy pagina voor button play from queue.
     
     sonos_playmenu(records, sonos, current_track)
         Geef webpagina terug om afspeellijst (queue) te beheren.
@@ -39,8 +45,6 @@ DATA
     TRO = u'<tr>'
     __author__ = 'dp'
     __date__ = '2014-09'
-    sonos_clear_queue = u'\n    <html>\n    sonos_clear_queue</br>\n\n  .....
-    sonos_play_from_queue = u'\n    <html>\n    sonos_play_from_queue</br>...
 
 DATE
     2014-09

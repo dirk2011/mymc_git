@@ -43,7 +43,6 @@ from dbfunc import dbSongsUpdateAlbumId
 from dbfunc import dbSongsUpdateAlbumArtistId
 from dbfunc import dbSongsUpdateArtistId
 from dbfunc import MyDB
-from dbfunc import dbGetSongInfoPlayed
 from dbfunc import q
 
 import queuebeheer.queuebeheer
@@ -83,7 +82,7 @@ class Mc:
         """
         #  database openen
         self._db = MyDB()
-        
+
         # list van historische tijdvakken, jaren, maanden, dagen
         self.periods = []
 
@@ -92,8 +91,67 @@ class Mc:
     def index(self):
         """Start pagina van mymc.
         """
-        
+
         return mymc_html.pageIndex()
+
+
+    @cherrypy.expose
+    def pagePlayedAlbumsArtists(self, year=0, month=0):
+        """Pagina toon, afgespeelde album artiesten per jaar / maand
+        """
+        
+        if year == 0 or month == 0:
+            today = datetime.datetime.now()
+            year = today.year
+            month = today.month
+
+        ### haal jaar, maand, en dag gegevens op, en maak er dictionaries van voor weergave op webpagina
+        ## haal jaren op
+        query = """
+            select distinct yr as year
+            from played_period_albumsartists 
+            order by yr
+        """
+        records = self._db.dbGetData(query)
+        yearsdict = {}
+        for record in records:
+            key = 'year' + str(record['year'])
+            yearsdict[key] = record['year']
+        # voeg ook year en month toe aan dictionary
+        yearsdict['year'] = year
+        yearsdict['month'] = month
+        print 'yearsdict ->', yearsdict
+
+        ## haal maanden op
+        query = """
+            select yr, month, sum(played_songs) as played_songs
+            from played_period_albumsartists
+            where yr = %s
+            group by yr, month
+            order by 1, 2
+        """ % (year)
+        records = self._db.dbGetData(query)
+        monthsdict = {}
+        for record in records:
+            key = 'month' + str(record['month'])
+            monthsdict[key] = record['played_songs']
+        # voeg ook year en month toe aan dictionary
+        monthsdict['year'] = year
+        monthsdict['month'] = month
+        print 'monthsdict ->', monthsdict
+        
+        ## haal albums artiesten op
+        query = """
+            select * 
+            from played_period_albumsartists 
+            where yr = %s and month = %s
+            order by played_last desc, played_songs desc  
+        """ % (year, month)
+        records = self._db.dbGetData(query)
+        print "records: ", records
+        
+        
+        
 
 
     @cherrypy.expose
@@ -175,6 +233,241 @@ class Mc:
 
 
     @cherrypy.expose
+    def pageRefreshPlayedAlbumsArtists(self):
+        """Verversen / aanvullen afgespeelde artiesten-albums info, per jaar / maand.
+        """
+
+        # bepaal laatst verwerkte afgespeelde song
+        query = """
+            select    parameter, number_value as played_id
+            from      parameters
+            where     parameter = 'played_period_albumsartists'
+        """
+        played_id = self._db.dbGetData(query)
+        played_id = played_id[0]['played_id']
+        print "laatst verwerkte played_id: ", played_id
+
+        # laad nog te verwerken afgespeelde songs
+        query = """
+            select    played_id
+                     ,song_id
+                     ,to_char(playdate, 'yyyy') as jaar
+                     ,to_char(playdate, 'mm') as maand
+                     ,to_date(to_char(playdate, 'yyyymmdd'), 'yyyymmdd') as playdate
+            from      played
+            where     played_id > %s
+            order by  played_id
+            limit     1000
+        """ % played_id
+        played_songs = self._db.dbGetData(query)
+        # print "played_songs: ", played_songs
+
+        # doorloop afgespeelde songs
+        for played_song in played_songs:
+            print "verwerking: ", played_song['played_id']
+            # zoek album_id op in table songs
+            query = """
+                select * 
+                from songs 
+                where song_id = %s
+            """ % played_song['song_id']
+            song = self._db.dbGetData(query)
+            albumartist_id = song[0]['albumartist_id']
+            # print "\nopgezochte song: ", song
+
+            # zoek jaar, maand, albumartist_id
+            query = """
+                select * 
+                from played_period_albumsartists
+                where yr = %s and month = %s and albumartist_id = %s
+            """ % (played_song['jaar'], played_song['maand'], albumartist_id)
+            played_album = self._db.dbGetData(query)
+            # print "\nplayed_album: ", played_album
+            
+            if len(played_album) == 1:
+                # albumartiest komt al voor in de jaar/maand
+                played_album = played_album[0]
+            elif len(played_album) == 0:
+                # album komt nog niet voor in jaar/maand, laad/bepaal extra benodigde gegevens
+                played_album = {}
+                played_album['id'] = 0
+                played_album['yr'] = played_song['jaar']
+                played_album['month'] = played_song['maand']
+                played_album['albumartist_id'] = song[0]['albumartist_id']
+                played_album['albumartist'] = q(song[0]['albumartist'])
+                played_album['played_first'] = played_song['playdate']
+                played_album['played_last'] = played_song['playdate']
+                played_album['played_songs'] = 0
+            # print "\nplayed_album 2: ", played_album
+            
+            # verhoog afgespeelde songs met 1
+            played_album['played_songs'] += 1
+            # werk datums bij
+            if played_album['played_first'] > played_song['playdate']:
+                played_album['played_first'] = played_song['playdate']
+            if played_album['played_last'] < played_song['playdate']:
+                played_album['played_last'] = played_song['playdate']
+            # print "\nplayed_album 3: ", played_album
+        
+            # update of insert
+            if played_album['id'] == 0:
+                # new record, insert
+                query = """
+                    insert into played_period_albumsartists (yr, month, albumartist_id, albumartist,
+                        played_first, played_last, played_songs)
+                    values (%(yr)s, %(month)s, %(albumartist_id)s, '%(albumartist)s',
+                        '%(played_first)s', '%(played_last)s', %(played_songs)s)
+                """ % played_album
+                # print "insert query: ", query
+            else:
+                # bestaand record, update
+                query = """
+                    update played_period_albumsartists set played_first = '%(played_first)s', 
+                        played_last = '%(played_last)s', played_songs = %(played_songs)s
+                    where id = %(id)s
+                """ % played_album
+                # print "update query: ", query
+            # voer update of insert uit
+            self._db.dbExecute(query)
+
+            # werk parameter bij, geef aan dat huidige played record verwerkt is
+            query = """
+                update parameters
+                set number_value = %s
+                where parameter = 'played_period_albumsartists'
+            """ % played_song['played_id']
+            self._db.dbExecute(query)
+
+        # laad template 
+        h = mymc_html.pageRefreshPlayedAlbumsArtists()
+        
+        return h
+
+
+    @cherrypy.expose
+    def pageRefreshPlayedAlbums(self):
+        """Verversen / aanvullen afgespeelde albums info, per jaar / maand.
+        """
+
+        # bepaal laatst verwerkte afgespeelde song
+        query = """
+            select    parameter, number_value as played_id
+            from      parameters
+            where     parameter = 'played_period_albums'
+        """
+        played_id = self._db.dbGetData(query)
+        played_id = played_id[0]['played_id']
+        print "laatst verwerkte played_id: ", played_id
+
+        # laad nog te verwerken afgespeelde songs
+        query = """
+            select    played_id
+                     ,song_id
+                     ,to_char(playdate, 'yyyy') as jaar
+                     ,to_char(playdate, 'mm') as maand
+                     ,to_date(to_char(playdate, 'yyyymmdd'), 'yyyymmdd') as playdate
+            from      played
+            where     played_id > %s
+            order by  played_id
+            limit     5000
+        """ % played_id
+        played_songs = self._db.dbGetData(query)
+        # print "played_songs: ", played_songs
+
+        # doorloop afgespeelde songs
+        for played_song in played_songs:
+            print "verwerking: ", played_song['played_id']
+            # zoek album_id op in table songs
+            query = """
+                select * 
+                from songs 
+                where song_id = %s
+            """ % played_song['song_id']
+            song = self._db.dbGetData(query)
+            album_id = song[0]['album_id']
+            # print "\nopgezochte song: ", song
+
+            # zoek jaar, maand, album_id
+            query = """
+                select * 
+                from played_period_albums 
+                where yr = %s and month = %s and album_id = %s
+            """ % (played_song['jaar'], played_song['maand'], album_id)
+            played_album = self._db.dbGetData(query)
+            # print "\nplayed_album: ", played_album
+            
+            if len(played_album) == 1:
+                # album komt al voor in de jaar/maand
+                played_album = played_album[0]
+            elif len(played_album) == 0:
+                # album komt nog niet voor in jaar/maand, laad/bepaal extra benodigde gegevens
+                played_album = {}
+                played_album['id'] = 0
+                played_album['yr'] = played_song['jaar']
+                played_album['month'] = played_song['maand']
+                played_album['album_id'] = song[0]['album_id']
+                played_album['album'] = q(song[0]['album'])
+                played_album['albumartist_id'] = song[0]['albumartist_id']
+                played_album['albumartist'] = q(song[0]['albumartist'])
+                # played_album['album_folder_jpg'] = song[0]['album_folder_jpg']
+                played_album['album_folder_jpg'] = q("<#>")
+                played_album['played_first'] = played_song['playdate']
+                played_album['played_last'] = played_song['playdate']
+                played_album['played_songs'] = 0
+                # bepaal aantal songs dat het album heeft
+                query = """
+                    select count(*) as aantal
+                    from songs where album_id = %s
+                """ % song[0]['album_id']
+                aantal = self._db.dbGetData(query)
+                played_album['album_songs'] = aantal[0]['aantal']
+            # print "\nplayed_album 2: ", played_album
+            
+            # verhoog afgespeelde songs met 1
+            played_album['played_songs'] += 1
+            # werk datums bij
+            if played_album['played_first'] > played_song['playdate']:
+                played_album['played_first'] = played_song['playdate']
+            if played_album['played_last'] < played_song['playdate']:
+                played_album['played_last'] = played_song['playdate']
+            # print "\nplayed_album 3: ", played_album
+        
+            # update of insert
+            if played_album['id'] == 0:
+                # new record, insert
+                query = """
+                    insert into played_period_albums (yr, month, album_id, album, albumartist_id, albumartist,
+                        album_songs, album_folder_jpg, played_first, played_last, played_songs)
+                    values (%(yr)s, %(month)s, %(album_id)s, '%(album)s', %(albumartist_id)s, '%(albumartist)s',
+                        %(album_songs)s, '%(album_folder_jpg)s', '%(played_first)s', '%(played_last)s', %(played_songs)s)
+                """ % played_album
+                # print "insert query: ", query
+            else:
+                # bestaand record, update
+                query = """
+                    update played_period_albums set played_first = '%(played_first)s', played_last = '%(played_last)s', 
+                        played_songs = %(played_songs)s
+                    where id = %(id)s
+                """ % played_album
+                # print "update query: ", query
+            # voer update of insert uit
+            self._db.dbExecute(query)
+
+            # werk parameter bij, geef aan dat huidige played record verwerkt is
+            query = """
+                update parameters
+                set number_value = %s
+                where parameter = 'played_period_albums'
+            """ % played_song['played_id']
+            self._db.dbExecute(query)
+
+        # laad template 
+        h = mymc_html.pageRefreshPlayedAlbums()
+        
+        return h
+
+
+    @cherrypy.expose
     def pageRefreshPlayedArtists(self):
         """Verversen cijfers voor played artists.
         """
@@ -230,7 +523,7 @@ class Mc:
         where		current_date - date(played.playdate) < %(days)s
         group by 	artist_id, album_id, songs.song_id
         order by 	9 desc
-        limit 		10 """
+        limit 		1 """
 
         # vorige cijfers verwijderen
         self.dbExecute('delete from played_artists')
@@ -245,7 +538,7 @@ class Mc:
             self.dbExecute(query2 % {'period': period, 'days': periods[period], 'level': level})
 
             level = levels[2]
-            self.dbExecute(query3 % {'period': period, 'days': periods[period], 'level': level})
+            # self.dbExecute(query3 % {'period': period, 'days': periods[period], 'level': level})
             tel = tel + 3
             print 'teller: ', tel
             # break
@@ -293,9 +586,8 @@ class Mc:
 
         ### haal jaar, maand, en dag gegevens op, en maak er dictionaries van voor weergave op webpagina
         # haal jaren op
-        db = MyDB()
         query = """select year, played from played_history where month = 0"""
-        records = db.dbGetData(query)
+        records = self._db.dbGetData(query)
         yearsdict = {}
         for record in records:
             key = 'year' + str(record['year'])
@@ -309,7 +601,7 @@ class Mc:
         # haal maanden op
         query = """select year, month, played from played_history
             where year = %s and month <> 0 and day = 0""" % (year)
-        records = db.dbGetData(query)
+        records = self._db.dbGetData(query)
         monthsdict = {}
         for record in records:
             key = 'month' + str(record['month'])
@@ -324,7 +616,7 @@ class Mc:
             , ltrim(to_char(year, '9999')) || ltrim(to_char(month, '09')) || ltrim(to_char(day, '09')) as datum
             from played_history
             where year = %s and month = %s and day <> 0""" % (year, month)
-        records = db.dbGetData(query)
+        records = self._db.dbGetData(query)
         # print query
         # print records
         daysdict = {}           # per dagnr de afgespeelde records
@@ -1023,19 +1315,33 @@ class Mc:
 
         # song_id = 1 # alleen waarde geven als debuggen
 
-        # 1 - song gegevens ophalen
-        song = self.dbGetSong(song_id)
+        ## 1 - song gegevens ophalen
+        query = """
+            select *
+            from songs
+            where song_id = %s
+            """ % int(song_id)
+        song = self._db.dbGetData(query)
+        song = song[0]
 
-        # 2 - afspeel info ophalen
-        song_playinfo = dbGetSongInfoPlayed(song_id)
-        if not song_playinfo:
+        ## 2 - afspeel info ophalen
+        query = """
+            select   to_char(min(playdate), 'yyyy-mm-dd hh24:mi') as first
+            ,        to_char(max(playdate), 'yyyy-mm-dd hh24:mi') as last
+            ,        count(*) as timesplayed
+            from     played
+            where    song_id = %s
+        """ % int(song_id)
+        song_playinfo = self._db.dbGetData(query)
+        song_playinfo = song_playinfo[0]
+        if song_playinfo['timesplayed'] == 0:
             song_playinfo = {}
             song_playinfo['first'] = u"Never"
             song_playinfo['last'] = u"Never"
             song_playinfo['timesplayed'] = u"0"
         # print 'song_playinfo', song_playinfo
 
-        # 3 - rating ophalen
+        ## 3 - rating ophalen
         query = """
             select *
             from songsinfo
@@ -1050,51 +1356,25 @@ class Mc:
             song_info['notes'] = u""
         # print 'song_info', song_info
 
-        # tel alle dict bij elkaar op
+        ## tel alle dict bij elkaar op
         a = dict(song.items() + song_playinfo.items() + song_info.items())
-        # print 'a', a
+        # als er str waarden zijn, zet ze om naar unicode
+        for sleutel in a.keys():
+            if isinstance(a[sleutel], str):
+                b = a[sleutel]
+                print "sleutel: ", sleutel, 'waarde: ', b
+                a[sleutel] = b.decode('utf-8', errors='replace') 
+        # print '\nrecord: ', a
        
         ### template voor pagina
         h = mymc_html.pageSong()
-        # print 'h', h
+        # print '\ntemplate: ', h
+        # print type(h)
 
         # items voor pagina samenstellen
         h = (h % a)
         
         return h
-
-
-    def dbGetSong(self, song_id=0):
-        """dbGetSong, get a song record from the database with 1 song
-        """
-
-        ## controleer song_id
-        if song_id < 1:
-            return []
-        
-        # zoek de song op in de database
-        query = """
-            select *
-            from songs
-            where song_id = %s
-            """ % int(song_id)
-        records = self._db.dbGetData(query)
-
-        if len(records) == 1:
-            record = records[0]
-
-            folder_jpg = "/muzik3" + record['location'] + "/" + 'folder.jpg'
-            folder_jpg = urllib.quote(folder_jpg)
-            folder_jpg = MCSERVER + folder_jpg
-            record['folder_jpg'] = folder_jpg
-
-            min = str(int(record['length'] / 60)) + ":"
-            sec = str(record['length'] - int(record['length'] / 60) * 60)
-            record['length'] = min + ((sec + "00")[0:2])
-
-            # print 'dbGetSong record', record
-
-        return record
 
 
     @cherrypy.expose

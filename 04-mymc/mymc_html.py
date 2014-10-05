@@ -802,17 +802,31 @@ def pageBeheer():
     h = html_start(title) + main_navigation() + html_h1("Beheer") 
     
     table = hTable()
+    table.td("Pagina's in cache", u'beheer')
+    table.tr()
     link = hLink(u"Toon pagina's in cache", u"pageShowCache")
     table.td(link, u'beheer')
     table.tr()
     link = hLink(u"Clear cache, verwijder gegenereerde webpagina's.", u"pageClearCache")
     table.td(link, u'beheer')
     table.tr()
-    link = hLink(u"Ververs played history", u"pageRefreshPlayedHistory")
+
+    table.td("Statistieken", u'beheer')
+    table.tr()
+    link = hLink(u"Ververs afgespeeld per jaar/maand/dag", u"pageRefreshPlayedHistory")
     table.td(link, u'beheer')
     table.tr()
-    link = hLink(u"Ververs played artists", u"pageRefreshPlayedArtists")
+    link = hLink(u"Ververs afgespeelde artiesten", u"pageRefreshPlayedArtists")
     table.td(link, u'beheer')
+    table.tr()
+    link = hLink(u"Ververs afgespeelde jaar/maand/artiesten/albums", u"pageRefreshPlayedAlbums")
+    table.td(link, u'beheer')
+    table.tr()
+    link = hLink(u"Ververs afgespeelde jaar/maand/artiesten", u"pageRefreshPlayedAlbumsArtists")
+    table.td(link, u'beheer')
+    table.tr()
+
+    table.td("Info", u'beheer')
     table.tr()
     link = hLink(u"Software versies", u"pageSoftwareVersions")
     table.td(link, u'beheer')
@@ -907,11 +921,11 @@ def pagePlayedHistory(yearsdict, monthsdict, daysdict):
         <td class="played"> <a href="pagePlayedHistory?year=%(year)s&month=9">%(month9)s</a> </td>
 
         <td class="maand">10</td> 
-        <td>%(month10)s</td> 
+        <td class="played"> <a href="pagePlayedHistory?year=%(year)s&month=10">%(month10)s</a> </td> 
         <td class="maand">11</td> 
-        <td>%(month11)s</td> 
+        <td class="played"> <a href="pagePlayedHistory?year=%(year)s&month=11">%(month11)s</a> </td> 
         <td class="maand">12</td> 
-        <td>%(month12)s</td>
+        <td class="played"> <a href="pagePlayedHistory?year=%(year)s&month=12">%(month12)s</a> </td> 
     </tr>
     </table>
 """
@@ -1303,9 +1317,9 @@ def pageMenuSearch():
     table = hTable()
     table.td(hButton(u'Vrij zoeken', u'btn1', u'menuknop2', u'pageSearch'))
     table.tr()
-    table.td(hButton(u'Zoeken met selecties', u'btn2', u'menuknop2', u'pageSearchWithSelections'))
-    table.tr()
     table.td(hButton(u'Beheer selecties', u'btn3', u'menuknop2', u'/pageSelections'))
+    table.tr()
+    table.td(hButton(u'Zoeken met selecties', u'btn2', u'menuknop2', u'pageSearchWithSelections'))
     table.tr()
     table.td(hButton(u'Beheer super selecties', u'btn4', u'menuknop2', u'/pageSearchWithSelections/manageSuperSelections'))
     table.tr()
@@ -1369,6 +1383,38 @@ def pageAboutMe(records):
     """ % records
 
     h = h + html_page(ht_page) + html_end() 
+
+    return h
+
+
+def pageRefreshPlayedAlbums():
+    """Template pagina, verversen / aanvullen afgespeelde albums info, per jaar / maand.
+    """
+
+    title = u'pageRefreshPlayedAlbums'
+    h = html_start(title) + main_navigation() + html_h1(title) + html_page(u"""
+
+    <script>
+        window.history.back();
+    </script>
+
+""") + html_end()
+
+    return h
+
+
+def pageRefreshPlayedAlbumsArtists():
+    """Template pagina, verversen / aanvullen afgespeelde artiesten info, per jaar / maand.
+    """
+
+    title = u'pageRefreshPlayedAlbumsArtists'
+    h = html_start(title) + main_navigation() + html_h1(title) + html_page(u"""
+
+    <script>
+        window.history.back();
+    </script>
+
+""") + html_end()
 
     return h
 

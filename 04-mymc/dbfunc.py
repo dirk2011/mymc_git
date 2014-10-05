@@ -29,6 +29,7 @@ DBNAME="dbmc"
 DBUSER="pi" 
 DBHOST="mc"
 DBPORT="5432"
+MCSERVER = "http://192.168.1.163"
 
 
 class MyDB():
@@ -94,6 +95,17 @@ class MyDB():
                     # print 'title_link', title_link
                 if sleutel == u"artist" and hrecord[u'artist'] is not None:
                     hrecord[u"artist"] = hrecord[u"artist"].decode('utf-8', errors='replace')
+                if sleutel == u"location" and hrecord[u'location'] is not None:
+                    # voeg folder.jpg toe
+                    folder_jpg = "/muzik3" + record[u'location'] + "/" + 'folder.jpg'
+                    folder_jpg = urllib.quote(folder_jpg)
+                    folder_jpg = MCSERVER + folder_jpg
+                    hrecord['folder_jpg'] = folder_jpg
+                if sleutel == u"length" and hrecord[u'length'] is not None:
+                    # lengte van de song omrekenen, naar mins en seconden
+                    min = str(int(record['length'] / 60)) + ":"
+                    sec = str(record['length'] - int(record['length'] / 60) * 60)
+                    hrecord['length'] = min + ((sec + "00")[0:2])
             hrecord[u'volgnr'] = tel
             hrecords.append(hrecord)
         # print hrecords # zet aan voor debuggen
@@ -186,32 +198,6 @@ def q(inString):
     if isinstance(uitString, str):
         uitString = unicode(uitString, 'utf-8', errors='replace')
     return uitString
-
-
-def dbGetSongInfoPlayed(song_id="0"):
-    """Haal afspeel gegevens over een song op: eerste en laatste keer, en aantal keer
-    """
-
-    # haal gegevens op
-    query = """
-        select   to_char(min(playdate), 'yyyy-mm-dd hh24:mi') as first
-        ,        to_char(max(playdate), 'yyyy-mm-dd hh24:mi') as last
-        ,        count(*) as timesplayed
-        from     played
-        where    song_id = %s
-        """ % int(song_id)
-
-    db = MyDB()
-    records = db.dbGetData(query)
-    print 'dbGetPlayInfoSong - records', records
-    print 'query: ', query
-
-    if len(records) == 1:
-        record = records[0]
-    else:
-        record = {}
-
-    return record
 
 
 def dbSongsUpdateAlbumId():
