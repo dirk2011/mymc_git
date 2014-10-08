@@ -89,6 +89,12 @@ FUNCTIONS
     pagePlayedHistoryDetails(datum, records)
         Toon details (songs), afgespeelde songs op een bepaalde datum.
     
+    pagePlayedPeriodAlbums(year, month, albumartist, albumartist_id, records)
+        Template voor pagina played period albums
+    
+    pagePlayedPeriodAlbumsArtists(year, month, year_records, month_records, records)
+        Template voor pagina played period albumsartists per jaar / maand
+    
     pageRefreshPlayedAlbums()
         Template pagina, verversen / aanvullen afgespeelde albums info, per jaar / maand.
     

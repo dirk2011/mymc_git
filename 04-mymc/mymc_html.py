@@ -813,7 +813,7 @@ def pageBeheer():
 
     table.td("Statistieken", u'beheer')
     table.tr()
-    link = hLink(u"Ververs afgespeeld per jaar/maand/dag", u"pageRefreshPlayedHistory")
+    link = hLink(u"Ververs afgespeeld per jaar/maand/dag", u"pageRefreshPlayedHistory2")
     table.td(link, u'beheer')
     table.tr()
     link = hLink(u"Ververs afgespeelde artiesten", u"pageRefreshPlayedArtists")
@@ -1214,6 +1214,9 @@ def pageAfgespeeld():
     link = hLink(u"Afgespeeld laatste tijd per artiest", u"pagePlayedArtists")
     table.td(link, u'beheer')
     table.tr()
+    link = hLink(u"Afgespeeld per jaar/maand albumartiest", u"pagePlayedPeriodAlbumsArtists")
+    table.td(link, u'beheer')
+    table.tr()
 
     return h + html_page(table.exp()) + html_end()
 
@@ -1417,5 +1420,169 @@ def pageRefreshPlayedAlbumsArtists():
 """) + html_end()
 
     return h
+
+
+def pagePlayedPeriodAlbumsArtists(year, month, year_records, month_records, records):
+    """ Template voor pagina played period albumsartists per jaar / maand
+    """
+
+    title = u'pagePlayedPeriodAlbumsArtists'
+    h = html_start(title) + main_navigation() + html_h1("Afgespeeld per jaar/maand albumartiest " + \
+                                                        str(year) + "/" + str(month))
+
+    # template table jaren
+    ht_jaren = """
+    <h2>Jaren</h2>
+    <table> <tr>
+    %s    <!-- jaren -->
+    </tr> </table>
+    """
+
+    # template jaren details
+    ht_jaar = """
+    <td>Jaar<br> <a href="pagePlayedPeriodAlbumsArtists?year=%(yr)s"> %(yr)s </a>
+    </td>
+    """
+    
+    # template table maanden
+    ht_maanden = """
+    <h2>Maanden</h2>
+    <table>
+    %s    <!-- header -->
+    %s    <!-- maanden -->
+    </table>
+    """
+    
+    # template maanden header
+    ht_maand_header = """
+    <tr> <th>Maand</th> <th>Aantal</th> <th>Maand</th> <th>Aantal</th> <th>Maand</th> <th>Aantal</th>
+    <th>Maand</th> <th>Aantal</th> <th>Maand</th> <th>Aantal</th> <th>Maand</th> <th>Aantal</th> </tr>
+    """
+    
+    # template maanden details
+    ht_maand = """
+    <td> %(month)s </td> 
+    <td> <a href="pagePlayedPeriodAlbumsArtists?year=%(yr)s&month=%(month)s"> %(played_songs)s </a> </td>
+    """
+    
+    # template table albumartiesten
+    ht_aa = """
+    <h2>Albumartiesten</h2>
+    <table>
+    %s     <!-- artiesten -->
+    </table>
+    """
+    
+    # template detail albumartiesten
+    ht_aa_detail = """
+    <td>
+        <table class="jmaa_table">
+        <tr><td colspan="2" class="jmaa_artist">
+            <a href="pagePlayedPeriodAlbums?year=%(yr)s&month=%(month)s&albumartist_id=%(albumartist_id)s">
+            %(volgnr)s) %(albumartist)s </a> 
+        </td></tr>
+        <tr><td class="jmaa_label">Laatst:</td><td> %(played_last)s </td></tr>
+        <tr><td class="jmaa_label">Eerst: </td><td> %(played_first)s </td></tr>
+        <tr><td class="jmaa_label">Aantal: </td><td> %(played_songs)s </td></tr>
+        </table>
+    </td>
+    """
+
+    ## vul table jaren
+    htab1 = Html()
+    for record in year_records:
+        htab1.add(ht_jaar % record)
+    htab1 =  ht_jaren % htab1.exp()
+    
+    ## vul table maanden
+    htab2 = Html()
+    tel = 0
+    for record in month_records:
+        # als 0 begin nieuwe rij
+        if tel == 0:
+            htab2.add(TRO)
+        tel += 1
+        
+        htab2.add(ht_maand % record)
+        
+        # als 6 sluit rij af
+        if tel == 6:
+            htab2.add(TRC)
+            tel = 0
+    htab2 = ht_maanden % (ht_maand_header, htab2.exp()) 
+    
+    ## vul table albumartiesten
+    htab3 = Html()
+    htab3.add(TRO)
+    tel = 0
+    for record in records:
+        htab3.add(ht_aa_detail % record)
+
+        # als <n> sluit rij af
+        tel += 1
+        if tel == 5:
+            htab3.add(TRC + TRO)
+            tel = 0
+    htab3.add(TRC)
+    htab3 = ht_aa % htab3.exp()
+    
+    h = h + html_page(htab1 + htab2 + htab3) + html_end()
+
+    return h
+
+
+def pagePlayedPeriodAlbums(year, month, albumartist, albumartist_id, records):
+    """ Template voor pagina played period albums
+    """
+
+    title = u'pagePlayedPeriodAlbums'
+    h = html_start(title) + main_navigation() + html_h1("Afgespeeld per jaar/maand albumartiest " + \
+                                                        str(year) + "/" + str(month))
+
+        
+    # template table maanden
+    ht_albums = """
+    <h2> <a href="pageListAlbums_AlbumArtist?albumartist_id=%s">Artiest: %s </a> </h2>
+    <table>
+    %s    <!-- albums -->
+    </table>
+    """
+    
+    # template album details
+    ht_album = """
+    <td>
+        <table class="jmaa_table">
+        <tr><td colspan="2">
+             <a href="listAlbumTracks?album_id=%(album_id)s"> 
+                <img class="thumb" src="%(album_folder_jpg)s">
+            </a>
+        </td></tr>
+        <tr><td colspan="2" class="">%(volgnr)s) %(album)s </td></tr>
+        <tr><td class="jmaa_label">Laatst:</td><td> %(played_last)s </td></tr>
+        <tr><td class="jmaa_label">Eerst: </td><td> %(played_first)s </td></tr>
+        <tr><td class="jmaa_label">Aantal: </td><td> %(played_songs)s / %(album_songs)s </td></tr>
+        </table>
+    </td>
+    """
+
+    ## vul table albums
+    htab1 = Html()
+    htab1.add(TRO)
+    tel = 0
+    for record in records:
+        htab1.add(ht_album % record)
+
+        # als <n> sluit rij af
+        tel += 1
+        if tel == 5:
+            htab1.add(TRC + TRO)
+            tel = 0
+    htab1.add(TRC)
+    htab1 = ht_albums % (albumartist_id, albumartist, htab1.exp())
+    
+    h = h + html_page(htab1) + html_end()
+
+    return h
+
 
 # eof

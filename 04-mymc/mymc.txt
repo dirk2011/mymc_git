@@ -49,15 +49,6 @@ CLASSES
      |  dbOpen(self)
      |      open connection met de database
      |  
-     |  fill_periods(self)
-     |      Cijfers opbouwen voor pagePlayedHistory
-     |  
-     |  generate_periods(self, by=2014, bm=8, bd=1)
-     |      genereer perioden, jaren, jaar-maanden, datums
-     |      in: begin year, begin month, begin day, end year
-     |      out: list met de periods
-     |      nb, voor het gemak gaan we er van uit dat elke maand 31 dagen telt
-     |  
      |  getFromCache(self, pagename='#', key1='#', key2='#', key3='#')
      |      Check of webpagina bestaat in cache, zo ja, ophalen.
      |  
@@ -91,9 +82,6 @@ CLASSES
      |  pageMenuSearch(self)
      |      Menu pagina voor zoeken.
      |  
-     |  pagePlayedAlbumsArtists(self, year=0, month=0)
-     |      Pagina toon, afgespeelde album artiesten per jaar / maand
-     |  
      |  pagePlayedArtists(self)
      |      Afgespeelde songs per artiest, 1e selectie, welke periode
      |  
@@ -108,6 +96,12 @@ CLASSES
      |  
      |  pagePlayedHistoryDetails(self, datum='#')
      |  
+     |  pagePlayedPeriodAlbums(self, year=0, month=0, albumartist_id=0)
+     |      Pagina toon, afgespeelde album artiesten per jaar / maand
+     |  
+     |  pagePlayedPeriodAlbumsArtists(self, year=0, month=0)
+     |      Pagina toon, afgespeelde album artiesten per jaar / maand
+     |  
      |  pageRefreshPlayedAlbums(self)
      |      Verversen / aanvullen afgespeelde albums info, per jaar / maand.
      |  
@@ -117,8 +111,10 @@ CLASSES
      |  pageRefreshPlayedArtists(self)
      |      Verversen cijfers voor played artists.
      |  
-     |  pageRefreshPlayedHistory(self)
+     |  pageRefreshPlayedHistory2(self)
      |      Verversen cijfers voor played history.
+     |      Versie 2 (okt 2014) werkt met parameter waarin laatste played song wordt bijgehouden,
+     |      aanvullen gaat daarom sneller.
      |  
      |  pageSearch(self)
      |      Presenteer pagina om te zoeken.

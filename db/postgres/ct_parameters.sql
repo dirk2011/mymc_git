@@ -17,6 +17,15 @@ create table parameters
 
 
 insert into parameters (parameter, parameter_desc, number_value)
+    values ('played_history', 'aantal per jaar/maand/dag', 0) ;
+update parameters set number_value = 0 where parameter = 'played_history' ;
+
+select parameter, number_value
+from parameters
+where parameter = 'played_history' ;
+
+
+insert into parameters (parameter, parameter_desc, number_value)
     values ('played_period_albumsartists', 'laatst verwerkte played_id', 0) ;
 update parameters set number_value = 0 where parameter = 'played_period_albumsartists' ;
 
