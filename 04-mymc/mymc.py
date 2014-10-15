@@ -96,6 +96,42 @@ class Mc:
 
 
     @cherrypy.expose
+    def pageDbSongsUpdateArtistId(self):
+        """Vul ArtistId's voor nieuwe songs
+        """
+        
+        dbSongsUpdateArtistId()
+
+        h = mymc_html.pageReturn()
+
+        return h
+
+
+    @cherrypy.expose
+    def pageDbSongsUpdateAlbumArtistId(self):
+        """Vul AlbumArtistId's voor nieuwe songs
+        """
+
+        dbSongsUpdateAlbumArtistId()
+
+        h = mymc_html.pageReturn()
+
+        return h
+
+
+    @cherrypy.expose
+    def pageDbSongsUpdateAlbumId(self):
+        """Vul AlbumId's voor nieuwe songs
+        """
+
+        dbSongsUpdateAlbumId()
+
+        h = mymc_html.pageReturn()
+
+        return h
+
+
+    @cherrypy.expose
     def pageRefreshPlayedHistory2(self):
         """Verversen cijfers voor played history.
         Versie 2 (okt 2014) werkt met parameter waarin laatste played song wordt bijgehouden,
@@ -123,7 +159,7 @@ class Mc:
             from      played
             where     played_id > %s
             order by  played_id
-            limit     5000
+            limit     10000
         """ % played_id
         played_songs = self._db.dbGetData(query)
         print "played_song: ", len(played_songs)
@@ -402,7 +438,7 @@ class Mc:
             from      played
             where     played_id > %s
             order by  played_id
-            limit     1000
+            limit     10000
         """ % played_id
         played_songs = self._db.dbGetData(query)
         # print "played_songs: ", played_songs
@@ -514,7 +550,7 @@ class Mc:
             from      played
             where     played_id > %s
             order by  played_id
-            limit     5000
+            limit     10000
         """ % played_id
         played_songs = self._db.dbGetData(query)
         # print "played_songs: ", played_songs
@@ -670,22 +706,23 @@ class Mc:
         limit 		1 """
 
         # vorige cijfers verwijderen
-        self.dbExecute('delete from played_artists')
+        self._db.dbExecute('delete from played_artists')
 
-        tel = 0
         # cijfers ophalen
         for period in periods:
+            print "period: ", period, ": ", 
             level = levels[0]
-            self.dbExecute(query1 % {'period': period, 'days': periods[period], 'level': level})
+            print level, " . . . ",
+            self._db.dbExecute(query1 % {'period': period, 'days': periods[period], 'level': level})
 
             level = levels[1]
-            self.dbExecute(query2 % {'period': period, 'days': periods[period], 'level': level})
+            print level, " . . . ",
+            self._db.dbExecute(query2 % {'period': period, 'days': periods[period], 'level': level})
 
             level = levels[2]
-            # self.dbExecute(query3 % {'period': period, 'days': periods[period], 'level': level})
-            tel = tel + 3
-            print 'teller: ', tel
-            # break
+            # self._db.dbExecute(query3 % {'period': period, 'days': periods[period], 'level': level})
+
+            print
 
 
     @cherrypy.expose
@@ -1196,10 +1233,16 @@ class Mc:
         """
         record7 = db.dbGetData(query7)
 
+        ## info over parameters
+        query8 = """
+        select count(*) as num_parameters from parameters
+        """
+        record8 = db.dbGetData(query8)
+
         # één dictionary van maken
         record = dict(record1[0].items() + record2[0].items() + record3[0].items() + \
                       record4[0].items() + record5[0].items() + record6[0].items() + \
-                      record7[0].items())
+                      record7[0].items() + record8[0].items())
         print "record ", record
 
         h = mymc_html.pageInfoMc(record)
@@ -1592,11 +1635,16 @@ class Mc:
         pagename = "listAlbumTracks"
         h = self.getFromCache(pagename, album_id)
         if len(h) > 1:
-            return h
+            pass
+            # return h
         
         # haal tracks op
         query = """
-            select * from songs where album_id = %s order by tracknumber
+            -- select * from songs where album_id = s order by tracknumber
+            select    *
+            from      v_songs
+            where     album_id = %s
+            order by  tracknumber
         """ % int(album_id)
         records = self._db.dbGetData(query)
         

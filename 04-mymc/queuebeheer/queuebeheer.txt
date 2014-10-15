@@ -20,7 +20,6 @@ CLASSES
      |  
      |  __init__(self)
      |      Database verbinding maken.
-     |      @ivar _db: database
      |  
      |  index(self)
      |      sonos_menu, menu om commando's aan sonos te geven en info op te halen

@@ -70,6 +70,15 @@ CLASSES
      |  pageClearCache(self)
      |      Cache bestanden verwijderen.
      |  
+     |  pageDbSongsUpdateAlbumArtistId(self)
+     |      Vul AlbumArtistId's voor nieuwe songs
+     |  
+     |  pageDbSongsUpdateAlbumId(self)
+     |      Vul AlbumId's voor nieuwe songs
+     |  
+     |  pageDbSongsUpdateArtistId(self)
+     |      Vul ArtistId's voor nieuwe songs
+     |  
      |  pageInfoMc(self)
      |      pageInfoMc, statistieken berekenen over de muziekcollectie
      |  

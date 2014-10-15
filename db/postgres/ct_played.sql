@@ -10,6 +10,9 @@ create table played
 
 ) ;
 
+create index played_song_id on played(song_id) ;
+
+
 -- test
 insert into played (song_id) values (1001) ;
 insert into played (song_id) values (151) ;

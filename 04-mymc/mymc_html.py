@@ -383,6 +383,8 @@ def pageInfoMc(record):
             <td> Table albums        </td><td> %(num_tab_albums)s </td>
         </tr><tr class="ExtraHoog">
             <td> Table artists       </td><td> %(num_tab_artists)s </td>
+        </tr><tr class="ExtraHoog">
+            <td> Table parameters    </td><td> %(num_parameters)s </td>
         </tr>
     </table>
 """
@@ -826,6 +828,18 @@ def pageBeheer():
     table.td(link, u'beheer')
     table.tr()
 
+    table.td("Song id's vullen", u'beheer')
+    table.tr()
+    link = hLink(u"Vul album Id van nieuwe songs", u"pageDbSongsUpdateAlbumId")
+    table.td(link, u'beheer')
+    table.tr()
+    link = hLink(u"Vul albumartist Id van nieuwe songs", u"pageDbSongsUpdateAlbumArtistId")
+    table.td(link, u'beheer')
+    table.tr()
+    link = hLink(u"Vul artist Id van nieuwe songs", u"pageDbSongsUpdateArtistId")
+    table.td(link, u'beheer')
+    table.tr()
+    
     table.td("Info", u'beheer')
     table.tr()
     link = hLink(u"Software versies", u"pageSoftwareVersions")
@@ -1167,33 +1181,64 @@ def listAlbumTracks(album_id, records):
     else:
         album = "geen"
     h = html_start(title) + main_navigation() + html_h1(u'Album: %s') % album
+
+    # table header (th) 
+    ht_th = """<tr>
+        <th rowspan="2" class="info">Info</th> 
+        <th rowspan="2" class="track">#</th> 
+        <th rowspan="2" class="title"> Titel </th> 
+        <th rowspan="2" class="rating"> W </th>
+        <th             class="artist">Artiest</th>
+        <th             class="firstlast"> Eerste keer </th>
+        <th rowspan="2" class="played">T</th>
+        <th rowspan="2" class="played">LQ</th>
+        <th rowspan="2" class="played">LM</th>
+        <th rowspan="2" class="played">LW</th>
+    </tr>
+    <tr>
+        <th class="title"> (voeg aan afspeellijst toe) </th>
+        <th class="firstlast"> Laatste keer <th>
+    </tr>
+    """
     
+    # table data (td)
+    ht_td = u"""<tr class="tr_track">
+        <td rowspan="2" class="info">
+            <a href="/pageSong?song_id=%(song_id)s">Info</a>
+        </td>
+        <td rowspan="2" class="track">
+            %(volgnr)s
+        </td>
+        <td rowspan="2" class="title">
+            <a href="/playAlsoSong?song_id=%(song_id)s">
+                %(title)s
+            </a>
+        </td>
+        <td rowspan="2" class="rating"> %(rating)s
+        <td class="artist">
+            <a href="/pageListAlbums_AlbumArtist?albumartist_id=%(albumartist_id)s">
+                %(albumartist)s
+            </a>
+        </td>
+        <td class="firstlast">
+                %(firstplayed)s
+        </td>
+        <td rowspan="2" class="played"> %(played)s </td>
+        <td rowspan="2" class="played"> %(lq)s </td>
+        <td rowspan="2" class="played"> %(lm)s </td>
+        <td rowspan="2" class="played"> %(lw)s </td>
+    </tr>
+    <tr>
+        <td class="artist"> %(artist)s </td>
+        <td class="firstlast"> %(lastplayed)s </td>
+    </tr>
+    """
+
+    # doorloop alle records
     table = hTable()
-    table.add(TRO + u"""
-    <th>Playlist</th> <th>Play</th> <th>Track</th> <th>Titel</th> <th>Lengte</th> <th>Bitrate</th>
-    """ + TRC)
-    
+    table.add(ht_th)    
     for record in records:
-        # print str(record['tracknumber']), record['title']
-        table.add(u'<tr class="ExtraHoog">') 
-        table.add(TDO + u'<a href="playAlsoSong?song_id=' + str(record[u'song_id']) + u'">' \
-                  + u'Add</a>' + TDC)
-        
-        table.add(TDO + u'<a href="playSong?song_id=' + str(record[u'song_id']) + u'">' \
-                  + u' Play</a>' + TDC)
-        
-        table.add(TDO + str(record[u'tracknumber']) + TDC)
-        
-        title = record[u'title']
-        # title = unicode(title, 'utf-8', errors='replace')
-        # print 'title', type(title), title
-        table.add(TDO + title + u"</a>" + TDC)
-        
-        table.add(TDO + str(record[u'length']) + TDC)
-        table.add(TDO + str(record[u'bitrate']) + TDC)
-        table.add(TDO + u'<a href="pageSong?song_id=' + str(record[u'song_id']) + '">')
-        table.add(u"Infopage" + u'</a>' + TDC)
-        table.add(TRC)
+        table.add(ht_td % record)
             
     h = h + html_page(table.exp()) + html_end()
     
@@ -1584,5 +1629,20 @@ def pagePlayedPeriodAlbums(year, month, albumartist, albumartist_id, records):
 
     return h
 
+
+def pageReturn():
+    """Template pagina, doet maar één ding terug naar vorige pagina
+    """
+
+    title = u'pageReturn'
+    h = html_start(title) + main_navigation() + html_h1(title) + html_page(u"""
+
+    <script>
+        window.history.back();
+    </script>
+
+""") + html_end()
+
+    return h
 
 # eof

@@ -107,6 +107,9 @@ FUNCTIONS
     pageRefreshPlayedHistory()
         pageRefreshPlayedHistory, cijfers verversen voor played history.
     
+    pageReturn()
+        Template pagina, doet maar één ding terug naar vorige pagina
+    
     pageSearch()
         Pagina om te zoeken in de muziek collectie.
     
