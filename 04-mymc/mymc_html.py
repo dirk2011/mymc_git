@@ -806,16 +806,17 @@ def pageBeheer():
     table = hTable()
     table.td("Pagina's in cache", u'beheer')
     table.tr()
-    link = hLink(u"Toon pagina's in cache", u"pageShowCache")
-    table.td(link, u'beheer')
-    table.tr()
     link = hLink(u"Clear cache, verwijder gegenereerde webpagina's.", u"pageClearCache")
+    table.td(link, u'beheer')
+    link = hLink(u"Toon pagina's in cache", u"pageShowCache")
     table.td(link, u'beheer')
     table.tr()
 
     table.td("Statistieken", u'beheer')
     table.tr()
     link = hLink(u"Ververs afgespeeld per jaar/maand/dag", u"pageRefreshPlayedHistory2")
+    table.td(link, u'beheer')
+    link = hLink(u"Controle", u"pageCheckPlayedHistory")
     table.td(link, u'beheer')
     table.tr()
     link = hLink(u"Ververs afgespeelde artiesten", u"pageRefreshPlayedArtists")
@@ -825,6 +826,8 @@ def pageBeheer():
     table.td(link, u'beheer')
     table.tr()
     link = hLink(u"Ververs afgespeelde jaar/maand/artiesten", u"pageRefreshPlayedAlbumsArtists")
+    table.td(link, u'beheer')
+    link = hLink(u"Controle", u"pageCheckPlayedAlbumsArtists")
     table.td(link, u'beheer')
     table.tr()
 
@@ -1186,9 +1189,9 @@ def listAlbumTracks(album_id, records):
     ht_th = """<tr>
         <th rowspan="2" class="info">Info</th> 
         <th rowspan="2" class="track">#</th> 
-        <th rowspan="2" class="title"> Titel </th> 
+        <th             class="title"> Titel (link = voeg toe)</th> 
         <th rowspan="2" class="rating"> W </th>
-        <th             class="artist">Artiest</th>
+        <th             class="artist">Album artiest</th>
         <th             class="firstlast"> Eerste keer </th>
         <th rowspan="2" class="played">T</th>
         <th rowspan="2" class="played">LQ</th>
@@ -1196,8 +1199,12 @@ def listAlbumTracks(album_id, records):
         <th rowspan="2" class="played">LW</th>
     </tr>
     <tr>
-        <th class="title"> (voeg aan afspeellijst toe) </th>
-        <th class="firstlast"> Laatste keer <th>
+        <th class="length"> Speeltijd </th>
+        <th class="artist"> Artiest </th>
+        <th class="firstlast"> Laatste keer </th>
+    </tr>
+    <tr>
+        <td class="lijn" colspan="10"> </td>
     </tr>
     """
     
@@ -1209,7 +1216,7 @@ def listAlbumTracks(album_id, records):
         <td rowspan="2" class="track">
             %(volgnr)s
         </td>
-        <td rowspan="2" class="title">
+        <td class="title">
             <a href="/playAlsoSong?song_id=%(song_id)s">
                 %(title)s
             </a>
@@ -1229,8 +1236,12 @@ def listAlbumTracks(album_id, records):
         <td rowspan="2" class="played"> %(lw)s </td>
     </tr>
     <tr>
+        <td class="length"> %(length)s </td>
         <td class="artist"> %(artist)s </td>
         <td class="firstlast"> %(lastplayed)s </td>
+    </tr>
+    <tr>
+        <td class="lijn" colspan="10"> </td>
     </tr>
     """
 
@@ -1262,9 +1273,11 @@ def pageAfgespeeld():
     link = hLink(u"Afgespeeld per jaar/maand albumartiest", u"pagePlayedPeriodAlbumsArtists")
     table.td(link, u'beheer')
     table.tr()
+    link = hLink(u"Afgespeelde 1000-tallen", u"pageTimeline")
+    table.td(link, u'beheer')
+    table.tr()
 
     return h + html_page(table.exp()) + html_end()
-
 
 
 def tableWithSongs(records):
@@ -1645,4 +1658,151 @@ def pageReturn():
 
     return h
 
+def pageCheckPlayedAlbumsArtists(records1, records2, records3, records4, records5):
+    """ Template voor pageCheckPlayedAlbumsArtists 
+    """
+
+    title = u'pageCheckPlayedAlbumsArtists'
+    h = html_start(title) + main_navigation() + html_h1("Steekproeven: afgespeeld per jaar/maand albumartiest")
+
+    ht_1 = """
+        <tr><td>Controle 1</td></tr>
+        <tr><td></td> <td>Aantal afgespeeld: </td> <td> %(played_songs)s </td></tr>
+    """
+    
+    ht_2 = """
+        <tr><td>Controle 2</td></tr>
+        <tr><td></td> <td>Eerste jaar: </td> <td> %(yr)s </td></tr>
+        <tr><td></td> <td>Eerste maand: </td> <td> %(month)s </td></tr>
+        <tr><td></td> <td>Eerste dag: </td> <td> %(played_first)s </td></tr>
+    """
+    
+    ht_3 = """
+        <tr><td>Controle 3</td></tr>
+        <tr><td></td> <td>Laatste jaar: </td> <td> %(yr)s </td></tr>
+        <tr><td></td> <td>Laatste maand: </td> <td> %(month)s </td></tr>
+        <tr><td></td> <td>Laatste dag: </td> <td> %(played_last)s </td></tr>
+    """
+
+    ht_4 = """
+        <tr><td>Controle 4</td></tr>
+        <tr><td></td> <td>Unieke eerste dagen: </td> <td> %(played_first)s </td></tr>
+    """
+
+    ht_5 = """
+        <tr><td>Controle 5</td></tr>
+        <tr><td></td> <td>Unieke albumartiesten: </td> <td> %(albumartist_count)s </td></tr>
+    """
+
+    ht_table = """
+    <table>
+        %s    <!-- 1 -->
+        %s    <!-- 2 -->
+        %s    <!-- 3 -->
+        %s    <!-- 4 -->
+        %s    <!-- 5 -->
+    </table>
+    """
+
+    ht_1 = ht_1 % records1[0]
+    ht_2 = ht_2 % records2[0]
+    ht_3 = ht_3 % records3[0]
+    ht_4 = ht_4 % records4[0]
+    ht_5 = ht_5 % records5[0]
+    ht_table = ht_table % (ht_1, ht_2, ht_3, ht_4, ht_5)
+
+    h = h + html_page(ht_table + html_end())
+
+    return h
+
+
+def pageCheckPlayedHistory(records):
+    """Template pagina voor pageCheckPlayedHistory 
+    """
+
+    title = u'pageCheckPlayedHistory'
+    h = html_start(title) + main_navigation() + html_h1("Eenvoudige visuele controle played_history")
+
+    # header
+    ht_h = """
+        <tr>
+            <th class="volgnr">Volgnr</th>
+            <th class="telling">Telling</th>
+            <th class="soort">Soort</th>
+            <th class="aantal">Aantal</th>
+        </tr>
+    """
+    
+    # td regel
+    ht_d = """
+        <tr>
+            <td class="volgnr">%(volgnr)s</td>
+            <td class="telling">%(telling)s</td>
+            <td class="soort">%(soort)s</td>
+            <td class="aantal">%(aantal)s</td>
+        </tr>
+    """
+    
+    ht_t = """
+        <table>
+            %s <!-- header -->
+            %s <!-- rijen -->
+        </table>
+    """
+
+    table = Html()
+    for record in records:
+        table.add(ht_d % record)
+
+    h = h + html_page(ht_t % (ht_h, table.exp()) + html_end())
+
+    return h
+
+
+def pageTimeline(records):
+    """Template voor tonen afgespeelde 1000-tallen.
+    """
+    
+    title = u'pageTimeline'
+    h = html_start(title) + main_navigation() + html_h1("Afgespeelde 1000-tallen")
+
+    ht_table = """
+    <table>
+        %s <!-- header -->
+        %s <!-- data   -->
+    </table>
+    """
+    
+    ht_th = """
+        <tr>
+            <th class="volgnr">Volgnr</th>
+            <th class="datum">Datum</th>
+            <th class="afgespeeld">Afgespeeld</th>
+            <th class="dagen">Dagen</th>
+        </tr>
+    """
+    
+    ht_td = """
+        <tr>
+            <td class="volgnr">%(sort)s</td>
+            <td class="datum">%(playdate)s</td>
+            <td class="afgespeeld">%(played)s</td>
+            <td class="dagen">%(days)s</td>
+        </tr>
+    """
+
+    tab = Html()
+    for record in records:
+        if record['days'] is not None:
+            record['days'] = int(record['days'])
+        else:
+            record['days'] = ""
+        tab.add(ht_td % record)
+    tab = tab.exp()
+        
+    h = h + html_page(ht_table % (ht_th, tab) + html_end())
+    
+    return h
+
+    
 # eof

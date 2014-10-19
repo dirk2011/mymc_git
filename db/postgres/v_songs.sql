@@ -1,5 +1,8 @@
 -- view voor gegevensweergave voor zoeken met selections
 
+-- 13 okt 2014, firstplayed, lq, lw, lm, toegevoegd
+-- 15 okt 2014, length toegevoegd
+
 drop view v_songs ;
 
 create view v_songs
@@ -30,6 +33,7 @@ select 	songs.song_id
                  else 0 end) as lm	-- last month
 ,       sum(case when extract(day from now() - played.playdate) <= 90 then 1
                  else 0 end) as lq	-- last quarter
+,       max(songs.length) as length
 from 	songs
 left join songsinfo
 on 	songs.song_id = songsinfo.song_id
@@ -37,3 +41,7 @@ left join played
 on 	songs.song_id = played.song_id
 group by songs.song_id ;
 
+
+
+,       max(to_char(songs.length / 60, '99') || ':' || trim(to_char(length - (length / 60) * 60, '00')))
+                 as length

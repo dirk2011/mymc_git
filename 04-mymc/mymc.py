@@ -132,6 +132,38 @@ class Mc:
 
 
     @cherrypy.expose
+    def pageTimeline(self):
+        """ Toon wanneer 1000-tallen zijn afgespeeld.
+        """
+        
+        query = """
+            select    *
+            from      v_timeline
+        """
+        records = self._db.dbGetData(query)
+        
+        h = mymc_html.pageTimeline(records)
+        
+        return h
+
+    
+    @cherrypy.expose
+    def pageCheckPlayedHistory(self):
+        """ Toon cijfers om played_history eenvoudig visueel te checken
+        """
+
+        query = """
+            select    *
+            from      v_check_played_history
+        """
+        records = self._db.dbGetData(query)
+
+        h = mymc_html.pageCheckPlayedHistory(records)
+
+        return h
+
+
+    @cherrypy.expose
     def pageRefreshPlayedHistory2(self):
         """Verversen cijfers voor played history.
         Versie 2 (okt 2014) werkt met parameter waarin laatste played song wordt bijgehouden,
@@ -409,6 +441,62 @@ class Mc:
         """
 
         h = mymc_html.pagePlayedArtists()
+
+        return h
+
+
+    @cherrypy.expose
+    def pageCheckPlayedAlbumsArtists(self):
+        """ Steekproeven op table: PlayedAlbumsArtists 
+        """
+        
+        query1 = """
+            -- aantal afgespeeld
+            select    sum(played_songs) as played_songs
+            from      played_period_albumsartists ;
+        """
+        records1 = self._db.dbGetData(query1)
+
+        query2 = """
+            -- eerste dag
+            select    yr, month, played_first
+            from      played_period_albumsartists 
+            order by  1, 2, 3
+            limit     1 ;
+        """
+        records2 = self._db.dbGetData(query2)
+
+        query3 = """
+            -- laatste dag
+            select    yr, month, played_last
+            from      played_period_albumsartists 
+            order by  3 desc
+            limit     1 ;
+        """
+        records3 = self._db.dbGetData(query3)
+
+        query4 = """
+            -- distinct played_first
+            select    count(*) as played_first
+            from     (
+                      select   distinct played_first
+                      from     played_period_albumsartists 
+                     ) as a
+        """
+        records4 = self._db.dbGetData(query4)
+
+        query5 = """
+            -- distinct albumartist
+            select    count(*) as albumartist_count
+            from     (
+                      select   distinct albumartist
+            ,                  albumartist_id
+                      from     played_period_albumsartists 
+                     ) as a
+        """
+        records5 = self._db.dbGetData(query5)
+
+        h = mymc_html.pageCheckPlayedAlbumsArtists(records1, records2, records3, records4, records5)
 
         return h
 
@@ -1066,7 +1154,7 @@ class Mc:
             group by songs.song_id, songs.title, songs.album, songs.artist, songs.albumartist, songs.year """
         if len(having) > 0:
             having = ' having ' + having
-        query3 = " order by songs.year, songs.tracknumber limit 40 "
+        query3 = " order by songs.year, songs.tracknumber limit 100 "
         query = query1 + where + query2 + having + query3
         # print 'query', query
 

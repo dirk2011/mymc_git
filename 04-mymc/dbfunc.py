@@ -105,7 +105,7 @@ class MyDB():
                     # lengte van de song omrekenen, naar mins en seconden
                     min = str(int(record['length'] / 60)) + ":"
                     sec = str(record['length'] - int(record['length'] / 60) * 60)
-                    hrecord['length'] = min + ((sec + "00")[0:2])
+                    hrecord['length'] = min + (("00" + sec)[-2:])
             hrecord[u'volgnr'] = tel
             hrecords.append(hrecord)
         # print hrecords # zet aan voor debuggen

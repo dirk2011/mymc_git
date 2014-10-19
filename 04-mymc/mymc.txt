@@ -67,6 +67,12 @@ CLASSES
      |  pageBeheer(self)
      |      Menu pagina voor beheer.
      |  
+     |  pageCheckPlayedAlbumsArtists(self)
+     |      Steekproeven op table: PlayedAlbumsArtists
+     |  
+     |  pageCheckPlayedHistory(self)
+     |      Toon cijfers om played_history eenvoudig visueel te checken
+     |  
      |  pageClearCache(self)
      |      Cache bestanden verwijderen.
      |  
@@ -145,6 +151,9 @@ CLASSES
      |  
      |  pageSonosSpeakers(self)
      |      pageSonosSpeakers, toon status sonos speaker, verander volume
+     |  
+     |  pageTimeline(self)
+     |      Toon wanneer 1000-tallen zijn afgespeeld.
      |  
      |  partPageSongRating(self, song_id=0)
      |      html code om song rating in te voegen

@@ -48,6 +48,12 @@ FUNCTIONS
     pageBeheer()
         Pagina voor beheer, verversen en opschonen, van tabellen, pagina's.
     
+    pageCheckPlayedAlbumsArtists(records1, records2, records3, records4, records5)
+        Template voor pageCheckPlayedAlbumsArtists
+    
+    pageCheckPlayedHistory(records)
+        Template pagina voor pageCheckPlayedHistory
+    
     pageClearCache(records)
         Pagina, voor als op clear cache is gedrukt.
         Er wordt een overzicht getoond van verwijderde pagina's uit de cache.
@@ -131,6 +137,9 @@ FUNCTIONS
     pageSonosSpeakers(records)
         Geef web pagina terug, om volume van de speakers te beheren.
         Tevens geeft dit inzicht in alle sonos componenten.
+    
+    pageTimeline(records)
+        Template voor tonen afgespeelde 1000-tallen.
     
     sonosSetVolume(record)
         Dummy html pagina, de mymc functie past het volume aan van de gevraagde speaker.
