@@ -1462,32 +1462,58 @@ class Mc:
         
         return h
 
+
     @cherrypy.expose
-    def pageSongSave(self, song_id=-1, rating=-1):
-        """pageSongSave, pageSong submit verwerken en opslaan
+    def pageSongLyricSave(self, song_id=-1, lyric=" "):
+        """Songtekst opslaan.
         """
 
-        self.dbOpen()
-        Mc.cursor.execute("""
+        query = """
+            select count(*) as aantal from songslyrics where song_id = %s
+        """ % song_id
+        recordset = self._db.dbGetData(query) 
+        recordset = recordset[0]
+
+        lyric = q(lyric)  # q, handel quotes in tekst af
+        if recordset['aantal'] > 0:
+            # doe een update
+            query = """update songslyrics set lyric = '%s' where song_id = %s
+            """ % (lyric, song_id)
+            self._db.dbExecute(query)
+        else:
+            # doe een insert
+            query = """
+                insert into songslyrics (lyric, song_id) values('%s', %s)
+            """ % (lyric, song_id)
+            self._db.dbExecute(query)
+
+        # pagina laden voor als antwoord terug aan de server
+        h = mymc_html.pageSongSave
+        return h
+
+    
+    @cherrypy.expose
+    def pageSongSave(self, song_id=-1, rating=-1):
+        """Waardering (rating) opslaan.
+        """
+
+        query = """
             select count(*) as aantal from songsinfo where song_id = %s
-            """ % song_id)
-        recordset = Mc.cursor.fetchall()
+        """ % song_id
+        recordset = self._db.dbGetData(query) 
         recordset = recordset[0]
 
         if recordset['aantal'] > 0:
             # doe een update
-            Mc.cursor.execute("""
-                update songsinfo set rating = %s where song_id = %s
-                """ % (rating, song_id))
+            query = """update songsinfo set rating = %s where song_id = %s
+            """ % (rating, song_id)
+            self._db.dbExecute(query)
         else:
             # doe een insert
-            Mc.cursor.execute("""
+            query = """
                 insert into songsinfo (rating, song_id) values(%s, %s)
-                """ % (rating, song_id))
-
-        Mc.connection.commit()
-        # cursor.close()
-        # connection.close()
+            """ % (rating, song_id)
+            self._db.dbExecute(query)
 
         # pagina laden voor als antwoord terug aan de server
         h = mymc_html.pageSongSave
@@ -1542,8 +1568,26 @@ class Mc:
             song_info['notes'] = u""
         # print 'song_info', song_info
 
+        ## 4 - lyric ophalen
+        query = """
+            select *
+            from songslyrics
+            where song_id = %s
+        """ % int(song_id)
+        song_lyric = self._db.dbGetData(query)
+        if len(song_lyric) == 1:
+            song_lyric = song_lyric[0]
+            song_lyric['song_lyric_lines'] = song_lyric['lyric'].count('\n') + 1
+            if song_lyric['song_lyric_lines'] < 3:
+                song_lyric['song_lyric_lines'] = 3
+        else:
+            song_lyric = {}
+            song_lyric['lyric'] = u""
+            song_lyric['song_lyric_lines'] = 3
+        # print 'song_lyric:', song_lyric
+
         ## tel alle dict bij elkaar op
-        a = dict(song.items() + song_playinfo.items() + song_info.items())
+        a = dict(song.items() + song_playinfo.items() + song_info.items() + song_lyric.items())
         # als er str waarden zijn, zet ze om naar unicode
         for sleutel in a.keys():
             if isinstance(a[sleutel], str):

@@ -146,8 +146,11 @@ CLASSES
      |  pageSong(self, song_id='0')
      |      Presenteer pagina om een song te raadplegen, en waardering op te geven.
      |  
+     |  pageSongLyricSave(self, song_id=-1, lyric=' ')
+     |      Songtekst opslaan.
+     |  
      |  pageSongSave(self, song_id=-1, rating=-1)
-     |      pageSongSave, pageSong submit verwerken en opslaan
+     |      Waardering (rating) opslaan.
      |  
      |  pageSonosSpeakers(self)
      |      pageSonosSpeakers, toon status sonos speaker, verander volume

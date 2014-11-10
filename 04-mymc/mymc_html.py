@@ -258,7 +258,27 @@ def pageSong():
   </td>
 </tr>
 
-</table>
+<tr>
+    <td colspan="2">
+    <fieldset><legend>Songstekst</legend>
+    <table>
+    <tr><td>
+    <form action="pageSongLyricSave">
+
+    <textarea name="lyric" cols="60" rows="%(song_lyric_lines)s">
+%(lyric)s</textarea>
+    <br><br>
+    <input type="submit" value="Ok">
+    <input type="text" hidden name="song_id" value="%(song_id)s">
+    
+    </form>
+    </td></tr>
+    </table>
+    </fieldset>
+    </td>
+</tr>
+
+</td></tr></table>
 """) + html_end()
 
 
