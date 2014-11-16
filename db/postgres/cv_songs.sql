@@ -2,6 +2,7 @@
 
 -- 13 okt 2014, firstplayed, lq, lw, lm, toegevoegd
 -- 15 okt 2014, length toegevoegd
+-- 11 nov 2014, songslyrics toegevoegd
 
 drop view v_songs ;
 
@@ -34,11 +35,15 @@ select 	songs.song_id
 ,       sum(case when extract(day from now() - played.playdate) <= 90 then 1
                  else 0 end) as lq	-- last quarter
 ,       max(songs.length) as length
+        -- 11 nov 2014, no/yes for lyrics
+,	case when max(songslyrics.song_id) is null then 'No' else 'Yes' end as lyric
 from 	songs
 left join songsinfo
 on 	songs.song_id = songsinfo.song_id
 left join played
 on 	songs.song_id = played.song_id
+left join songslyrics	-- bevat maar 1 record per song
+on      songs.song_id = songslyrics.song_id
 group by songs.song_id ;
 
 

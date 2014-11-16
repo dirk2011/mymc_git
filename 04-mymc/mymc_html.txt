@@ -34,7 +34,7 @@ FUNCTIONS
         geef link terug: href naar song info pagina
     
     listAlbumTracks(album_id, records)
-        HTML voor: toon alle songs van een album
+        Html template voor: toon alle songs van een album
     
     main_navigation()
         Menu voor de website.

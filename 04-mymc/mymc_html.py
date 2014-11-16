@@ -1190,7 +1190,7 @@ def pageListAlbums_AlbumArtist(records):
 
 
 def listAlbumTracks(album_id, records):
-    """HTML voor: toon alle songs van een album
+    """Html template voor: toon alle songs van een album
     """
 
     # pagina title 
@@ -1256,7 +1256,7 @@ def listAlbumTracks(album_id, records):
         <td rowspan="2" class="played"> %(lw)s </td>
     </tr>
     <tr>
-        <td class="length"> %(length)s </td>
+        <td class="length"> %(length)s - Lyric: %(lyric)s </td>
         <td class="artist"> %(artist)s </td>
         <td class="firstlast"> %(lastplayed)s </td>
     </tr>

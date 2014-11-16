@@ -8,7 +8,7 @@ en afspelen via sonos.
 """
 
 __author__  = 'dp'
-__date__    = '2014-09'
+__date__    = '2014-11'
 
 
 # pylint: disable=C0103, C0301, R0201
@@ -1468,23 +1468,32 @@ class Mc:
         """Songtekst opslaan.
         """
 
-        query = """
-            select count(*) as aantal from songslyrics where song_id = %s
-        """ % song_id
-        recordset = self._db.dbGetData(query) 
-        recordset = recordset[0]
+        # q, handel quotes in tekst af
+        lyric = q(lyric)
 
-        lyric = q(lyric)  # q, handel quotes in tekst af
-        if recordset['aantal'] > 0:
-            # doe een update
-            query = """update songslyrics set lyric = '%s' where song_id = %s
+        # als lengte tekst groter dan 1 opslaan
+        if len(lyric.strip()) > 1:
+            # update, als lyric al bestaat
+            query = """
+                update songslyrics set lyric = '%s' where song_id = %s
             """ % (lyric, song_id)
             self._db.dbExecute(query)
-        else:
-            # doe een insert
+    
+            # insert, als lyric niet bestaat
             query = """
-                insert into songslyrics (lyric, song_id) values('%s', %s)
-            """ % (lyric, song_id)
+                insert into songslyrics (lyric, song_id)
+                select '%s', %s
+                where not exists (
+                    select 1 from songslyrics where song_id = %s
+                )
+            """ % (lyric, song_id, song_id)
+            self._db.dbExecute(query)
+        else:
+            # songtekst te kort, verwijder
+            query = """
+                delete from songslyrics
+                where song_id = %s
+            """ % song_id
             self._db.dbExecute(query)
 
         # pagina laden voor als antwoord terug aan de server
