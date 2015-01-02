@@ -199,7 +199,27 @@ class Mc:
         ### doorloop afgespeelde songs
         for played_song in played_songs:
             print "verwerking: ", played_song['played_id']
-            
+
+            ## jaar "0" toegevoegd, voor totaal (01-2015)
+            query = """
+                insert into played_history (year, month, day, played)
+                select 0, 0, 0, 0
+                where not exists (
+                    select   *
+                    from     played_history
+                    where    year = 0 and month = 0 and day = 0
+                ) 
+            """
+            self._db.dbExecute(query)
+
+            ## werk jaar 0 bij
+            query = """
+                update     played_history
+                set        played = played + 1
+                where      year = 0 and month = 0 and day = 0
+            """
+            self._db.dbExecute(query)
+
             ## als jaar nog niet bestaat voeg het toe
             year = int(played_song['year'])
             query = """
@@ -832,24 +852,23 @@ class Mc:
         """Toon per jaar, maand en dag, aantal afgespeelde songs.
         """
 
-        if year == 0 or month == 0:
+        if year == 0:
             today = datetime.datetime.now()
             year = today.year
+        if month == 0:
+            today = datetime.datetime.now()
             month = today.month
 
         ### haal jaar, maand, en dag gegevens op, en maak er dictionaries van voor weergave op webpagina
         # haal jaren op
-        query = """select year, played from played_history where month = 0"""
-        records = self._db.dbGetData(query)
-        yearsdict = {}
-        for record in records:
-            key = 'year' + str(record['year'])
-            yearsdict[key] = record['played']
-        # voeg ook year en month toe aan dictionary
-        yearsdict['year'] = year
-        yearsdict['month'] = month
-        #print records
-        #print 'yearsdict', yearsdict
+        query = """
+            select    year, played 
+            from      played_history
+            where     month = 0
+            order by  year
+        """
+        yearsdict = self._db.dbGetData(query)
+        print 'yearsdict: ', yearsdict
 
         # haal maanden op
         query = """select year, month, played from played_history
@@ -880,7 +899,7 @@ class Mc:
             daysdict[key2] = record['datum']
         # print 'daysdict', daysdict
 
-        h = mymc_html.pagePlayedHistory(yearsdict, monthsdict, daysdict)
+        h = mymc_html.pagePlayedHistory(year, month, yearsdict, monthsdict, daysdict)
         # print h
 
         return h
@@ -1326,11 +1345,17 @@ class Mc:
         select count(*) as num_parameters from parameters
         """
         record8 = db.dbGetData(query8)
+        
+        ## info over songsteksten
+        query9 = """
+        select count(*) as num_songslyrics from songslyrics
+        """
+        record9 = db.dbGetData(query9)
 
         # één dictionary van maken
         record = dict(record1[0].items() + record2[0].items() + record3[0].items() + \
                       record4[0].items() + record5[0].items() + record6[0].items() + \
-                      record7[0].items() + record8[0].items())
+                      record7[0].items() + record8[0].items() + record9[0].items())
         print "record ", record
 
         h = mymc_html.pageInfoMc(record)

@@ -405,6 +405,8 @@ def pageInfoMc(record):
             <td> Table artists       </td><td> %(num_tab_artists)s </td>
         </tr><tr class="ExtraHoog">
             <td> Table parameters    </td><td> %(num_parameters)s </td>
+        </tr><tr class="ExtraHoog">
+            <td> Table songslyrics   </td><td> %(num_songslyrics)s </td>
         </tr>
     </table>
 """
@@ -906,7 +908,7 @@ def pageRefreshPlayedArtists():
     return h
 
     
-def pagePlayedHistory(yearsdict, monthsdict, daysdict):
+def pagePlayedHistory(year, month, yearsdict, monthsdict, daysdict):
     """Toon webpagina met afspeel resultaten per jaar, maand, dag,
     met doorklik naar ander jaar en maand.
     """
@@ -914,18 +916,25 @@ def pagePlayedHistory(yearsdict, monthsdict, daysdict):
     title = u'pagePlayedHistory'
     h = html_start(title) + main_navigation() + html_h1(u'Afgespeeld per periode')
 
-    # deel 1, jaren
-    h_part1_d = u"""
-    <h2>Jaren</h2>
-    <table>
-    <tr>
-      <th>Jaar</th><th>Aantal</th> 
-    </tr><tr>
-      <td>2014</td> <td class="played">%(year2014)s</td>
-    </tr>
-    </table>
+    # totaal van allen jaren
+    h_year_t = u"""
+        <h2>Jaren, totaal: %(played)s</h2>
 """
-
+    # totaal per jaar
+    h_year_d = u"""
+        <table>
+            <tr>
+                <td class="played">
+                    %(year)s
+                </td>  
+            </tr><tr>
+                <td class="played">
+                    <a href="pagePlayedHistory?year=%(year)s"> %(played)s </a>
+                </td>
+            </tr>
+        </table>
+"""
+    
     # deel 2, maanden
     h_part2_d = u"""
     <h2>Maanden</h2>
@@ -936,11 +945,11 @@ def pagePlayedHistory(yearsdict, monthsdict, daysdict):
     </tr>
     <tr>
         <td class="maand">01</td>
-        <td>%(month1)s</td> 
+        <td class="played"> <a href="pagePlayedHistory?year=%(year)s&month=1">%(month1)s</a> </td>  
         <td class="maand">02</td> 
-        <td>%(month2)s</td>
+        <td class="played"> <a href="pagePlayedHistory?year=%(year)s&month=2">%(month2)s</a> </td>  
         <td class="maand">03</td> 
-        <td>%(month3)s</td>
+        <td class="played"> <a href="pagePlayedHistory?year=%(year)s&month=3">%(month3)s</a> </td>  
         
         <td class="maand">04</td> 
         <td>%(month4)s</td> 
@@ -1029,8 +1038,22 @@ def pagePlayedHistory(yearsdict, monthsdict, daysdict):
         key = u'dayb' + str(tel)
         if key not in daysdict.keys():
             daysdict[key] = u''
-    
-    h_page = (h_part1_d % yearsdict)
+
+    ### genereer html
+    ## h2 heade, totaal alle jaren
+    record = yearsdict[0]
+    yearsdict = yearsdict[1:]
+    h_page = h_year_t % record 
+
+    ## de jaren
+    h_jaren = hTable()
+    for record in yearsdict:
+        print "html record: ", record
+        h_jaren.add(TDO)
+        h_jaren.add(h_year_d % record)
+        h_jaren.add(TDC)
+    h_page = h_page + h_jaren.exp()
+
     h_page = h_page + (h_part2_d % monthsdict)
     h_page = h_page + (h_part3_d % daysdict)
     h = h + html_page(h_page) + html_end()
