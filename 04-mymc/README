@@ -1,5 +1,30 @@
-MC, muziek collectie
+mc = Music Collection
 
+Maakt gebruik van mutagen, Soco, sqlite3 en pycherry.
+
+Voordat de songs ingelezen kunnen worden in de database moeten ze van een uniek 
+nummer worden voorzien. Doel hiervan is dat als de songs verplaatst worden naar
+een andere map ze altijd teruggevonden kunnen worden.
+De eerste stap voor het inlezen is dan ook: 01-nummeren.
+
+================================================================================
+2015-01-04
+
+pageAlbumsWithLyrics, toegevoegd
+Toont aantal songteksten per album, indien een album een songtekst heeft.
+
+================================================================================
 2015-01-02
-pagePlayedHistory, aangepast, geeft nu alle jaren weer, in plaats van alleen maar 2014
+pagePlayedHistory, aangepast, geeft nu alle jaren weer, in plaats van alleen 
+maar 2014
 
+================================================================================
+2014-08-17
+git, project onder controle van git gebracht
+documentatie, uitgezocht hoe ik documentatie kan genereren, 
+  wel erg handig om inzicht te houden.
+
+================================================================================
+start 2014-08-11
+
+================================================================================

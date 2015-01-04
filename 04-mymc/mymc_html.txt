@@ -45,6 +45,9 @@ FUNCTIONS
     pageAfgespeeld()
         Menu pagina voor afgespeeld
     
+    pageAlbumsWithLyrics(records)
+        Template pagina voor tonen albums met songteksten
+    
     pageBeheer()
         Pagina voor beheer, verversen en opschonen, van tabellen, pagina's.
     

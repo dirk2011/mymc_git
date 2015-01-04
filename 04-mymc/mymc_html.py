@@ -1427,6 +1427,8 @@ def pageMenuSearch():
     table.tr()
     table.td(hButton(u'Beheer super selecties', u'btn4', u'menuknop2', u'/pageSearchWithSelections/manageSuperSelections'))
     table.tr()
+    table.td(hButton(u'Albums en songteksten', u'btn5', u'menuknop2', u'/pageAlbumsWithLyrics'))
+    table.tr()
     
     return h + html_page(table.exp()) + html_end()
 
@@ -1847,5 +1849,60 @@ def pageTimeline(records):
     
     return h
 
+
+def pageAlbumsWithLyrics(records):
+    """Template pagina voor tonen albums met songteksten
+    """
+
+    title = u'pageAlbumsWithLyrics'
+    h = html_start(title) + main_navigation() + html_h1("Albums met songteksten")
+
+    # table template
+    ht_table = """
+    <table>
+        %s <!-- header -->
+        %s <!-- data   -->
+    </table>
+    """
     
+    # table header
+    ht_th = u"""
+        <tr>
+            <th class="artist"> Albumartiest </th>
+            <th class="album"> Album </th>
+            <th class="firstlast"> Songtekst toegevoegd </th>
+            <th class="aantal"> Song- teksten </th>
+            <th class="aantal"> Titels </th>
+            <th class="firstlast"> Laatst afgespeeld </th>
+        </tr>
+    """
+
+    ht_td = """
+        <tr>
+            <td class="artist">%(albumartist)s</td>
+            <td class="album">
+                <a href="/listAlbumTracks?album_id=%(album_id)s">
+                    %(album)s
+                </a>
+            </td>
+            <td class="firstlast">%(lyric_added)s</td>
+            <td class="aantal">%(lyrics)s</td>
+            <td class="aantal">%(songs)s</td>
+            <td class="firstlast">%(lastplayed)s</td>
+        </tr>
+    """
+
+    tab = Html()
+    totaal = 0
+    for record in records:
+        totaal = totaal + record['lyrics']
+        tab.add(ht_td % record)
+    tab = tab.exp()
+
+    h = h + html_page(ht_table % (ht_th, tab) +\
+                      u"<br><b>Totaal aantal songteksten: %s </b><br>" % totaal +\
+                      html_end())
+
+    return h
+
 # eof

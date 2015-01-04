@@ -64,6 +64,9 @@ CLASSES
      |  pageAfgespeeld(self)
      |      Menu pagina voor afgespeeld
      |  
+     |  pageAlbumsWithLyrics(self)
+     |      Toon de namen van albums waarvan songteksten aanwezig zijn.
+     |  
      |  pageBeheer(self)
      |      Menu pagina voor beheer.
      |  

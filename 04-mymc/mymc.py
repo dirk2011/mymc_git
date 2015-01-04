@@ -146,6 +146,23 @@ class Mc:
         
         return h
 
+
+    @cherrypy.expose
+    def pageAlbumsWithLyrics(self):
+        """Toon de namen van albums waarvan songteksten aanwezig zijn.
+        """
+        
+        query = """
+            select    *
+            from      v_albums_with_lyrics
+        """
+        records = self.dbGetData(query)
+        # print "record: ", records
+
+        h = ""
+        h = mymc_html.pageAlbumsWithLyrics(records)
+        
+        return h
     
     @cherrypy.expose
     def pageCheckPlayedHistory(self):
