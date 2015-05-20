@@ -11,9 +11,9 @@ from mutagen.easyid3 import EasyID3
 
 import ConfigParser     # tbv ini files
 
-dirCol = "/media/multimedia/multimedia/muzik3"
 dirCol = "/media/multimedia/multimedia/muzik3/New/2014-08"
-
+dirCol = "/media/rasp163-v/mymc/01-number/mp3s"
+dirCol = "/media/rasp164-v/mymc/01-number/mp3s"
 
 class MCNumber:
     """MCNumber, class voor afhandelen nummering
