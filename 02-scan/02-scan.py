@@ -150,8 +150,7 @@ class Mp3:
         if Mp3.connection is None:
             ### postgresql
             try:
-                Mp3.connection = psycopg2.connect(database='dbmc', user='pi', host="192.168.1.163", \
-                                  port="5432", password='pi')
+                Mp3.connection = psycopg2.connect(database='dbmc', user='pi', host="192.168.1.164", port="5432")
                 Mp3.cursor = Mp3.connection.cursor()
                 Mp3.cursor.execute('select version()')
                 ver = Mp3.cursor.fetchone()
