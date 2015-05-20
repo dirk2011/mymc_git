@@ -1,0 +1,13 @@
+*.*~
+*.pyc
+*.py~
+*.sql~
+*.html~
+*.gitignore~
+README~
+*.db
+cache/
+db/bak/
+db/*.db
+music_collection.db
+add

@@ -12,6 +12,6 @@ git add *.sh
 git add *.jpg
 git add *.css
 git add *.txt
-git add README
+git add README.md
 
 git status
