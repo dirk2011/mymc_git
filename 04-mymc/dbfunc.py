@@ -27,16 +27,16 @@ import datetime
 # dbconnectie
 DBNAME="dbmc"
 DBUSER="pi" 
-DBHOST="mc"
+DBHOST="192.168.1.164"	# mc2 voor raspberry 2, 2015-02
 DBPORT="5432"
-MCSERVER = "http://192.168.1.163"
+MCSERVER = "http://192.168.1.164"	# 164 is raspberry 2, 2015-02
 
 
 class MyDB():
     _db_connection = None
     _db_cur = None
 
-    # @classmethod
+    @classmethod
     def __init__(self):
         """Connectie met postgresql database maken, en een cursor maken.
         """
@@ -59,7 +59,7 @@ class MyDB():
     def __del__(self):
         """Verbinding met postgres database sluiten.
         """
-        self._db_connection.close()
+        pass # self._db_connection.close()
 
 
     def dbGetData(self, query="select * from songs limit 5 "):
@@ -84,7 +84,10 @@ class MyDB():
                     # hrecord[u'folder_jpg'] = self.createLinkFolderJpg(hrecord[u'location'])
                 # aparte kolom album_link, voor bijzondere tekens in album naam zoals: #
                 if sleutel == u"album" and hrecord[u'album'] is not None:
-                    hrecord[u'album_link'] = urllib.quote(hrecord[u'album'].encode('utf-8'))
+                    # tot 2015-04: uitgeschakeld
+                    # hrecord[u'album_link'] = urllib.quote(hrecord[u'album'].encode('utf-8'))
+                    # 2015-04, dit nu toegevoegd
+                    hrecord[u'album'] = hrecord[u'album'].decode('utf-8', errors='replace')
                 if sleutel == u"albumartist":
                     hrecord[u'albumartist_link'] = urllib.quote(hrecord[u'albumartist'])
                     hrecord[u"albumartist"] = hrecord[u"albumartist"].decode('utf-8', errors='replace') 

@@ -4,7 +4,7 @@ NAME
     queuebeheer - Module queue.
 
 FILE
-    /media/rasp163-v/mymc/04-mymc/queuebeheer/queuebeheer.py
+    /media/rasp164-v/mymc/04-mymc/queuebeheer/queuebeheer.py
 
 DESCRIPTION
     Bevat class afspeel queue te beheren.

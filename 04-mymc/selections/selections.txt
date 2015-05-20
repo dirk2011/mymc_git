@@ -4,7 +4,7 @@ NAME
     selections - Module selections.
 
 FILE
-    /media/rasp163-v/mymc/04-mymc/selections/selections.py
+    /media/rasp164-v/mymc/04-mymc/selections/selections.py
 
 DESCRIPTION
     Bevat class om table selections te muteren.

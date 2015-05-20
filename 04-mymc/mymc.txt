@@ -4,7 +4,7 @@ NAME
     mymc - Module music collection.
 
 FILE
-    /media/rasp163-v/mymc/04-mymc/mymc.py
+    /media/rasp164-v/mymc/04-mymc/mymc.py
 
 DESCRIPTION
     Doel database maken van al mijn mp3s.
@@ -88,6 +88,10 @@ CLASSES
      |  pageDbSongsUpdateArtistId(self)
      |      Vul ArtistId's voor nieuwe songs
      |  
+     |  pageFindWithTags(self, txtTags)
+     |      zoek records op mbv de lijst met tags
+     |      toegevoegd: 2015-04
+     |  
      |  pageInfoMc(self)
      |      pageInfoMc, statistieken berekenen over de muziekcollectie
      |  
@@ -140,6 +144,10 @@ CLASSES
      |  pageSearchResult(self, **kwargs)
      |      Geef zoek resultaat terug, zoekopdracht door pageSearch.
      |  
+     |  pageSearchWithTags(self)
+     |      Zoeken naar gebruikte tags, eerst alleen voor albums
+     |      toegevoegd, 2015-04
+     |  
      |  pageShowCache(self)
      |      Toon bestanden in cache.
      |  
@@ -157,6 +165,10 @@ CLASSES
      |  
      |  pageSonosSpeakers(self)
      |      pageSonosSpeakers, toon status sonos speaker, verander volume
+     |  
+     |  pageTagRefresh(self, album_id=-1)
+     |      pagina tags bewerken opnieuw laden
+     |      2015-04
      |  
      |  pageTimeline(self)
      |      Toon wanneer 1000-tallen zijn afgespeeld.
@@ -180,6 +192,10 @@ CLASSES
      |  storeInCache(self, page='#', pagename='#', key1='#')
      |      Web pagina voor hergebruik opslaan op schijf.
      |  
+     |  tagssave(self, mObject, mObjectId, txtTags)
+     |      Tags gekozen bij een album, song, etc, opslaan
+     |      toegevoegd: 2015-04
+     |  
      |  ----------------------------------------------------------------------
      |  Data and other attributes defined here:
      |  
@@ -195,13 +211,13 @@ DATA
     CACHE = '../cache'
     CACHING = True
     COORDINATOR = '192.168.1.21'
-    DBHOST = 'mc'
+    DBHOST = '192.168.1.164'
     DBNAME = 'dbmc'
     DBPORT = '5432'
     DBUSER = 'pi'
     DEBUG = True
     GENERATEDAYS = 100
-    MCSERVER = 'http://192.168.1.163'
+    MCSERVER = 'http://192.168.1.164'
     TABC = u'</table>'
     TABO = u'<table>'
     TDC = u'</td>'

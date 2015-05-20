@@ -1,0 +1,35 @@
+Help on module tagsbeheer_temp:
+
+NAME
+    tagsbeheer_temp - Module tags template.
+
+FILE
+    /media/rasp164-v/mymc/04-mymc/tagsbeheer/tagsbeheer_temp.py
+
+DESCRIPTION
+    Pagina tempates om tags te bewerken
+
+FUNCTIONS
+    pageTag(records)
+        Pagina template voor muteren van één tag
+    
+    pageTagsList(records)
+        Pagina template, lijst alle tags, table tagslov
+
+DATA
+    TABC = u'</table>'
+    TABO = u'<table>'
+    TDC = u'</td>'
+    TDO = u'<td>'
+    TRC = u'</tr>\n'
+    TRO = u'<tr>'
+    __author__ = 'dp'
+    __date__ = '2015-04'
+
+DATE
+    2015-04
+
+AUTHOR
+    dp
+
+

@@ -4,7 +4,7 @@ NAME
     dbfunc - Module met database functies.
 
 FILE
-    /media/rasp163-v/mymc/04-mymc/dbfunc.py
+    /media/rasp164-v/mymc/04-mymc/dbfunc.py
 
 DESCRIPTION
     Voor opvragen gegevens, en wijzigingen uitvoeren.
@@ -19,9 +19,6 @@ CLASSES
      |  __del__(self)
      |      Verbinding met postgres database sluiten.
      |  
-     |  __init__(self)
-     |      Connectie met postgresql database maken, en een cursor maken.
-     |  
      |  dbExecute(self, query)
      |      Voer queries uit, niet om gegevens op te halen, maar data manipulatie,
      |      zoals inserts, deletes, etc
@@ -30,6 +27,12 @@ CLASSES
      |      dbGetData, Voer een query uit en geef data terug..
      |      @param query: de uit te voeren query.
      |      @return: de data in de vorm: list, genest meerdere dictionries
+     |  
+     |  ----------------------------------------------------------------------
+     |  Class methods defined here:
+     |  
+     |  __init__(self) from __builtin__.classobj
+     |      Connectie met postgresql database maken, en een cursor maken.
 
 FUNCTIONS
     dbLogPlayedSong(song_id=-1)
@@ -50,11 +53,11 @@ FUNCTIONS
         door nog een quote
 
 DATA
-    DBHOST = 'mc'
+    DBHOST = '192.168.1.164'
     DBNAME = 'dbmc'
     DBPORT = '5432'
     DBUSER = 'pi'
-    MCSERVER = 'http://192.168.1.163'
+    MCSERVER = 'http://192.168.1.164'
     __author__ = 'dp'
     __date__ = '2014-09'
 

@@ -4,7 +4,7 @@ NAME
     mymc_html - Deze module hoort bij module mymc.
 
 FILE
-    /media/rasp163-v/mymc/04-mymc/mymc_html.py
+    /media/rasp164-v/mymc/04-mymc/mymc_html.py
 
 DESCRIPTION
     Deze module bevat templates en functies om webpagina's
@@ -60,6 +60,10 @@ FUNCTIONS
     pageClearCache(records)
         Pagina, voor als op clear cache is gedrukt.
         Er wordt een overzicht getoond van verwijderde pagina's uit de cache.
+    
+    pageFindWithTags(records, txtTags)
+        template pagina voor weergeven gezocht albums mbv tags
+        toegevoegd: 2015-04
     
     pageIndex()
         Index (start) pagina van mymc.
@@ -125,6 +129,10 @@ FUNCTIONS
     pageSearchResult(records)
         Pagina om het zoek resultaat te tonen.
     
+    pageSearchWithTags(allTags)
+        Template pagina voor zoeken met tags
+        toegevoegd: 2015-04
+    
     pageShowCache(records)
         Toon pagina's in cache.
     
@@ -140,6 +148,10 @@ FUNCTIONS
     pageSonosSpeakers(records)
         Geef web pagina terug, om volume van de speakers te beheren.
         Tevens geeft dit inzicht in alle sonos componenten.
+    
+    pageTagRefresh(mObject, mObjectId, objectDesc, allTags, usedTags)
+        Template pagina voor wijzigen tags van een object
+        toegevoegd: 2015-04
     
     pageTimeline(records)
         Template voor tonen afgespeelde 1000-tallen.

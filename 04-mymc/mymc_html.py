@@ -407,6 +407,13 @@ def pageInfoMc(record):
             <td> Table parameters    </td><td> %(num_parameters)s </td>
         </tr><tr class="ExtraHoog">
             <td> Table songslyrics   </td><td> %(num_songslyrics)s </td>
+        </tr><tr class="ExtraHoog">
+            <td> Table tags          </td><td> %(num_tags)s (objecten met één of meerdere tags)</td>
+        </tr><tr class="ExtraHoog">
+            <td> Table tagslov       </td><td> %(num_tagslov)s (tags list of values)</td>
+        </tr><tr class="ExtraHoog">
+            <td> Table tags          </td><td> %(num_usedtags)s (aantal gebruikte tags in table 
+                tags)</td>
         </tr>
     </table>
 """
@@ -432,6 +439,8 @@ def pageSonosSpeakers(records):
       <table>
 	    <tr>
 	  <td class="SonosSpeakers"><a href="sonosSetVolume?speaker=%(ip_address)s&volume=0">0</td>
+      <!-- # 2015-05, volume stand 2 toegevoegd, voor slaap stand -->
+	  <td class="SonosSpeakers"><a href="sonosSetVolume?speaker=%(ip_address)s&volume=2">2</td>
 	  <td class="SonosSpeakers"><a href="sonosSetVolume?speaker=%(ip_address)s&volume=10">10</td>
 	  <td class="SonosSpeakers"><a href="sonosSetVolume?speaker=%(ip_address)s&volume=15">15</td>
 	  <td class="SonosSpeakers"><a href="sonosSetVolume?speaker=%(ip_address)s&volume=20">20</td>
@@ -468,7 +477,7 @@ def pageSonosSpeakers(records):
         <th class="SonosSpeakers">Aan/Uit</th>
         <th class="SonosSpeakers">Volume</th> 
         <th class="SonosSpeakers">Zet volume</th>
-        <th class="SonosSpeakers">Component</th>
+        <th class="SonosSpeakers">Volgnr</th>
         <th class="SonosSpeakers">Adres</th>
         <th class="SonosSpeakers">Coordinator</th>
     </tr>
@@ -951,16 +960,16 @@ def pagePlayedHistory(year, month, yearsdict, monthsdict, daysdict):
         <td class="maand">03</td> 
         <td class="played"> <a href="pagePlayedHistory?year=%(year)s&month=3">%(month3)s</a> </td>  
         
-        <td class="maand">04</td> 
-        <td>%(month4)s</td> 
-        <td class="maand">05</td> 
-        <td>%(month5)s</td> 
-        <td class="maand">06</td> 
-        <td>%(month6)s</td>
+        <td class="maand">04</td>
+        <td class="played"> <a href="pagePlayedHistory?year=%(year)s&month=4">%(month4)s</a> </td>  
+        <td class="maand">05</td>
+        <td class="played"> <a href="pagePlayedHistory?year=%(year)s&month=5">%(month5)s</a> </td>  
+        <td class="maand">06</td>
+        <td class="played"> <a href="pagePlayedHistory?year=%(year)s&month=6">%(month6)s</a> </td>  
     </tr>
     <tr>
-        <td class="maand">07</td> 
-        <td>%(month7)s</td>  
+        <td class="maand">07</td>
+        <td class="played"> <a href="pagePlayedHistory?year=%(year)s&month=7">%(month7)s</a> </td>  
         <td class="maand">08</td>
         <td class="played"> <a href="pagePlayedHistory?year=%(year)s&month=8">%(month8)s</a> </td>  
         <td class="maand">09</td> 
@@ -1197,7 +1206,7 @@ def pageListAlbums_AlbumArtist(records):
     
         if tel == 1:
             table.add(TRO)
-    
+
         table.add(h_td % record)
     
         if tel == 4:
@@ -1288,13 +1297,23 @@ def listAlbumTracks(album_id, records):
     </tr>
     """
 
+    # button naar tags van het album, 2015-04
+    htags = """
+    <form action="pageTagRefresh">
+    <br>
+    <input type="submit" value="Tags album">
+    <input type="text" hidden name="album_id" value="%s">
+    <br>
+    </form>
+    """ % album_id
+
     # doorloop alle records
     table = hTable()
     table.add(ht_th)    
     for record in records:
         table.add(ht_td % record)
             
-    h = h + html_page(table.exp()) + html_end()
+    h = h + html_page(table.exp() + htags) + html_end()
     
     return h
 
@@ -1425,9 +1444,14 @@ def pageMenuSearch():
     table.tr()
     table.td(hButton(u'Zoeken met selecties', u'btn2', u'menuknop2', u'pageSearchWithSelections'))
     table.tr()
-    table.td(hButton(u'Beheer super selecties', u'btn4', u'menuknop2', u'/pageSearchWithSelections/manageSuperSelections'))
+    table.td(hButton(u'Beheer super selecties', u'btn4', u'menuknop2', \
+            u'/pageSearchWithSelections/manageSuperSelections'))
     table.tr()
     table.td(hButton(u'Albums en songteksten', u'btn5', u'menuknop2', u'/pageAlbumsWithLyrics'))
+    table.tr()
+    table.td(hButton(u'Beheer tags', u'btn6', u'menuknop2', u'/pageTagsBeheer/index'))
+    table.tr()
+    table.td(hButton(u'Zoeken met tags', u'btn7', u'menuknop2', u'/pageSearchWithTags'))
     table.tr()
     
     return h + html_page(table.exp()) + html_end()
@@ -1905,4 +1929,324 @@ def pageAlbumsWithLyrics(records):
 
     return h
 
+
+####################################################################################################
+def pageTagRefresh(mObject, mObjectId, objectDesc, allTags, usedTags):
+    """Template pagina voor wijzigen tags van een object
+    toegevoegd: 2015-04
+    """
+
+    title = u'pageTagRefresh'
+    h = html_start(title) + main_navigation() + html_h1("Tags toevoegen en wijzigen")
+
+    # javascript voor afhandelen buttons
+    h_js = u"""
+<script type="text/javascript">
+$(document).ready(function() {
+    // AT = all tags, op geklikt, zet used tags button aan
+    $("[id*=btnAT]").click(function() {
+        var btn = this.id ;
+        var txtTag = btn.substr(5) ;
+        var usedTag = "btnUT" + txtTag ;
+        $('#' + usedTag).show() ;
+    });
+
+    // UT = used tags, er is op een used tag geklikt maak deze hidden
+    $("[id*=btnUT]").click(function() {
+        $(this).hide();
+    });
+
+    // button save (opslaan) afhandelen
+    $("#btnSave").click(function() {
+        txtTags = ""
+        // vraag visibility op van alle btnUT* buttons
+        $("[id*=btnUT]").each(function() {
+            // var btn = this.id ;
+            // var txtTag = btn.substr(5) ;
+            // var usedTag = "btnUT" + txtTag ;
+            // $('#' + usedTag).show() ;
+            var isVisible = $(this).is(':visible');
+            if (isVisible) {
+                // waarde van button aan gekozen tags toevoegen
+                txtTags = txtTags + this.value + "," ;
+            }
+        });
+        // alert (txtTags) ;
+
+        $.ajax({
+            url: "tagssave",
+            type: "POST",
+            data: {mObject:   $("#mObject").val()
+                  ,mObjectId: $("#mObjectId").val()
+                  ,txtTags:   txtTags },
+            success: function(response) {
+                /* window.location = "index"; */
+                /* alert(btn); */
+                /* $("#test").html(response); */
+                }
+        });
+        // terug naar vorige pagina
+        parent.history.back();
+    });
+
+    // terug (back) button
+    $("#btnBack").click(function() {
+        parent.history.back();
+    //     return false;
+    });
+});
+</script>
+    """
+
+    # pagina bestaat uit 5 blokken
+    ht_table = u"""
+    <table> <tr><td>
+        %s <!-- javascript -->
+        %s <!-- object -->
+        %s <!-- alle tags -->
+        %s <!-- gebruikte tags -->
+        %s <!-- actie knoppen -->
+    </td></tr> </table>
+    """
+
+    # pagina deel 1, object omschrijving
+    objectDesc = objectDesc.decode('utf-8')
+    h1 = u"""
+    <fieldset><legend>Object</legend>
+        <table><tr>
+        <td>%s</td>
+        <td align="right">
+        <input type="text" id="mObject"   value="%s" hidden readonly tabindex="-1">
+        <input type="text" id="mObjectId" value="%s" hidden readonly tabindex="-1">
+        </td>
+        </tr></table>
+    </fieldset>
+    """ % (objectDesc, mObject, mObjectId)
+
+    # pagina deel 2, alle tags
+    h2 = """
+    <fieldset><legend>Beschikbare tags</legend>
+    %s
+    </fieldset>
+    """
+    h2at = ""
+    for tag in allTags:
+        h2at = h2at + '<input class="zmsbtnSel" type="button" value="%s" id="btnAT%s"> ' \
+                % (tag, tag)
+    h2 = h2 % h2at
+
+    # pagina deel 3, gebruikte tags
+    h3 = """
+    <fieldset><legend>Gebruikte tags</legend>
+    %s
+    </fieldset>
+    """
+    h3ut = ""
+    for tag in allTags:
+        if tag in usedTags:
+            hidden = ""
+        else:
+            hidden = "hidden "
+        h3ut = h3ut + '<input class="zmsbtnSel" type="button" %s value="%s" id="btnUT%s"> ' \
+                % (hidden, tag, tag)
+    h3 = h3 % h3ut
+
+    # pagina deel 4, acties
+    h4 = """
+    <fieldset><legend>Acties</legend>
+        <input type="button" value="Opslaan" id="btnSave">
+        <input type="button" value="Terug"   id="btnBack">
+    </fieldset>
+    """
+
+    h = h + html_page(ht_table % (h_js, h1, h2, h3, h4) + \
+        html_end())
+
+    return h
+
+
+####################################################################################################
+def pageSearchWithTags(allTags):
+    """Template pagina voor zoeken met tags
+    toegevoegd: 2015-04
+    """
+
+    title = u'pageSearchWithTags'
+    h = html_start(title) + main_navigation() + html_h1("Zoeken met tags")
+
+    # style
+    h_style = """
+    <style>
+.tagsveld {
+    margin: 4px;
+}
+</style>
+    """
+
+    # javascript voor afhandelen buttons
+    h_js = """
+<script type="text/javascript">
+$(document).ready(function() {
+    // AT = all tags, op geklikt, zet used tags button aan
+    $("[id*=btnAT]").click(function() {
+        var btn = this.id ;
+        var txtTag = btn.substr(5) ;
+        var usedTag = "btnUT" + txtTag ;
+        $('#' + usedTag).show() ;
+    });
+
+    // UT = used tags, er is op een used tag geklikt maak deze hidden
+    $("[id*=btnUT]").click(function() {
+        $(this).hide();
+    });
+
+    // button save (opslaan) afhandelen
+    $("#btnSearch").click(function() {
+        txtTags = ""
+        // vraag visibility op van alle btnUT* buttons
+        $("[id*=btnUT]").each(function() {
+            // var btn = this.id ;
+            // var txtTag = btn.substr(5) ;
+            // var usedTag = "btnUT" + txtTag ;
+            // $('#' + usedTag).show() ;
+            var isVisible = $(this).is(':visible');
+            if (isVisible) {
+                // waarde van button aan gekozen tags toevoegen
+                txtTag = this.id ;
+                txtTag = txtTag.substr(5) ;
+                txtTags = txtTags + txtTag + "," ;
+            }
+        });
+        // alert (txtTags) ;
+
+        window.location = "pageFindWithTags?txtTags=" + txtTags ;
+        //alternatief: window.location.replace("pageFindWithTags?txtTags=" + product_id);
+    });
+});
+</script>
+    """
+
+    # pagina bestaat uit een aantal blokken
+    ht_table = """
+    <table> <tr><td>
+        %s <!-- style -->
+        %s <!-- javascript -->
+        %s <!-- alle tags -->
+        %s <!-- gebruikte tags -->
+        %s <!-- actie knoppen -->
+    </td></tr> </table>
+    """
+
+    # pagina deel 1, alle tags die voorkomen, hiermee kan gezocht worden
+    h1 = """
+    <fieldset><legend>Tags waarmee gezocht kan worden</legend>
+    %s
+    </fieldset>
+    """
+    h1at = ""
+    for tag in allTags:
+        h1at = h1at + '<input class="tagsveld" type="button" value="%s" id="btnAT%s"> ' \
+                % (tag['tag'] + " (%s)" % tag['aantal'], tag['tag'])
+    h1 = h1 % h1at
+
+    # pagina deel 2, gebruikte tags
+    h2 = """
+    <fieldset><legend>Zoek met volgende tags</legend>
+    %s
+    </fieldset>
+    """
+    h2ut = ""
+    for tag in allTags:
+        h2ut = h2ut + '<input class="tagsveld" hidden type="button" value="%s" id="btnUT%s"> ' \
+                % (tag['tag'] + " (%s)" % tag['aantal'], tag['tag'])
+    h2 = h2 % h2ut
+
+    # pagina deel 4, acties
+    h3 = """
+    <fieldset><legend>Acties</legend>
+        <input type="button" value="Zoeken" id="btnSearch">
+    </fieldset>
+    """
+
+    h = h + html_page(ht_table % (h_style, h_js, h1, h2, h3) + \
+        html_end())
+
+    return h
+
+
+####################################################################################################
+def pageFindWithTags(records, txtTags):
+    """template pagina voor weergeven gezocht albums mbv tags
+    toegevoegd: 2015-04
+    """
+
+    title = u'pageFindWithTags'
+    h = html_start(title) + main_navigation() + html_h1("Gevonden albums")
+
+    # java script
+    ht_js = """
+<script type="text/javascript">
+$(document).ready(function() {
+    // terug (back) button
+    $("#btnBack").click(function() {
+        parent.history.back();
+    //     return false;
+    });
+});
+</script>
+    """
+
+    # table template
+    ht_table = """
+    <table>
+        %s <!-- header -->
+        %s <!-- data   -->
+    </table>
+    """
+    
+    # header voor de table
+    txtTags = txtTags.strip(',')
+    ht_tags = "<h2>Gezocht op: %s </h2>" % txtTags
+
+    # table header
+    ht_th = u"""
+        <tr>
+            <th class="artist"> Albumartiest </th>
+            <th class="album"> Album </th>
+            <th class="tags"> Tags </th>
+        </tr>
+    """
+
+    ht_td = """
+        <tr>
+            <td class="artist">%(albumartist)s</td>
+            <td class="album">
+                <a href="/listAlbumTracks?album_id=%(album_id)s">
+                    %(album)s
+                </a>
+            </td>
+            <td class="tags"> %(tags)s </td>
+        </tr>
+    """
+
+    tab = Html()
+    teller = 0
+    for record in records:
+        tab.add(ht_td % record)
+        teller += 1
+    tab = tab.exp()
+
+    ht_tel = """
+        <br>Aantal: %s<br>
+        <br>
+        <input type="button" value="Terug"   id="btnBack">
+    """ % teller
+
+    h = h + html_page(ht_js + ht_tags + ht_table % (ht_th, tab) + ht_tel + html_end())
+    # print "mymc_html.pageFindWithTags", h
+
+    return h
+
+
 # eof
+

@@ -34,7 +34,8 @@ class queuebeheer(object):
 
     def __init__(self):
         """Database verbinding maken."""
-        self._db = MyDB() 
+        # self._db = MyDB()
+        pass 
 
 
     @cherrypy.expose
@@ -50,6 +51,7 @@ class queuebeheer(object):
         current_track = int(current_song['playlist_position'])
 
         # haal queue uit database op
+        self._db = MyDB()
         query = """select * from queue order by queue_id"""
         records = self._db.dbGetData(query)
         # print 'queue records', records

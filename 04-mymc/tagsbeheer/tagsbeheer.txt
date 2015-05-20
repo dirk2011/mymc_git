@@ -1,0 +1,62 @@
+Help on module tagsbeheer:
+
+NAME
+    tagsbeheer - Module tags
+
+FILE
+    /media/rasp164-v/mymc/04-mymc/tagsbeheer/tagsbeheer.py
+
+DESCRIPTION
+    Bevat class om tags te muteren
+
+CLASSES
+    __builtin__.object
+        tagsbeheer
+    
+    class tagsbeheer(__builtin__.object)
+     |  Muteren van tags
+     |  @since: 2015-04
+     |  @version: 1
+     |  
+     |  Methods defined here:
+     |  
+     |  __init__(self)
+     |      Database verbinding maken.
+     |      @ivar _db: database
+     |  
+     |  delete(self, txtCode='#')
+     |      Button delete afhandelen, een tag verwijderen.
+     |  
+     |  index(self)
+     |      Hoofd ingang muteren tags
+     |      Pagina geeft een lijst van bestaande tags
+     |  
+     |  new(self)
+     |      Buttton new afhandelen, om nieuwe tags toe te voegen
+     |  
+     |  pageTag(self, id)
+     |      Pagina voor het muteren van één tag.
+     |  
+     |  save(self, txtCode='#', txtDescr='#', txtId='#')
+     |      Button saven afhandelen, een tag opslaan.
+     |  
+     |  ----------------------------------------------------------------------
+     |  Data descriptors defined here:
+     |  
+     |  __dict__
+     |      dictionary for instance variables (if defined)
+     |  
+     |  __weakref__
+     |      list of weak references to the object (if defined)
+
+DATA
+    __author__ = 'dp'
+    __date__ = '2015-04'
+
+DATE
+    2015-04
+
+AUTHOR
+    dp
+
+

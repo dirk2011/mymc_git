@@ -8,7 +8,7 @@ en afspelen via sonos.
 """
 
 __author__  = 'dp'
-__date__    = '2014-11'
+__date__    = '2015-05'
 
 
 # pylint: disable=C0103, C0301, R0201
@@ -46,17 +46,18 @@ from dbfunc import MyDB
 from dbfunc import q
 
 import queuebeheer.queuebeheer
-import selections.selections           # pagina muteren selecties
+import selections.selections                         # pagina muteren selecties
 import searchwithselections.searchwithselections     # pagina om met selecties te zoeken
+import tagsbeheer.tagsbeheer                         # pagina voor beheer tags
 
 
 # dbconnectie
 DBNAME="dbmc"
 DBUSER="pi" 
-DBHOST="mc"
+DBHOST="192.168.1.164"	# 2015-02, mc2 voor raspberry 2
 DBPORT="5432"
 
-MCSERVER = "http://192.168.1.163"
+MCSERVER = "http://192.168.1.164"
 # de box die de baas is
 # COORDINATOR = sonos_discover.getSonosCoordinator()
 COORDINATOR = '192.168.1.21'
@@ -93,6 +94,66 @@ class Mc:
         """
 
         return mymc_html.pageIndex()
+
+
+    @cherrypy.expose
+    def pageTagRefresh(self, album_id=-1):
+        """pagina tags bewerken opnieuw laden
+        2015-04
+        """
+
+        ### input valideren
+        # album_id 
+        if album_id == -1:
+            album_id = 1
+            mObject = 'album'
+            mObjectId = album_id
+        else:
+            mObject = 'album'
+            mObjectId = album_id
+
+        ### object ophalen, wordt op het scherm getoond
+        if mObject == "album":
+            query = """
+                select 'Album: ' || albumartist || ': ' || album as objectDesc
+                from    albums
+                where   album_id = %s
+            """ % mObjectId
+        records = self.dbGetData(query)
+        objectDesc = records[0]['objectdesc']
+        print "\nobjectDesc: ", objectDesc
+
+        ### alle mogelijke tags ophalen
+        query = """
+            select tag
+            from tagslov 
+            order by 1;
+        """
+        records = self.dbGetData(query)
+        # zet gevonden gegevens om in een list
+        allTags = []
+        for record in records:
+            allTags.append(record['tag'])
+        print "\nallTags: ", allTags
+
+        ### tags van huidige object ophalen
+        query = """
+            select distinct trim(regexp_split_to_table(tags, ',')) as tag
+            from tags 
+            where object = '%s' and object_id = %s
+            order by 1;
+        """ % (mObject, mObjectId)
+        records = self.dbGetData(query)
+        # gebruikte tags in een lijst opnemen
+        usedTags = []
+        for record in records:
+            usedTags.append(record['tag'])
+        print "\nusedTags: ", usedTags
+
+        h = mymc_html.pageTagRefresh(mObject, mObjectId, objectDesc, allTags, usedTags)
+        # print h
+
+        return h
 
 
     @cherrypy.expose
@@ -1368,12 +1429,37 @@ class Mc:
         select count(*) as num_songslyrics from songslyrics
         """
         record9 = db.dbGetData(query9)
+        # print "\n record9: ", record9, "\n"
+
+        ## info over tags
+        query10 = """
+            select count(*) as num_tags from tags
+        """
+        record10 = db.dbGetData(query10)
+        # print "\n record10: ", record10, "\n"
+
+        ## info tagslov
+        query11 = """
+            select count(*) as num_tagslov from tagslov
+        """
+        record11 = db.dbGetData(query11)
+        # print "\n record11: ", record11, "\n"
+
+        ## info aantal gebruikte tags, is niet een aparte tabel
+        query12 = """
+            select count(*) as num_usedtags from (
+                select trim(regexp_split_to_table(tags, ',')) from tags
+            ) as a ;
+        """
+        record12 = db.dbGetData(query12)
+        # print "\n record12: ", record12, "\n"
 
         # één dictionary van maken
-        record = dict(record1[0].items() + record2[0].items() + record3[0].items() + \
-                      record4[0].items() + record5[0].items() + record6[0].items() + \
-                      record7[0].items() + record8[0].items() + record9[0].items())
-        print "record ", record
+        record = dict(record1[0].items()  + record2[0].items() + record3[0].items() + \
+                      record4[0].items()  + record5[0].items() + record6[0].items() + \
+                      record7[0].items()  + record8[0].items() + record9[0].items() + \
+                      record10[0].items() + record11[0].items() + record12[0].items())
+        # print "record ", record
 
         h = mymc_html.pageInfoMc(record)
 
@@ -1455,10 +1541,14 @@ class Mc:
                     hrecord[u'folder_jpg'] = self.createLinkFolderJpg(hrecord[u'location'])
                 # aparte kolom album_link, voor bijzondere tekens in album naam zoals: #
                 if sleutel == u"album" and hrecord[u'album'] is not None:
-                    hrecord[u'album_link'] = urllib.quote(hrecord[u'album'].encode('utf-8'))
+                    # 2015-04 foutmelding, uitgeschakeld waarschijnlijk niet meer nodig
+                    # hrecord[u'album_link'] = urllib.quote(hrecord[u'album'].encode('utf-8'))
+                    # hrecord[u'album_link'] = urllib.quote(hrecord[u'album'].decode('utf-8', errors='replace'))
+                    hrecord[u"album"] = hrecord[u"album"].decode('utf-8', errors='replace')
+                    pass
                 if sleutel == u"albumartist":
                     hrecord[u'albumartist_link'] = urllib.quote(hrecord[u'albumartist'])
-                    hrecord[u"albumartist"] = hrecord[u"albumartist"].decode('utf-8', errors='replace') 
+                    hrecord[u"albumartist"] = hrecord[u"albumartist"].decode('utf-8', errors='replace')
                 if sleutel == u"title" and hrecord[u'title'] is not None:
                     title_link = hrecord[u'title']
                     hrecord[u'title_link'] = urllib.quote(title_link)
@@ -1933,6 +2023,101 @@ class Mc:
             print 'Error %s' % e
 
 
+    @cherrypy.expose
+    def tagssave(self, mObject, mObjectId, txtTags):
+        """ Tags gekozen bij een album, song, etc, opslaan
+        toegevoegd: 2015-04
+        """
+        
+        # print "\n def tagssave  \n mObject: %s\n mObjectId: %s\n txtTags: %s\n" \
+        #        % (mObject, mObjectId, txtTags)
+
+        # oude gegevens eventueel verwijderen
+        query = """
+            delete from tags where object = '%s' and object_id = %s
+        """ % (mObject, mObjectId)
+        self._db.dbExecute(query)
+
+        # als txtTags niet leeg is
+        if len(txtTags) > 1:
+            # nieuwe gegevens toevoegen
+            query = """
+                insert into tags (object, object_id, tags)
+                select '%s', %s, '%s'
+            """ % (mObject, mObjectId, txtTags)
+            self._db.dbExecute(query)
+
+        return
+
+
+    @cherrypy.expose
+    def pageSearchWithTags(self):
+        """Zoeken naar gebruikte tags, eerst alleen voor albums
+        toegevoegd, 2015-04
+        """
+
+        # maak een lijst van alle gebruikte album tags
+        query = """
+            select *
+            from (
+                select    trim(regexp_split_to_table(tags, ',')) as tag
+                ,         count(*) as aantal
+                from      tags 
+                group by  trim(regexp_split_to_table(tags, ',')) 
+            ) as tags
+            where  'x' || tag || 'x' <> 'xx' -- lege tags uitsluiten
+            order by  1
+        """
+        records = self._db.dbGetData(query)
+        print "\n pageSearchWithTags, records: ", records, '\n'
+
+        h = mymc_html.pageSearchWithTags(records)
+
+        return h
+
+
+    @cherrypy.expose
+    def pageFindWithTags(self, txtTags):
+        """ zoek records op mbv de lijst met tags
+        toegevoegd: 2015-04
+        """
+        print "\n pageFindWithtags: ", txtTags, '\n'
+
+        ### query maken om de records te vinden
+        # verwerk ontvangen tags in een lijst
+        tags = txtTags.strip(',')
+        tags = tags.split(',')
+        # de hoofd query 
+        query = """
+          select 	  albums.album_id
+,         albums.albumartist
+,         albums.album
+,         tags.tags
+from      albums 
+join      tags
+on        albums.album_id = tags.object_id
+where     album_id in (
+          select    object_id
+          from      tags
+          where     1 = 1 
+          %s
+)
+          order by albums.albumartist, albums.album
+        """
+        # geselecteerd tags toevoegen
+        where = ""
+        for tag in tags:
+            where = where + " and position('%s' in tags) > 0 " % tag
+        query = query % where
+        records = self._db.dbGetData(query)
+        for record in records:
+            print record
+
+        h = mymc_html.pageFindWithTags(records, txtTags)
+
+        return h
+
+
 def debug(input):
     """print debug meldingen
     """
@@ -1959,6 +2144,9 @@ if __name__ == '__main__' and not 'idlelib.__main__' in sys.modules:
     root.queuebeheer = queuebeheer.queuebeheer.queuebeheer()
     root.pageSelections = selections.selections.pageSelections()
     root.pageSearchWithSelections = searchwithselections.searchwithselections.searchWithSelections()
+    root.pageTagsBeheer = tagsbeheer.tagsbeheer.tagsbeheer()
     
     cherrypy.quickstart(root, '/', conf)
+
+# eof
 
